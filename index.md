@@ -10,8 +10,7 @@ layout: default
 ### Population Growth and Fertility Transitions
 
 **The Population "Bomb"**
-   * [Global warming policy- Is
-population left out in the cold](https://jlgodwin.github.io/PHI2020/Readings/BongaartsONeill2018.pdf)
+   * [Global warming and population growth](https://jlgodwin.github.io/PHI2020/Readings/BongaartsONeill2018.pdf)
 
 
 ### Census
