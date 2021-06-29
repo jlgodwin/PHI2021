@@ -11,11 +11,11 @@ layout: default
 
  * **The Population "Bomb"** 
     * [Global warming policy- Is
-population left out in the cold](https://jlgodwin.github.io/PHI-2020/Readings/BongaartsONeill2018.pdf)
+population left out in the cold](https://jlgodwin.github.io/PHI2020/Readings/BongaartsONeill2018.pdf)
 
 
 ## Census
 
  * **R**
-   * [tidycensus by Neal Marquez and Connor Gilroy](https://jlgodwin.github.io/PHI-2020/Tutorials/tidycensus-tutorial.rmd)
+   * [tidycensus by Neal Marquez and Connor Gilroy](https://jlgodwin.github.io/PHI2020/Tutorials/tidycensus-tutorial.rmd)
 
