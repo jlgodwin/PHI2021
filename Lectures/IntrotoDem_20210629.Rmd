@@ -1,0 +1,1135 @@
+---
+title: "PHI Applied Research Fellows 2021\\ Intro to Demography"
+author: "Jessica Godwin"
+date: "June 23, 2021"
+output: 
+  beamer_presentation:
+    theme: "Dresden"
+header-includes: 
+  - \addtobeamertemplate{title page}{\includegraphics[width=1.5cm]{W-Logo_Purple_RGB} \hfill \includegraphics[width=1.5cm]{csdelogo}}{}
+classoption: "aspectratio=169"
+urlcolor: blue
+linkcolor: blue
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_knit$set(root.dir = "~/Dropbox/PHI2021/Slides/")
+if(FALSE){
+  setwd("~/Dropbox/PHI2021/Slides/")
+}
+
+sandArt <- function(popsize, popcontains,
+                    x.pts, x.lims,
+                    colors, color.cuts,
+                    plot.dat,
+                    colors.box = 0000){
+  plot(NA,
+       xlab = "",
+       ylab = paste0("Proportion of ",
+                     popcontains),
+       xlim = c(0, popsize),
+       ylim = c(0, popsize),
+       xaxt = 'n', yaxt = 'n',
+       axes = FALSE)
+  
+  if(sum(x.lims != range(x.pts)) == 0){
+    fake.x.pts <- popsize*((x.pts-x.pts[1])/
+                             (x.pts[length(x.pts)] - x.pts[1]))
+  }else{
+    fake.x.pts <- popsize*((x.pts-x.lims[1])/
+                             (x.lims[2] - x.lims[1]))
+  }
+  
+  
+  for(lower in color.cuts[-length(color.cuts)]){
+    idx <- match(lower, color.cuts)
+    n.by.time <- apply(as.matrix(plot.dat), 2, function(value){
+      sum(value >= lower & 
+            value < color.cuts[idx + 1],
+          na.rm = TRUE)
+    })
+    
+    if(idx == 1){
+      y1 <- rep(0,length(fake.x.pts))
+      y2 <- rep(0,length(fake.x.pts))
+    }else{
+        y1 <- y2 
+    }
+    
+    if(idx != length(color.cuts) - 1){
+      y2 <- y1 + n.by.time
+    }else{
+      y2 <- rep(popsize, length(x.pts))
+    }                 
+    
+    # print(paste0("\n", y1, "--", y2))
+    # print(paste0("\n Age: ", lower, "\n"))
+    # print(paste(n.by.time, collapse = "  "))
+    polygon(x = c(fake.x.pts,
+                  rev(fake.x.pts)),
+            y = c(y1, rev(y2)),
+            col = colors[idx],
+            border = FALSE)
+    
+    if(lower %in% colors.box){
+      lines(x = c(fake.x.pts,
+                  rev(fake.x.pts)),
+            y = c(y1, rev(y2)),
+            col = colors[idx], lwd = 3)
+    }
+  }
+  
+  axis(2, at = popsize*seq(0,1,.2),
+       labels = seq(0, 1, .2))
+}
+```
+
+
+```{r libs, include = FALSE}
+library(wesanderson)
+library(xtable)
+library(dplyr)
+library(tidyr)
+library(scales)
+library(wpp2019)
+library(viridisLite)
+```
+
+# What is Demography?
+
+
+\pause 
+$$P_{t+1} = P_t + B_t - D_t + IM_t - OM_t$$
+
+* Fertility, mortality, migration, population size
+- The balancing equation
+* How these processes work together in a population
+* Break it all down by age and sex and ...
+
+# Why is Demography?
+
+\pause
+* Understand a population's make up today
+* Targeted intervention
+* Projections allow planning for future population
+* Historical demography
+* Social demography
+
+# The main textbooks
+
+*  Demography: Measuring and Modeling Population Processes
+- Samuel Preston, Patrick Heuveline, Michell Guillot
+*  Essential Demographic Methods 
+- Kenneth Wachter
+*  [Tools for Demographic Estimation](https://demographicestimation.iussp.org/content/introduction-tools-demographic-estimation)
+- IUSSP (many prominent world demographers)
+
+# The Demographic Transistion Theory
+
+ * Mortality begins to decrease $\rightarrow$
+ * Fertility begins to decrease $\rightarrow$
+ * In countries that have already experienced the transition, to below "replacement level" $\approx$ 2.1 children per parents $\rightarrow$ rise to and fluctuation around this point
+  * behind model in WPP (Alkema et al., 2011)
+  * Is this true in places where TFR remains high? Is all "high" fertility a result of unmet family planning needs?
+ * [This really succinct amazing graphic on Wikipedia](https://en.wikipedia.org/wiki/Demographic_transition#/media/File:Demographic-TransitionOWID.png)
+
+# N Africa & West Asia: 1950-1955 to 2015-2020
+```{r, dtNAWA,fig.height=3.5,message = FALSE, warning = FALSE, results='asis'}
+data(UNlocations)
+data(e0F)
+data(tfr)
+data(pop)
+
+# 1 "World"
+# 903 Africa
+# 935 Asia
+# 908 Europe
+# 904 LA&Car
+# 905 North America
+# 909 Oceania
+# 1833 NA & W Asia
+# 921 C & S Asia
+# 1832 E & SE Asia
+# 1830 LA & Car
+#  927 Aus/NZ
+# 1835 Oceania
+# 1829 E & NA
+countries <- UNlocations$country_code[which(UNlocations$location_type == 4)]
+codes <- c(1833,947, 921, 1832, 1830, 927, 1835, 1829)
+x.lim <- c(1950,2020)
+plot.years <- seq(1952, 2017, 5)
+e0.cuts <- c(15, 25, 45, 55, 65,
+             70, 75, 80, 85, 90)
+cols <- wes_palette("Zissou1", 5,type = c("discrete"))[c(1,3,5)]
+code.idx <- 1
+Area <- UNlocations$name[UNlocations$country_code == codes[code.idx]]
+{
+  col.idx <- grep(codes[code.idx], names(UNlocations))
+  sub.codes <- UNlocations$country_code[which(UNlocations[,col.idx] == codes[code.idx])]
+  
+  par(lend = 1,
+      mar = c(2,2,2,2) + 0.1)
+  layout(matrix(c(1,2,3), nrow = 1, byrow = TRUE),
+         widths = c(1,1,.33), heights = 1)
+  plot.tmp <- e0F %>% filter(country_code %in% sub.codes)
+  n.countries <- nrow(plot.tmp)
+  e0.cols <- alpha(cols[3],
+                   seq(1,.15, length.out = length(e0.cuts)-1))
+  sandArt(popsize = n.countries,
+          popcontains = "Countries",
+          x.pts =  plot.years,
+          x.lims = x.lim,
+          colors = e0.cols, 
+          color.cuts = e0.cuts,
+          plot.dat = as.matrix(plot.tmp[,-c(1:2,ncol(plot.tmp))]))
+  axis(1, at = n.countries*((seq(1952, 2022, 10)-x.lim[1])/(x.lim[2]-x.lim[1])), 
+       labels = seq(1950,2020,10))
+  title(main = expression("Life Expectancy, e"[0]))
+  plot.tmp <- tfr %>% filter(country_code %in% sub.codes)
+  n.countries <- nrow(plot.tmp)
+  tfr.cols <- rev(alpha(cols[1],
+                        seq(1,.15, length.out = length(e0.cuts)-1)))
+  tfr.cuts <- c(0.75, 1, 1.5, 2.1, 2.5,
+                3, 4, 5, 6, 9)
+  sandArt(popsize = n.countries,
+          popcontains = "Countries",
+          x.pts =  plot.years,
+          x.lims = x.lim,
+          colors = tfr.cols, 
+          color.cuts = tfr.cuts,
+          plot.dat = as.matrix(plot.tmp[,-c(1:2,ncol(plot.tmp))]),
+          colors.box = 2.1)
+  axis(1, at = n.countries*((seq(1950, 2020, 10)-x.lim[1])/(x.lim[2]-x.lim[1])), 
+       labels = seq(1950,2020,10)) 
+  title(main = "Total fertility rate (TFR)")
+  plot(NA,
+       xlim = c(0,1),
+       ylim = c(0,1),
+       xlab = "",
+       ylab = "",
+       axes = FALSE)
+  legend.all <- c(e0.cuts, tfr.cuts)
+  legend.order <- legend.all
+  order <- 0
+  for(i in 1:9){
+    order <- order + 1
+    legend.order[i] <- order
+    order <- order + 1
+    legend.order[i + 9] <- order
+  }
+  legend("center",
+         fill = c(e0.cols,
+                  tfr.cols),
+         ncol = 2,
+         cex = 1,
+         box.col = 'white',
+         legend = c(e0.cuts[-1],
+                    tfr.cuts[-1]),
+         border = FALSE)
+}  
+```
+
+
+# Sub-Saharan Africa: 1950-1955 to 2015-2020
+```{r, dtSSA,fig.height=3.5,message = FALSE, warning = FALSE, results='asis'}
+data("UNlocations")
+data(e0F)
+data(tfr)
+data(pop)
+
+# 1 "World"
+# 903 Africa
+# 935 Asia
+# 908 Europe
+# 904 LA&Car
+# 905 North America
+# 909 Oceania
+# 1833 NA & W Asia
+# 921 C & S Asia
+# 1832 E & SE Asia
+# 1830 LA & Car
+#  927 Aus/NZ
+# 1835 Oceania
+# 1829 E & NA
+countries <- UNlocations$country_code[which(UNlocations$location_type == 4)]
+codes <- c(1833,947, 921, 1832, 1830, 927, 1835, 1829)
+x.lim <- c(1950,2020)
+plot.years <- seq(1952, 2017, 5)
+e0.cuts <- c(15, 25, 45, 55, 65,
+             70, 75, 80, 85, 90)
+cols <- wes_palette("Zissou1", 5,type = c("discrete"))[c(1,3,5)]
+code.idx <- 2
+Area <- UNlocations$name[UNlocations$country_code == codes[code.idx]]
+{
+  col.idx <- grep(codes[code.idx], names(UNlocations))
+  sub.codes <- UNlocations$country_code[which(UNlocations[,col.idx] == codes[code.idx])]
+  
+  par(lend = 1,
+      mar = c(2,2,2,2) + 0.1)
+  layout(matrix(c(1,2,3), nrow = 1, byrow = TRUE),
+         widths = c(1,1,.33), heights = 1)
+  plot.tmp <- e0F %>% filter(country_code %in% sub.codes)
+  n.countries <- nrow(plot.tmp)
+  e0.cols <- alpha(cols[3],
+                   seq(1,.15, length.out = length(e0.cuts)-1))
+  sandArt(popsize = n.countries,
+          popcontains = "Countries",
+          x.pts =  plot.years,
+          x.lims = x.lim,
+          colors = e0.cols, 
+          color.cuts = e0.cuts,
+          plot.dat = as.matrix(plot.tmp[,-c(1:2,ncol(plot.tmp))]))
+  axis(1, at = n.countries*((seq(1952, 2022, 10)-x.lim[1])/(x.lim[2]-x.lim[1])), 
+       labels = seq(1950,2020,10))
+  title(main = expression("Life Expectancy, e"[0]))
+  n.countries <- nrow(plot.tmp)
+  plot.tmp <- tfr %>% filter(country_code %in% sub.codes)
+  tfr.cols <- rev(alpha(cols[1],
+                        seq(1,.15, length.out = length(e0.cuts)-1)))
+  tfr.cuts <- c(0.75, 1, 1.5, 2.1, 2.5,
+                3, 4, 5, 6, 9)
+  sandArt(popsize = n.countries,
+          popcontains = "Countries",
+          x.pts =  plot.years,
+          x.lims = x.lim,
+          colors = tfr.cols, 
+          color.cuts = tfr.cuts,
+          plot.dat = as.matrix(plot.tmp[,-c(1:2,ncol(plot.tmp))]),
+          colors.box = 2.1)
+  axis(1, at = n.countries*((seq(1950, 2020, 10)-x.lim[1])/(x.lim[2]-x.lim[1])), 
+       labels = seq(1950,2020,10)) 
+  title(main = "Total fertility rate (TFR)")
+  plot(NA,
+       xlim = c(0,1),
+       ylim = c(0,1),
+       xlab = "",
+       ylab = "",
+       axes = FALSE)
+  legend.all <- c(e0.cuts, tfr.cuts)
+  legend.order <- legend.all
+  order <- 0
+  for(i in 1:9){
+    order <- order + 1
+    legend.order[i] <- order
+    order <- order + 1
+    legend.order[i + 9] <- order
+  }
+  legend("center",
+         fill = c(e0.cols,
+                  tfr.cols),
+         ncol = 2,
+         cex = 1,
+         box.col = 'white',
+         legend = c(e0.cuts[-1],
+                    tfr.cuts[-1]),
+         border = FALSE)
+}  
+```
+
+
+# Central & South Asia: 1950-1955 to 2015-2020
+```{r, dtCSA,fig.height=3.5,message = FALSE, warning = FALSE, results='asis'}
+# 1 "World"
+# 903 Africa
+# 935 Asia
+# 908 Europe
+# 904 LA&Car
+# 905 North America
+# 909 Oceania
+# 1833 NA & W Asia
+# 947 SSA
+# 921 C & S Asia
+# 1832 E & SE Asia
+# 1830 LA & Car
+#  927 Aus/NZ
+# 1835 Oceania
+# 1829 E & NA
+countries <- UNlocations$country_code[which(UNlocations$location_type == 4)]
+codes <- c(1833,947, 921, 1832, 1830, 927, 1835, 1829)
+x.lim <- c(1950,2020)
+plot.years <- seq(1952, 2017, 5)
+e0.cuts <- c(15, 25, 45, 55, 65,
+             70, 75, 80, 85, 90)
+cols <- wes_palette("Zissou1", 5,type = c("discrete"))[c(1,3,5)]
+code.idx <- 3
+Area <- UNlocations$name[UNlocations$country_code == codes[code.idx]]
+{
+  col.idx <- grep(codes[code.idx], names(UNlocations))
+  
+  par(lend = 1,
+      mar = c(2,2,2,2) + 0.1)
+  layout(matrix(c(1,2,3), nrow = 1, byrow = TRUE),
+         widths = c(1,1,.33), heights = 1)
+  plot.tmp <- e0F %>% filter(country_code %in% sub.codes)
+  n.countries <- nrow(plot.tmp)
+  e0.cols <- alpha(cols[3],
+                   seq(1,.15, length.out = length(e0.cuts)-1))
+  sandArt(popsize = n.countries,
+          popcontains = "Countries",
+          x.pts =  plot.years,
+          x.lims = x.lim,
+          colors = e0.cols, 
+          color.cuts = e0.cuts,
+          plot.dat = as.matrix(plot.tmp[,-c(1:2,ncol(plot.tmp))]))
+  axis(1, at = n.countries*((seq(1952, 2022, 10)-x.lim[1])/(x.lim[2]-x.lim[1])), 
+       labels = seq(1950,2020,10))
+  title(main = expression("Life Expectancy, e"[0]))
+  plot.tmp <- tfr %>% filter(country_code %in% sub.codes)
+  n.countries <- nrow(plot.tmp)
+  tfr.cols <- rev(alpha(cols[1],
+                        seq(1,.15, length.out = length(e0.cuts)-1)))
+  tfr.cuts <- c(0.75, 1, 1.5, 2.1, 2.5,
+                3, 4, 5, 6, 9)
+  sandArt(popsize = n.countries,
+          popcontains = "Countries",
+          x.pts =  plot.years,
+          x.lims = x.lim,
+          colors = tfr.cols, 
+          color.cuts = tfr.cuts,
+          plot.dat = as.matrix(plot.tmp[,-c(1:2,ncol(plot.tmp))]),
+          colors.box = 2.1)
+  axis(1, at = n.countries*((seq(1950, 2020, 10)-x.lim[1])/(x.lim[2]-x.lim[1])), 
+       labels = seq(1950,2020,10)) 
+  title(main = "Total fertility rate (TFR)")
+  plot(NA,
+       xlim = c(0,1),
+       ylim = c(0,1),
+       xlab = "",
+       ylab = "",
+       axes = FALSE)
+  legend.all <- c(e0.cuts, tfr.cuts)
+  legend.order <- legend.all
+  order <- 0
+  for(i in 1:9){
+    order <- order + 1
+    legend.order[i] <- order
+    order <- order + 1
+    legend.order[i + 9] <- order
+  }
+  legend("center",
+         fill = c(e0.cols,
+                  tfr.cols),
+         ncol = 2,
+         cex = 1,
+         box.col = 'white',
+         legend = c(e0.cuts[-1],
+                    tfr.cuts[-1]),
+         border = FALSE)
+}  
+```  
+
+# East & South-Eastern Asia: 1950-1955 to 2015-2020
+```{r, dtESEA,fig.height=3.5,message = FALSE, warning = FALSE, results='asis'}
+# 1 "World"
+# 903 Africa
+# 935 Asia
+# 908 Europe
+# 904 LA&Car
+# 905 North America
+# 909 Oceania
+# 1833 NA & W Asia
+# 947 SSA
+# 921 C & S Asia
+# 1832 E & SE Asia
+# 1830 LA & Car
+#  927 Aus/NZ
+# 1835 Oceania
+# 1829 E & NA
+countries <- UNlocations$country_code[which(UNlocations$location_type == 4)]
+codes <- c(1833,947, 921, 1832, 1830, 927, 1835, 1829)
+x.lim <- c(1950,2020)
+plot.years <- seq(1952, 2017, 5)
+e0.cuts <- c(15, 25, 45, 55, 65,
+             70, 75, 80, 85, 90)
+cols <- wes_palette("Zissou1", 5,type = c("discrete"))[c(1,3,5)]
+code.idx <- 4
+Area <- UNlocations$name[UNlocations$country_code == codes[code.idx]]
+{
+  col.idx <- grep(codes[code.idx], names(UNlocations))
+  sub.codes <- UNlocations$country_code[which(UNlocations[,col.idx] == codes[code.idx])]
+  
+  par(lend = 1,
+      mar = c(2,2,2,2) + 0.1)
+  layout(matrix(c(1,2,3), nrow = 1, byrow = TRUE),
+         widths = c(1,1,.33), heights = 1)
+  plot.tmp <- e0F %>% filter(country_code %in% sub.codes)
+  n.countries <- nrow(plot.tmp)
+  e0.cols <- alpha(cols[3],
+                   seq(1,.15, length.out = length(e0.cuts)-1))
+  sandArt(popsize = n.countries,
+          popcontains = "Countries",
+          x.pts =  plot.years,
+          x.lims = x.lim,
+          colors = e0.cols, 
+          color.cuts = e0.cuts,
+          plot.dat = as.matrix(plot.tmp[,-c(1:2,ncol(plot.tmp))]))
+  axis(1, at = n.countries*((seq(1952, 2022, 10)-x.lim[1])/(x.lim[2]-x.lim[1])), 
+       labels = seq(1950,2020,10))
+  title(main = expression("Life Expectancy, e"[0]))
+  plot.tmp <- tfr %>% filter(country_code %in% sub.codes)
+  n.countries <- nrow(plot.tmp)
+  tfr.cols <- rev(alpha(cols[1],
+                        seq(1,.15, length.out = length(e0.cuts)-1)))
+  tfr.cuts <- c(0.75, 1, 1.5, 2.1, 2.5,
+                3, 4, 5, 6, 9)
+  sandArt(popsize = n.countries,
+          popcontains = "Countries",
+          x.pts =  plot.years,
+          x.lims = x.lim,
+          colors = tfr.cols, 
+          color.cuts = tfr.cuts,
+          plot.dat = as.matrix(plot.tmp[,-c(1:2,ncol(plot.tmp))]),
+          colors.box = 2.1)
+  axis(1, at = n.countries*((seq(1950, 2020, 10)-x.lim[1])/(x.lim[2]-x.lim[1])), 
+       labels = seq(1950,2020,10)) 
+  title(main = "Total fertility rate (TFR)")
+  plot(NA,
+       xlim = c(0,1),
+       ylim = c(0,1),
+       xlab = "",
+       ylab = "",
+       axes = FALSE)
+  legend.all <- c(e0.cuts, tfr.cuts)
+  legend.order <- legend.all
+  order <- 0
+  for(i in 1:9){
+    order <- order + 1
+    legend.order[i] <- order
+    order <- order + 1
+    legend.order[i + 9] <- order
+  }
+  legend("center",
+         fill = c(e0.cols,
+                  tfr.cols),
+         ncol = 2,
+         cex = 1,
+         box.col = 'white',
+         legend = c(e0.cuts[-1],
+                    tfr.cuts[-1]),
+         border = FALSE)
+}  
+```  
+
+# Latin America \& the Caribbean: 1950-1955 to 2015-2020
+```{r, dtLAC,fig.height=3.5,message = FALSE, warning = FALSE, results='asis'}
+# 1 "World"
+# 903 Africa
+# 935 Asia
+# 908 Europe
+# 904 LA&Car
+# 905 North America
+# 909 Oceania
+# 1833 NA & W Asia
+# 947 SSA
+# 921 C & S Asia
+# 1832 E & SE Asia
+# 1830 LA & Car
+#  927 Aus/NZ
+# 1835 Oceania
+# 1829 E & NA
+countries <- UNlocations$country_code[which(UNlocations$location_type == 4)]
+codes <- c(1833,947, 921, 1832, 1830, 927, 1835, 1829)
+x.lim <- c(1950,2020)
+plot.years <- seq(1952, 2017, 5)
+e0.cuts <- c(15, 25, 45, 55, 65,
+             70, 75, 80, 85, 90)
+cols <- wes_palette("Zissou1", 5,type = c("discrete"))[c(1,3,5)]
+code.idx <- 5
+Area <- UNlocations$name[UNlocations$country_code == codes[code.idx]]
+{
+  col.idx <- grep(codes[code.idx], names(UNlocations))
+  sub.codes <- UNlocations$country_code[which(UNlocations[,col.idx] == codes[code.idx])]
+  
+  par(lend = 1,
+      mar = c(2,2,2,2) + 0.1)
+  layout(matrix(c(1,2,3), nrow = 1, byrow = TRUE),
+         widths = c(1,1,.33), heights = 1)
+  plot.tmp <- e0F %>% filter(country_code %in% sub.codes)
+  n.countries <- nrow(plot.tmp)
+
+  e0.cols <- alpha(cols[3],
+                   seq(1,.15, length.out = length(e0.cuts)-1))
+  sandArt(popsize = n.countries,
+          popcontains = "Countries",
+          x.pts =  plot.years,
+          x.lims = x.lim,
+          colors = e0.cols, 
+          color.cuts = e0.cuts,
+          plot.dat = as.matrix(plot.tmp[,-c(1:2,ncol(plot.tmp))]))
+  axis(1, at = n.countries*((seq(1952, 2022, 10)-x.lim[1])/(x.lim[2]-x.lim[1])), 
+       labels = seq(1950,2020,10))
+  title(main = expression("Life Expectancy, e"[0]))
+  plot.tmp <- tfr %>% filter(country_code %in% sub.codes)
+  n.countries <- nrow(plot.tmp)
+  tfr.cols <- rev(alpha(cols[1],
+                        seq(1,.15, length.out = length(e0.cuts)-1)))
+  tfr.cuts <- c(0.75, 1, 1.5, 2.1, 2.5,
+                3, 4, 5, 6, 9)
+  sandArt(popsize = n.countries,
+          popcontains = "Countries",
+          x.pts =  plot.years,
+          x.lims = x.lim,
+          colors = tfr.cols, 
+          color.cuts = tfr.cuts,
+          plot.dat = as.matrix(plot.tmp[,-c(1:2,ncol(plot.tmp))]),
+          colors.box = 2.1)
+  axis(1, at = n.countries*((seq(1950, 2020, 10)-x.lim[1])/(x.lim[2]-x.lim[1])), 
+       labels = seq(1950,2020,10)) 
+  title(main = "Total fertility rate (TFR)")
+  plot(NA,
+       xlim = c(0,1),
+       ylim = c(0,1),
+       xlab = "",
+       ylab = "",
+       axes = FALSE)
+  legend.all <- c(e0.cuts, tfr.cuts)
+  legend.order <- legend.all
+  order <- 0
+  for(i in 1:9){
+    order <- order + 1
+    legend.order[i] <- order
+    order <- order + 1
+    legend.order[i + 9] <- order
+  }
+  legend("center",
+         fill = c(e0.cols,
+                  tfr.cols),
+         ncol = 2,
+         cex = 1,
+         box.col = 'white',
+         legend = c(e0.cuts[-1],
+                    tfr.cuts[-1]),
+         border = FALSE)
+}  
+```  
+
+# Australia, New Zealand, Oceania: 1950-1955 to 2015-2020
+```{r, dtOce,eval=TRUE,fig.height=3.5,message = FALSE, warning = FALSE, results='asis'}
+# 1 "World"
+# 903 Africa
+# 935 Asia
+# 908 Europe
+# 904 LA&Car
+# 905 North America
+# 909 Oceania
+# 1833 NA & W Asia
+# 947 SSA
+# 921 C & S Asia
+# 1832 E & SE Asia
+# 1830 LA & Car
+#  927 Aus/NZ
+# 1835 Oceania
+# 1829 E & NA
+countries <- UNlocations$country_code[which(UNlocations$location_type == 4)]
+codes <- c(1833,947, 921, 1832, 1830, 927, 1835, 1829)
+x.lim <- c(1950,2020)
+plot.years <- seq(1952, 2017, 5)
+e0.cuts <- c(15, 25, 45, 55, 65,
+             70, 75, 80, 85, 90)
+cols <- wes_palette("Zissou1", 5,type = c("discrete"))[c(1,3,5)]
+code.idx <- 6:7
+# Area <- UNlocations$name[UNlocations$country_code == codes[code.idx]]
+{
+  col.idx <- grep(codes[code.idx[1]], names(UNlocations))
+  col.idx <- c(col.idx, grep(codes[code.idx[2]], names(UNlocations)))
+  sub.codes <- UNlocations$country_code[which(UNlocations[,col.idx[1]] == codes[code.idx[1]])]
+  sub.codes <- c(sub.codes,
+                 UNlocations$country_code[which(UNlocations[,col.idx[2]] == codes[code.idx[2]])])
+  
+  par(lend = 1,
+      mar = c(2,2,2,2) + 0.1)
+  layout(matrix(c(1,2,3), nrow = 1, byrow = TRUE),
+         widths = c(1,1,.33), heights = 1)
+  plot.tmp <- e0F %>% filter(country_code %in% sub.codes)
+  n.countries <- nrow(plot.tmp)
+  e0.cols <- alpha(cols[3],
+                   seq(1,.15, length.out = length(e0.cuts)-1))
+  sandArt(popsize = n.countries,
+          popcontains = "Countries",
+          x.pts =  plot.years,
+          x.lims = x.lim,
+          colors = e0.cols, 
+          color.cuts = e0.cuts,
+          plot.dat = as.matrix(plot.tmp[,-c(1:2,ncol(plot.tmp))]))
+  axis(1, at = n.countries*((seq(1952, 2022, 10)-x.lim[1])/(x.lim[2]-x.lim[1])), 
+       labels = seq(1950,2020,10))
+  title(main = expression("Life Expectancy, e"[0]))
+  plot.tmp <- tfr %>% filter(country_code %in% sub.codes)
+  n.countries <- nrow(plot.tmp)
+  tfr.cols <- rev(alpha(cols[1],
+                        seq(1,.15, length.out = length(e0.cuts)-1)))
+  tfr.cuts <- c(0.75, 1, 1.5, 2.1, 2.5,
+                3, 4, 5, 6, 9)
+  sandArt(popsize = n.countries,
+          popcontains = "Countries",
+          x.pts =  plot.years,
+          x.lims = x.lim,
+          colors = tfr.cols, 
+          color.cuts = tfr.cuts,
+          plot.dat = as.matrix(plot.tmp[,-c(1:2,ncol(plot.tmp))]),
+          colors.box = 2.1)
+  axis(1, at = n.countries*((seq(1950, 2020, 10)-x.lim[1])/(x.lim[2]-x.lim[1])), 
+       labels = seq(1950,2020,10)) 
+  title(main = "Total fertility rate (TFR)")
+  plot(NA,
+       xlim = c(0,1),
+       ylim = c(0,1),
+       xlab = "",
+       ylab = "",
+       axes = FALSE)
+  legend.all <- c(e0.cuts, tfr.cuts)
+  legend.order <- legend.all
+  order <- 0
+  for(i in 1:9){
+    order <- order + 1
+    legend.order[i] <- order
+    order <- order + 1
+    legend.order[i + 9] <- order
+  }
+  legend("center",
+         fill = c(e0.cols,
+                  tfr.cols),
+         ncol = 2,
+         cex = 1,
+         box.col = 'white',
+         legend = c(e0.cuts[-1],
+                    tfr.cuts[-1]),
+         border = FALSE)
+}  
+```  
+
+# Europe \& North America: 1950-1955 to 2015-2020
+```{r, dtENA,fig.height=3.5,message = FALSE, warning = FALSE, results='asis'}
+# 1 "World"
+# 903 Africa
+# 935 Asia
+# 908 Europe
+# 904 LA&Car
+# 905 North America
+# 909 Oceania
+# 1833 NA & W Asia
+# 947 SSA
+# 921 C & S Asia
+# 1832 E & SE Asia
+# 1830 LA & Car
+#  927 Aus/NZ
+# 1835 Oceania
+# 1829 E & NA
+countries <- UNlocations$country_code[which(UNlocations$location_type == 4)]
+codes <- c(1833,947, 921, 1832, 1830, 927, 1835, 1829)
+x.lim <- c(1950,2020)
+plot.years <- seq(1952, 2017, 5)
+e0.cuts <- c(15, 25, 45, 55, 65,
+             70, 75, 80, 85, 90)
+cols <- wes_palette("Zissou1", 5,type = c("discrete"))[c(1,3,5)]
+code.idx <- 8
+Area <- UNlocations$name[UNlocations$country_code == codes[code.idx]]
+{
+  col.idx <- grep(codes[code.idx], names(UNlocations))
+  sub.codes <- UNlocations$country_code[which(UNlocations[,col.idx] == codes[code.idx])]
+  
+  par(lend = 1,
+      mar = c(2,2,2,2) + 0.1)
+  layout(matrix(c(1,2,3), nrow = 1, byrow = TRUE),
+         widths = c(1,1,.33), heights = 1)
+  plot.tmp <- e0F %>% filter(country_code %in% sub.codes)
+  n.countries <- nrow(plot.tmp)
+  e0.cols <- alpha(cols[3],
+                   seq(1,.15, length.out = length(e0.cuts)-1))
+  sandArt(popsize = n.countries,
+          popcontains = "Countries",
+          x.pts =  plot.years,
+          x.lims = x.lim,
+          colors = e0.cols, 
+          color.cuts = e0.cuts,
+          plot.dat = as.matrix(plot.tmp[,-c(1:2,ncol(plot.tmp))]))
+  axis(1, at = n.countries*((seq(1952, 2022, 10)-x.lim[1])/(x.lim[2]-x.lim[1])), 
+       labels = seq(1950,2020,10))
+  title(main = expression("Life Expectancy, e"[0]))
+  plot.tmp <- tfr %>% filter(country_code %in% sub.codes)
+  tfr.cols <- rev(alpha(cols[1],
+                        seq(1,.15, length.out = length(e0.cuts)-1)))
+  tfr.cuts <- c(0.75, 1, 1.5, 2.1, 2.5,
+                3, 4, 5, 6, 9)
+  sandArt(popsize = n.countries,
+          popcontains = "Countries",
+          x.pts =  plot.years,
+          x.lims = x.lim,
+          colors = tfr.cols, 
+          color.cuts = tfr.cuts,
+          plot.dat = as.matrix(plot.tmp[,-c(1:2,ncol(plot.tmp))]),
+          colors.box = 2.1)
+  axis(1, at = n.countries*((seq(1950, 2020, 10)-x.lim[1])/(x.lim[2]-x.lim[1])), 
+       labels = seq(1950,2020,10)) 
+  title(main = "Total fertility rate (TFR)")
+  plot(NA,
+       xlim = c(0,1),
+       ylim = c(0,1),
+       xlab = "",
+       ylab = "",
+       axes = FALSE)
+  legend.all <- c(e0.cuts, tfr.cuts)
+  legend.order <- legend.all
+  order <- 0
+  for(i in 1:9){
+    order <- order + 1
+    legend.order[i] <- order
+    order <- order + 1
+    legend.order[i + 9] <- order
+  }
+  legend("center",
+         fill = c(e0.cols,
+                  tfr.cols),
+         ncol = 2,
+         cex = 1,
+         box.col = 'white',
+         legend = c(e0.cuts[-1],
+                    tfr.cuts[-1]),
+         border = FALSE)
+}  
+```  
+
+# Population Growth by Continent
+
+```{r continent, fig.align='center',fig.height = 3, fig.width = 9}
+y.lim <- c(0, 2500000)
+cols <- rainbow(length(codes))
+
+
+par(mfrow = c(1,3),
+    mar = c(2,2,2,2))
+plot(NA,
+     xlim = x.lim,
+     ylim = y.lim,
+     xaxt = 'n',
+     yaxt = 'n',
+     axes = FALSE,
+     xlab = "Year",
+     ylab = "Population in 1000s")
+axis(1, seq(1950,2020,10))
+axis(2, seq(0, 2500000, length.out = 6))
+title(main = "Population")
+plot.tmp <- pop %>% filter(country_code %in% codes)
+
+
+for(code in codes){
+  tmp <- plot.tmp[plot.tmp$country_code == code,]
+  lines(plot.years,
+        tmp[-c(1:2,ncol(tmp))],
+        lwd = 2, col = cols[match(code,codes)],
+        type = 'b')
+}
+
+
+legend('topleft',
+       lty = 1, lwd = 2,
+       col = cols, pch = 1,
+       bty = 'n', cex = .8,
+       legend = c("N Africa & W Asia",
+                  "Sub-Saharan Africa",
+                  "Central & S Asia",
+                  "Latin America & Carribean",
+                  "E & SE Asia",
+                  "Australia/NZ",
+                  "Oceania",
+                  "Europe & N America"))
+
+plot.tmp <- e0F %>% filter(country_code %in% codes)
+y.lim <- c(35,85)
+plot(NA,
+     xlim = x.lim,
+     ylim = y.lim,
+     xaxt = 'n',
+     yaxt = 'n',
+     axes = FALSE,
+     xlab = "Year",
+     ylab = expression(paste0("Life expectancy, ",e[0])))
+axis(1, seq(1950,2020,10))
+axis(2, seq(35,85, 10))
+title(main = "Mortality")
+
+for(code in codes){
+  tmp <- plot.tmp[plot.tmp$country_code == code,]
+  lines(plot.years,
+        tmp[-c(1:2,ncol(tmp))],
+        lwd = 2, col = cols[match(code,codes)],
+        type = 'b')
+}
+
+
+
+plot.tmp <- tfr %>% filter(country_code %in% codes)
+y.lim <- c(0.75,7)
+plot(NA,
+     xlim = x.lim,
+     ylim = y.lim,
+     xaxt = 'n',
+     yaxt = 'n',
+     axes = FALSE,
+     xlab = "Year",
+     ylab = "Total fertility rate (TFR)")
+axis(1, seq(1950,2020,10))
+axis(2, c(1, 2.1, 3, 5, 7))
+title(main = "Fertility")
+for(code in codes){
+  tmp <- plot.tmp[plot.tmp$country_code == code,]
+  lines(plot.years,
+        tmp[-c(1:2,ncol(tmp))],
+        lwd = 2, col = cols[match(code,codes)],
+        type = 'b')
+}
+
+
+```
+
+# Population Pyramids: Europe, 2015
+
+```{r pyr1, fig.align='center',fig.height=4,fig.width=4, message=FALSE}
+library(bayesPop)
+data(popF)
+data("popM")
+popF.long <- popF %>% pivot_longer(contains(c("5", "0")),
+                                    names_to = "Year",
+                                    values_to = "female")
+
+ages <- unique(popM$age)
+pyr.data <- popM %>% pivot_longer(contains(c("5", "0")),
+                                    names_to = "Year",
+                                    values_to = "male") %>%
+  select(-name) %>%
+  filter(Year == 2015) %>%
+  left_join(popF.long, by = c("country_code",
+                               "Year", "age"))
+
+pyr.tmp <-pyr.data %>%
+  filter(name == "EUROPE") %>%
+  select(c("male", "female")) %>%
+  as.matrix()
+rownames(pyr.tmp) <- ages
+
+pyr <- get.bPop.pyramid(pyr.tmp, legend = "Europe")
+plot(pyr, pyr1.par = list(col = tfr.cols[9], 
+                          border = tfr.cols[9]))
+
+```
+# Population Pyramids: Latin America \& Caribbean, 2015
+
+```{r pyr2, fig.align='center',fig.height=4,fig.width=4}
+
+
+pyr.tmp <-pyr.data %>%
+  filter(name == "LATIN AMERICA AND THE CARIBBEAN") %>%
+  select(c("male", "female")) %>%
+  as.matrix()
+rownames(pyr.tmp) <- ages
+
+pyr <- get.bPop.pyramid(pyr.tmp, legend = "Latin America/Caribbean")
+plot(pyr, pyr1.par = list(col = tfr.cols[9], 
+                          border = tfr.cols[9]))
+```
+
+# Population Pyramids: Asia, 2015
+```{r pyr3, fig.align='center',fig.height=3,fig.width=6}
+pyr.tmp <-pyr.data %>%
+  filter(country_code == 921) %>%
+  select(c("male", "female")) %>%
+  as.matrix()
+rownames(pyr.tmp) <- ages
+par(mfrow=c(1,2))
+pyr <- get.bPop.pyramid(pyr.tmp)
+plot(pyr, pyr1.par = list(col = tfr.cols[9], 
+                          border = tfr.cols[9]), main = "South-Central Asia")
+
+pyr.tmp <-pyr.data %>%
+  filter(name == "Eastern Asia") %>%
+  select(c("male", "female")) %>%
+  as.matrix()
+rownames(pyr.tmp) <- ages
+
+pyr <- get.bPop.pyramid(pyr.tmp)
+plot(pyr, pyr1.par = list(col = tfr.cols[9], 
+                          border = tfr.cols[9]), main = "Eastern Asia")
+```
+
+# Population Pyramids: Africa, 2015
+
+```{r pyr4, fig.align='center',fig.height=3,fig.width=6}
+
+pyr.tmp <- pyr.data %>%
+  filter(name == "Northern Africa") %>%
+  select(c("male", "female")) %>%
+  as.matrix()
+rownames(pyr.tmp) <- ages
+par(mfrow=c(1,2))
+pyr <- get.bPop.pyramid(pyr.tmp)
+plot(pyr, pyr1.par = list(col = tfr.cols[9], 
+                          border = tfr.cols[9]),
+     main = "North Africa")
+
+pyr.tmp <- pyr.data %>%
+  filter(country_code == 947) %>%
+  select(c("male", "female")) %>%
+  as.matrix()
+rownames(pyr.tmp) <- ages
+
+pyr <- get.bPop.pyramid(pyr.tmp)
+plot(pyr, pyr1.par = list(col = tfr.cols[9], 
+                          border = tfr.cols[9]),
+     main = "Sub-Saharan Africa")
+
+```
+
+
+# Population Pyramids: WA, 2011
+ * [Over time from WA OFM](https://ofm.wa.gov/washington-data-research/statewide-data/washington-trends/population-changes/distribution-washington-population-age-and-gender)
+```{r pyrWA,message=FALSE,fig.height=4.5}
+data <- read.table(file.path(find.package("bayesPop"), "ex-data", "popestimates_WAKing.txt"), 
+    header=TRUE, row.names=1)
+# extract data for two pyramids and put it into the right format
+WA <- data[,c("WA.male", "WA.female")]; colnames(WA) <- c("male", "female")
+King <- data[,c("King.male", "King.female")]; colnames(King) <- c("male", "female")
+pyramid <- get.bPop.pyramid(list(WA, King), legend=c("Washington", "King"))
+plot(pyramid,
+     pyr1.par = list(col = alpha(tfr.cols[9],0.7),
+                  border = tfr.cols[9]),
+     pyr2.par = list(col = e0.cols[1],
+                  border = e0.cols[1]))
+
+
+```
+
+
+# Mortality: Age-specific Mortality
+
+```{r mxfig, echo = FALSE, fig.align='center', fig.height=4,fig.width=4}
+data(mxM)
+data(mxF)
+
+countries <- c("United States of America", "Zimbabwe")
+ages <- unique(mxM$age)
+
+sex.cols <- wes_palette("Zissou1", n = 5)[c(1,3)]
+
+years <- c("1995-2000", "2005-2010", "2015-2020")
+ylim <- range(log(mxM[mxM$name %in% countries, years])) + .1*c(-1,1)
+y.axis.num <- seq(-10,0,2)
+y.axis.label <- round(exp(y.axis.num)*1000, 0)
+
+par(mfrow = c(1,1), lend = 1)
+for(year in years[1]){
+  plot(NA,
+       xlim = range(ages),
+       ylim = ylim,
+       yaxt = 'n',
+       xlab = "Age",
+       ylab = "Mortality rate (per 1000)",
+       main =  year)
+  axis(2, at = y.axis.num, labels = y.axis.label)
+  
+  lines(ages, log(mxM[mxM$name == countries[1], year]),
+        type = 'b',
+        col = alpha(sex.cols[2], 0.5),
+        pch = 19)
+  lines(ages, log(mxF[mxF$name == countries[1], year]),
+        type = 'b',
+        col = alpha(sex.cols[1], 0.5),
+        pch = 19)
+  lines(ages, log(mxM[mxM$name == countries[2], year]),
+        type = 'b',
+        col = alpha(sex.cols[2], 1),
+        pch = 19)
+  lines(ages, log(mxF[mxF$name == countries[2], year]),
+        type = 'b',
+        col = alpha(sex.cols[1], 1),
+        pch = 19)
+  legend('bottomright', bty = 'n',
+         lty = 1, pch = 19, cex = 0.75,
+         col = c(alpha(sex.cols[2:1],0.5),
+                 sex.cols[2:1]),
+         legend = c("US: Male", "US: Female",
+                    "Zimbabwe: Male", "Zimbabwe: Female"))
+}
+
+```
+
+# Mortality: Age-specific Mortality
+
+```{r mxfig2, echo = FALSE, fig.align='center', fig.height=3.5, fig.width=3.5}
+data(mxM)
+data(mxF)
+
+countries <- c("United States of America", "Zimbabwe")
+ages <- unique(mxM$age)
+
+sex.cols <- wes_palette("Zissou1", n = 5)[c(1,3)]
+
+years <- c("1995-2000", "2005-2010", "2015-2020")
+ylim <- range(log(mxM[mxM$name %in% countries, years])) + .1*c(-1,1)
+y.axis.num <- seq(-10,0,2)
+y.axis.label <- round(exp(y.axis.num)*1000, 0)
+
+par(mfrow = c(1,1), lend = 1)
+for(year in years[3]){
+  plot(NA,
+       xlim = range(ages),
+       ylim = ylim,
+       yaxt = 'n',
+       xlab = "Age",
+       ylab = "Mortality rate (per 1000)",
+       main =  year)
+  axis(2, at = y.axis.num, labels = y.axis.label)
+  
+  lines(ages, log(mxM[mxM$name == countries[1], year]),
+        type = 'b',
+        col = alpha(sex.cols[2], 0.5),
+        pch = 19)
+  lines(ages, log(mxF[mxF$name == countries[1], year]),
+        type = 'b',
+        col = alpha(sex.cols[1], 0.5),
+        pch = 19)
+  lines(ages, log(mxM[mxM$name == countries[2], year]),
+        type = 'b',
+        col = alpha(sex.cols[2], 1),
+        pch = 19)
+  lines(ages, log(mxF[mxF$name == countries[2], year]),
+        type = 'b',
+        col = alpha(sex.cols[1], 1),
+        pch = 19)
+  legend('bottomright', bty = 'n',
+         lty = 1, pch = 19, cex = 0.75,
+         col = c(alpha(sex.cols[2:1],0.5),
+                 sex.cols[2:1]),
+         legend = c("US: Male", "US: Female",
+                    "Zimbabwe: Male", "Zimbabwe: Female"))
+}
+
+```
+
+# The Lexis Diagram: Age-Period-Cohort
+
+\begin{figure}[h]
+\centering
+\includegraphics[height=0.8\textheight]{LexisLifeline.pdf}
+\end{figure}
+
+
+# The Lexis Diagram: Age-Period-Cohort
+
+\begin{figure}[h]
+\centering
+\includegraphics[height=0.8\textheight]{LexisPopSummary.pdf}
+\end{figure}
+
+# The Life Table: Age-Period-Cohort
+\begin{figure}[h]
+\centering
+\includegraphics[height=0.8\textheight]{LexisLifetableLine.pdf}
+\end{figure}
+
+# The Life Table: Age-Period-Cohort
+\begin{figure}[h]
+\centering
+\includegraphics[height=0.8\textheight]{Lifetable}
+\end{figure}
+
