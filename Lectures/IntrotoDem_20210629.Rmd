@@ -356,7 +356,7 @@ code.idx <- 3
 Area <- UNlocations$name[UNlocations$country_code == codes[code.idx]]
 {
   col.idx <- grep(codes[code.idx], names(UNlocations))
-  
+  sub.codes <- UNlocations$country_code[which(UNlocations[,col.idx] == codes[code.idx])]
   par(lend = 1,
       mar = c(2,2,2,2) + 0.1)
   layout(matrix(c(1,2,3), nrow = 1, byrow = TRUE),
