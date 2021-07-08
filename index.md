@@ -8,7 +8,7 @@ layout: default
 ### Population Growth and Fertility Transitions
 
 **Introduction to Demography + WPP data and R graphics**
-  * [Slides](https://jlgodwin.github.io/PHI2021/Lectures/IntrotoDem_20210629.pdf) | [Recording](https://washington.zoom.us/rec/share/2N6cPR41MsDSz3q7l3DDvy4R1fq560sLAzfA_VL9QIxoND1EAqnwml7TcERONWfP.nK4Yo3_xgVECg1SR?startTime=1625066602000) | [Slides.Rmd](https://jlgodwin.github.io/PHI2021/Lectures/IntrotoDem_20210629.Rmd)
+  * [Slides](https://jlgodwin.github.io/PHI2021/Lectures/IntrotoDem_20210629.pdf) | [Annotated Slides](https://jlgodwin.github.io/PHI2021/Lectures/IntrotoDem_20210629_Annotated.pdf) | [Recording](https://washington.zoom.us/rec/share/2N6cPR41MsDSz3q7l3DDvy4R1fq560sLAzfA_VL9QIxoND1EAqnwml7TcERONWfP.nK4Yo3_xgVECg1SR?startTime=1625066602000) | [Slides.Rmd](https://jlgodwin.github.io/PHI2021/Lectures/IntrotoDem_20210629.Rmd)
 
 
 **The Population "Bomb"**
@@ -24,6 +24,8 @@ layout: default
 **Demographic Data Sources**
   * [Slides by Neal Marquez + Me](https://jlgodwin.github.io/PHI2021/Lectures/DemographicDataSources.pdf)
 
+**Intro to Survey Statistics**
+  * [Slides](https://jlgodwin.github.io/PHI2021/Lectures/SurveyStatistics_20210707.pdf) 
+ 
 **R**
    * [tidycensus by Neal Marquez and Connor Gilroy](https://jlgodwin.github.io/PHI2021/Tutorials/tidycensus-tutorial.rmd)
-
