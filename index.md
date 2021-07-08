@@ -25,7 +25,7 @@ layout: default
   * [Slides by Neal Marquez + Me](https://jlgodwin.github.io/PHI2021/Lectures/DemographicDataSources.pdf)
 
 **Intro to Survey Statistics**
-  * [Slides](https://jlgodwin.github.io/PHI2021/Lectures/SurveyStatistics_20210707.pdf) 
+  * [Slides](https://jlgodwin.github.io/PHI2021/Lectures/SurveyStatistics_20210707.pdf) | [Recording I: up to design-based (long)](https://washington.zoom.us/rec/share/yoDCJQDYn-lIUJX_CnSO-PUDWtgRISIUPh9L_jsje6XfpSMQP1Q1IhHxD_v_2-se.fAYz1qRqtN08PA5B?startTime=1625766321000) [Recording II: design-based and model-based (short)](https://washington.zoom.us/rec/share/yoDCJQDYn-lIUJX_CnSO-PUDWtgRISIUPh9L_jsje6XfpSMQP1Q1IhHxD_v_2-se.fAYz1qRqtN08PA5B?startTime=1625770578000) | [Annotated Slides](https://jlgodwin.github.io/PHI2021/Lectures/SurveyStatistics_20210707_Annotated.pdf)
  
 **R**
    * [tidycensus by Neal Marquez and Connor Gilroy](https://jlgodwin.github.io/PHI2021/Tutorials/tidycensus-tutorial.rmd)
