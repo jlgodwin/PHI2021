@@ -1,0 +1,348 @@
+---
+title: "PHI Applied Research Fellows 2021: Survey Statistics"
+author: "Jessica Godwin"
+date: "July 7, 2021"
+output: 
+  beamer_presentation:
+    theme: "Dresden"
+    slide_level: 2
+    toc: true
+header-includes: 
+  - \addtobeamertemplate{title page}{\includegraphics[width=1.5cm]{W-Logo_Purple_RGB} \hfill \includegraphics[width=1.5cm]{csdelogo}}{}
+classoption: "aspectratio=169"
+urlcolor: blue
+linkcolor: blue
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_knit$set(root.dir = "~/Dropbox/PHI2021/Slides/")
+if(FALSE){
+  setwd("~/Dropbox/PHI2021/Slides/")
+}
+
+```
+
+# Data-generating Processes
+
+* Statisticians often choose models and likelihoods based on a combination of:
+  - how closely they reflect the true **data-generating process**
+  - the mathematical and statistical properties 
+  - (hopefully) the principle of parsimony
+* If our outcome is binary:
+  - \pause Flipping a coin? or
+  - Drawing from an urn?
+  - \pause What does flipping a coin or drawing from an urn have to do with surveys with human respondents?
+
+## Finite vs. superpopulations
+
+For observations $i = 1, \dots, n$, let
+\begin{equation*} y_i = \begin{cases}
+1, & \mbox{success},\\
+0, & \mbox{failure}.
+\end{cases} \end{equation*}
+
+* Superpopulation: If $y \sim \mbox{Bernoulli}(p)$, 
+  - $E[y] = p \mbox{   } Var(y) = p(1-p).$
+* Finite population: If $y \sim \mbox{Hypergeometric}(N, K, n)$,
+  - $E[y] = \dfrac{K}{N} \mbox{   }Var(y) = \dfrac{K}{N}\left(1-\dfrac{K}{N}\right)\left(1 - \dfrac{n}{N}\right).$
+How do we say what $\widehat{p}$ means in either case? Is it the same? 
+
+## Finite vs. superpopulations, cont'd
+
+\begin{columns}
+\begin{column}{0.5\textwidth}
+
+If $y_i \stackrel{\mbox{iid}}{\sim} \mbox{Bernoulli}(p)$,
+\begin{align*}
+\widehat{p} =& \dfrac{\sum_{i=1}^n y_i}{n},\\
+\widehat{Var}(\widehat{p}) =& \dfrac{\widehat{p}(1-\widehat{p})}{n}.
+\end{align*}
+\end{column}
+\begin{column}{0.5\textwidth}
+If $y_i \stackrel{\mbox{iid}}{\sim} \mbox{Hypergeometric}(N, K, n)$,
+\begin{align*}
+\widehat{p} = &\dfrac{\sum_{i=1}^n y_i}{n} = \dfrac{k}{n}\\
+\widehat{Var}(\widehat{p}) =  &\dfrac{\widehat{p}(1-\widehat{p})}{n} \times (1 - \dfrac{n}{N}).
+\end{align*}
+\end{column}
+\end{columns}
+\vspace{0.5in}
+How do we say what $\widehat{p}$ means in either case? Is it the same? 
+
+# Sampling Schemes
+## Simple random sampling(SRS)
+
+\begin{columns}
+\begin{column}{0.5\textwidth}
+\begin{itemize}
+\item Under an \textbf{SRS} of $n$ observations
+
+\begin{align*}
+\mbox{Pr}(\mbox{subject } k \in \mbox{sample,} S) =& \\ \pi_k = &\dfrac{1}{N} \\
+\mbox{Pr}(\mbox{subjects } k, k' \in \mbox{sample,} S) =& \\ \pi_{k,k'} = &\dfrac{1}{N}\times \dfrac{1}{N}.
+\end{align*}
+\end{itemize}
+\end{column}
+\begin{column}{0.5\textwidth}
+\begin{itemize}
+\item Under an \textbf{SRSWOR} of $n$ observation
+
+\begin{align*}
+\mbox{Pr}(\mbox{subject } k \in \mbox{sample,} S) = & \\ \pi_k =& \dfrac{n}{N} \\
+\mbox{Pr}(\mbox{subjects } k, k' \in \mbox{sample,} S) =& \\ \pi_{k,k'} = & \dfrac{n}{N}\times \dfrac{n-1}{N-1}.
+\end{align*}
+\end{itemize}
+\end{column}
+\end{columns}
+
+## Systematic sampling
+
+* Select every $r^{th}$ sampling unit from the sampling frame of length $N \colon r \times n \leq N < r \times (n+1)$
+  - What is $\pi_k$ for individual $k = r$? $k = r + 1$? \pause
+  - Can a systematic sample be implemented so that it is the equivalent of an SRS? \pause
+  - What is $\pi_{r, r+1}$? \pause
+* Random single start $\rightarrow$ what changes? \pause
+* Multiple starts 
+  - No individual sampling probabilities are 0 or 1
+  - Joint sampling probabilities defined
+
+## Stratified simple random sampling (strSRS)
+
+* Consider $h = 1, \dots, H$ strata from each of which you want to sample $n_h$ individuals.
+
+\begin{align*}
+\mbox{Pr}(\mbox{subject } k \in S_h) = &  \pi_k = \dfrac{n_h}{N_h} \\
+\mbox{Pr}(\mbox{subjects } k, k' \in S_h) =&  \pi_{k,k'} =  \dfrac{n_h}{N_h}\times \dfrac{n_h-1}{N_h-1}\\
+\mbox{Pr}(\mbox{subjects } k \in S_h, k' \in S_{h'}) =& \pi_{k,k'} = \dfrac{n_h}{N_h}\times \dfrac{n_{h'}}{N_{h'}}.
+\end{align*}
+
+## strSRS, cont'd
+
+* Why stratify? Why not an SRS or SRSWOR? \pause
+  -  Availability of **sampling frame**
+  -  Cost, convenience, speed
+  -  $N_1, \dots, N_h$ vary widely 
+  -  Rare outcomes within certain strata
+  -  We know strata are related to outcome of interest $\rightarrow$ precision gains!
+* What happens if we ignore the stratification?
+  - Waste a lot of folks' money!!
+  - Implicit assumption that outcome of interest doesn't differ by strata
+  - $\rightarrow$ obscure differences in outcomes by strata
+  - $\rightarrow$ OVERESTIMATE variance/standard errors
+  - $\rightarrow$ worsens variability in outcomes between strata grows and within strata shrinks
+  - $\rightarrow$ worsens as variability in  $\pi_{k \in S_h}$ between strata grows
+  
+## Cluster sampling
+
+Consider sampling $c = 1, \dots, C$ clusters or **primary sampling units (PSU)** from your population of $N_C$ clusters and $N$ **units**.
+
+Indivuals $k$ are the **observation units** contained within clusters on which we will make measurements.
+\vspace{0.15in}
+\begin{columns}
+\begin{column}{0.5\textwidth}
+\textbf{One-stage cluster sampling}\\
+\begin{align*}
+\mbox{Pr}(\mbox{PSU } c \in S) = & \dfrac{C}{N_c}\\
+\pi_{k \in Sc} = \begin{cases}
+1, & \mbox{PSU } c \in S,\\
+0, & \mbox{otherwise}.
+\end{cases}
+\end{align*}
+\end{column}
+\begin{column}{0.5\textwidth}
+\textbf{Two-stage cluster sampling}\\
+Sample $m_c$ from $M_c$ units in cluster $c$.
+\begin{align*}
+\mbox{Pr}(\mbox{PSU } c \in S) = & \dfrac{C}{N_c}\\
+\pi_{k \in S_c} = \begin{cases}
+\dfrac{m_c}{M_c}, & \mbox{PSU } c \in S,\\
+0, & \mbox{otherwise}.
+\end{cases}
+\end{align*}
+\end{column}
+\end{columns}
+
+## Cluster sampling, cont'd
+
+ * Probability proportional to size (PPS) sampling
+   - $\pi_c \propto M_c$ 
+   - When does this make sense?
+ * Why implement a cluster sample?
+   - The only sampling frame we have is a list of groups of observation units 
+   - Cost and convenience
+ * What happens if we ignore clustering in our sample?
+   - The $m_c$ observation units sampled in cluster $c$ are **not** independent samples
+   - $\rightarrow$ we have LESS information than $m_c$ observations from an SRS
+   - $\rightarrow$ we will UNDERESTIMATE variances and standard errors if we ignore this dependence
+   - $\rightarrow$ this underestimation worsens as the correlation between outcomes from individuals in a cluster increases
+
+## Complex surveys
+\begin{itemize}
+\item[] \textbf{Multi-stage sampling}
+\begin{itemize}
+\item \textbf{Example:} DHS (among others) stratify clusters by administrative divisions$\times$ urban/rural $\rightarrow$ select women withihn households within clusters within strata 
+\item \textbf{Stratified two-stage cluster sampling}
+\item PSUs $\rightarrow$ \textbf{secondary sampling units} (SSUs) $\rightarrow$ observation units
+\item One could stratify within clusters if a sampling frame necessitates (never encountered this yet)
+\end{itemize}
+\item[] \textbf{Multi-phase sampling}
+\begin{itemize}
+\item Fancy term for trying again to reach non-respondents!!
+\item Sub-sample (perhaps fully) your nonrespondents in attempts to get a response.
+\end{itemize}
+\end{itemize}
+
+# Design-based Estimation
+## Horvitz-Thompson estimators
+
+* Each individual $k$ has their responses weighted by their **sampling weight** $w_k = \dfrac{1}{\pi_k}$
+  - i.e. an individual with low chance of being sampled $\rightarrow$ $\pi_k$ small $\rightarrow$ $w_k$ big
+  - $w_k$ can be interpreted as number of individuals in the finite population that individual $k$'s response represents
+  - **Caveat:** nonresponse
+* **Average** or **arithmetic mean** 
+\begin{align*}
+\dfrac{\sum_{k = 1}^n y_k}{n} &\stackrel{?}{=} \dfrac{\sum_{k = 1}^n w_k y_k}{\sum_{k = 1}^n w_k} & = \dfrac{\sum_{k = 1}^n \frac{N}{n}y_k}{\sum_{k = 1}^n \frac{N}{n}}\\
+& = \dfrac{\frac{N}{n} \sum_{k = 1}^n y_k}{\frac{N}{n} \sum_{k = 1}^n 1} & = \dfrac{N}{n} \left(\dfrac{\sum_{k = 1}^n y_k}{\frac{N}{n} \times n}\right)  \
+& = \dfrac{N}{n} \left(\dfrac{\sum_{k = 1}^n y_k}{N}\right) & = \dfrac{\sum_{k = 1}^n y_k}{n}
+\end{align*}
+
+## Horvitz-Thompson estimators
+
+* Each individual $k$ has their responses weighted by their **sampling weight** $w_k = \dfrac{1}{\pi_k}$
+  - i.e. an individual with low chance of being sampled $\rightarrow$ $\pi_k$ small $\rightarrow$ $w_k$ big
+  - $w_k$ can be interpreted as number of individuals in the finite population that individual $k$'s response represents
+  - **Caveat:** nonresponse
+* **Weighted average**
+\begin{align*}
+\sum_{k = 1}^n w_k y_k & \mbox{ such that } w_k \in [0,1] \mbox{ and } \sum_k^n w_k = 1
+\end{align*}
+
+## Horvitz-Thompson estimators
+
+* Consider a population of size $N$, a sample of size $n$, where each individual has outcome $Y_k$
+* $Y_k$ is \textbf{not} random, but $Z_k$ is
+  \begin{align*}
+  Z_k = \begin{cases}
+  1, & k \in S \\
+  0, & \mbox{otherwise}.
+  \end{cases}
+  \end{align*}
+* Once sample taken $y_k = Y_k \times Z_k$ denotes an individual's observed response (may contain measurement error)
+  - $E[y_k] = E[Y_k \times Z_k] = Y_k E[Z_k] = Y_k \times \pi_k$
+
+## Horvitz-Thompson estimators
+
+* The population total of outcomes $Y$ is 
+\begin{align*}
+T =  \sum_{k = 1}^N Y_k
+\end{align*}
+\begin{align*}
+\widehat{T} = & \sum_{k = 1}^n w_k y_k =  \sum_{k = 1}^n \dfrac{y_k}{\pi_k}\\
+\widehat{Var}(\widehat{T})  = & \sum_{k, k'} \dfrac{y_{k}y_{k'}}{\pi_{k}\pi_{k'}} - \dfrac{y_{k}y_{k'}}{\pi_{kk'}} 
+\end{align*}
+
+## Horvitz-Thompson estimators
+
+* The population mean of outcomes $Y$ is $$\overline{Y}= \dfrac{\sum_{k = 1}^N Y_k}{N}$$
+\begin{align*}
+\widehat{\overline{Y}} = & \dfrac{\sum_{k = 1}^n w_k y_k}{N} =  \dfrac{1}{N} \sum_{k = 1}^n \dfrac{y_k}{\pi_k}\\
+\widehat{Var}(\widehat{\overline{Y}})  = & \dfrac{\widehat{Var}(\widehat{T})}{N^2}
+\end{align*}
+
+
+
+## Horvitz-Thompson estimators
+
+* The population mean of binary outcomes $Y$ or **prevalence**  is $$P = \dfrac{\sum_{k = 1}^N Y_k}{N}$$
+\begin{align*}
+\widehat{P} = & \dfrac{\sum_{k = 1}^n w_k y_k}{N} =  \dfrac{1}{N} \sum_{k = 1}^n \dfrac{y_k}{\pi_k}\\
+\widehat{Var}(\widehat{P})  = & \dfrac{\widehat{Var}(\widehat{T})}{N^2}
+\end{align*}
+
+## Horvitz-Thompson estimators
+
+* Stratified sampling
+\begin{align*}
+\widehat{T}  = \sum_{h=1}^H  \widehat{T}_h & = \sum_{h = 1}^H \sum_{k=1}^{n_h} w_{hk} y_{hk},\\
+\widehat{Var}(\widehat{T}) = \sum_{h = 1}^H \widehat{Var}(\widehat{T}_h) & = \sum_{h = 1}^H \sum_{k, k'} \dfrac{y_{hk}y_{hk'}}{\pi_{hk}\pi_{hk'}} - \dfrac{y_{hk}y_{hk'}}{\pi_{hkk'}},
+\end{align*}
+* Calculate variance in terms of each individual's difference from their respective strata total.
+
+## Horvitz-Thompson estimators
+
+* Cluster sampling
+\begin{align*}
+\widehat{T}  = \sum_{c=1}^C  {T}_c & = \sum_{c = 1}^C \sum_{k=1}^{N_c} w_{ck} y_{ck} = \sum_{c=1}^C w_c \sum_{k=1}^{N_c} y_{ck},\\
+\end{align*}
+* Calculate the variance in terms of each cluster total's difference from the overall population total
+
+## Horvitz-Thompson estimators
+
+* Stratified two-stage cluster sampling
+ \begin{align*}
+\widehat{T}  & = \sum_{h=1}^H \widehat{T}_h  = \sum_{h=1}^H \sum_{{c_1}=1}^{C_{1h}} \widehat{T}_{h[{c_1}]} \\
+  & = \sum_{h=1}^H \sum_{{c_1}=1}^{C_{1h}} \sum_{{c_2}=1}^{C_{2h}} \widehat{T}_{h[{c_1}:{c_2}]}  = \sum_{h=1}^H \sum_{{c_1}=1}^{C_{1h}} \sum_{{c_2}=1}^{C_{2h}}  \sum_{k=1}^{n_{c_2}} w_{h[{c_1}:{c_2}]k} y_{h[{c_1}:{c_2}]k}\\
+\widehat{Var}(\widehat{T})&  = \sum_{h=1}^H \widehat{Var}(\widehat{T}_h).
+\end{align*}
+* Apply methods from previous two in appropriate summation order
+
+## Horvitz-Thompson estimators
+
+* What if we don't know $N$? 
+\begin{align*}
+\widehat{P} = & \dfrac{\sum_{k = 1}^n w_k y_k}{N} \approx \dfrac{\sum_{k = 1}^n w_k y_k}{\widehat{N}} = \dfrac{\sum_{k = 1}^n w_k y_k}{\sum_{k=1}^n w_k} \\
+\widehat{Var}(\widehat{P})  = & \widehat{Var}\left(\dfrac{\widehat{T}}{\widehat{N}}\right)  = \dfrac{\widehat{??}}{\widehat{??}}
+\end{align*}
+* **Linearization:** Use Taylor series expansions to approximate the variance
+  - \texttt{survey} package in \texttt{R}
+
+## Binder (1983) and regression
+
+* Linear regression mean model $$E[ Y \vert \theta, X] = X\beta,$$
+* The \textbf{likelihood} $$L(\theta \vert y, \mathbf{X}) = \prod_{k = 1}^n L(\theta \vert y_k, \mathbf{x_k}) $$
+* The \textbf{log-likelihood} $$l(\theta \vert y, \mathbf{X}) = \log L(\theta \vert y, \mathbf{X}) = \sum_{k=1}^n \log L(\theta \vert y_k, \mathbf{x_k})$$
+
+## Binder (1983) and regression, cont'd
+
+* The \textbf{score function} $$\nabla l(\theta \vert y, \mathbf{X}) = [ \begin{array}{ccc} \frac{\partial l}{\partial \beta_0} & \dots & \frac{\partial l}{\partial \beta_p}\end{array}]$$ is set equal to 0 to estimate $\widehat{\beta}$ in \textbf{maximum likelihood estimation}
+* Incorporates sampling weights in \textbf{pseudolikelihood method} by weighting each observation unit's contribution to the score function by $w_k$
+* \texttt{survey::svyglm} function
+
+
+# Model-based estimation
+
+\begin{itemize}
+\item[] Design-based methods have nice properties, but
+\begin{itemize}
+  \item what if sampling weights not provided?
+  \item small sample sizes $\rightarrow$ design-based standard errors too large
+  \item especially a concern in \textbf{small area estimation}
+\end{itemize}
+
+\item[] Fixed effects for strata $\rightarrow$ different means for strata
+\item[] Random effects for cluster $\rightarrow$ account for dependence between observations within cluster
+$$y_{h[{c_1}:{c_2}]k} = \mu_h + \mathbf{b}_{c_1} + \mathbf{b}_{c_2}$$
+\begin{itemize}
+\item Is there enough information to estimate $\mathbf{b}_{c_2}$'s or all $\mu_h$ if $H$ is large  or $m_{c_1:c_2}$ is small compared to $m_{c_1}$'s?
+\item Nonresponse? Design variables or weights not available for every stage of sampling?
+\end{itemize}
+
+\end{itemize}
+
+
+# References
+
+* Horvitz, D. G. and Thompson, D. J. (1952). A generalization of sampling without replace- ment from a finite universe. Journal of the American statistical Association, 47(260):663– 685.
+* Binder, D. (1983). On the variances of asymptotically normal estimators from complex surveys. International Statistical Review, 51:279–292.
+* Lohr, S. (2010). Sampling: Design and Analysis, Second Edition. Brooks/Cole Cengage Learning, Boston.
+* Lumley, T. (2004). Analysis of complex survey samples. Journal of Statistical Software, 9:1–19.
+* Lumley, T. (2010). Complex Surveys: A Guide to Analysis using R. John Wiley and Sons, Hoboken, Jersey.
+
+## Maximum Likelihood Estimation Examples, if needed
+
+\begin{itemize}
+\item $k = 1, \dots, n$, $y_k \stackrel{iid}{\sim} \mbox{Bernoulii}(p)$
+\item $k = 1, \dots, n$, $y_k \stackrel{iid}{\sim} \mbox{Normal}(\mu, \sigma^2)$
+\end{itemize}
+
