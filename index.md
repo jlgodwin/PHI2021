@@ -3,11 +3,18 @@ title: PHI 2021
 layout: default
 ---
 
+# Table of Contents
+
+* [Demography](#demography)
+* [Demographic Data](#census-and-demographic-data)
+* [Statistics](#statistics)
+* [Housing and households](#housing-and-households)
+
 # Demography
 
 ## Population Growth and Fertility Transitions
 
-**Introduction to Demography + WPP data and R graphics**
+**Introduction to Demography: WPP data and R graphics**
   * [Slides](https://jlgodwin.github.io/PHI2021/Lectures/IntrotoDem_20210629.pdf) | [Annotated Slides](https://jlgodwin.github.io/PHI2021/Lectures/IntrotoDem_20210629_Annotated.pdf) | [Recording](https://washington.zoom.us/rec/share/2N6cPR41MsDSz3q7l3DDvy4R1fq560sLAzfA_VL9QIxoND1EAqnwml7TcERONWfP.nK4Yo3_xgVECg1SR?startTime=1625066602000) | [Slides.Rmd](https://jlgodwin.github.io/PHI2021/Lectures/IntrotoDem_20210629.Rmd)
 
 
@@ -20,14 +27,14 @@ layout: default
    * [Slides](https://jlgodwin.github.io/PHI2021/Lectures/Population_Projections_Overview.pdf) | [Recording--Cohort Change Ratios and Hamilton-Perry with Crystal Yu](https://washington.zoom.us/rec/share/JrhvDjcIVRAARF1Wbrzx9Mk6XynPM6uSWziziBYEDf4CtJjzhXvKbmgPdCH5jFVL.dwSvG-R3FDiqVaYb?startTime=1625077413000)
 
 
-## Census / Demographic data
+## Census and Demographic data
 
 **Demographic Data Sources**
   * [Slides by Neal Marquez + Me](https://jlgodwin.github.io/PHI2021/Lectures/DemographicDataSources.pdf)
 
-**R**
+**R Tutorials**
    * [tidycensus by Neal Marquez and Connor Gilroy](https://jlgodwin.github.io/PHI2021/Tutorials/tidycensus-tutorial.rmd)
-   * [IPUMS-NHGIS](https://jlgodwin.github.io/PHI2021/Tutorials/NHGIS.html) | [.Rmd](https://jlgodwin.github.io/PHI2021/Tutorials/NHGIS.Rmd)
+   * [IPUMS-NHGIS](https://jlgodwin.github.io/PHI2021/Tutorials/NHGIS.html) | [NHGIS.Rmd](https://jlgodwin.github.io/PHI2021/Tutorials/NHGIS.Rmd)
 
 # Statistics
 
