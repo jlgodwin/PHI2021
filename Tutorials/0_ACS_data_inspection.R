@@ -12,10 +12,11 @@ library(tidycensus)
 library(sf)
 library(mapview)
 library(data.table)
+library(tidyverse)
 
 # set api key to access tidycensusdata
 myKey <- "98068953d7f457e6b1166ff2218f263faefa119e"
-census_api_key(myKEY)
+census_api_key(myKey)
 
 #####################
 # -- ACS 2015-19 -- #
@@ -30,7 +31,7 @@ var_df <- load_variables(2019, "acs5", cache = TRUE)
 tract_hh <- get_acs("tract",
                     table = "B11016",
                     summary_var = "B11016_001",
-                    year = 2018,
+                    year = 2019,
                     state = "WA",
                     county = "King",
                     geometry = TRUE, 
@@ -85,7 +86,7 @@ all_var_df %>%
   filter(name == "B11016_001")
 
 # We loop through years of the ACS 1-year data and bind the rows together
-acsDF <- bind_rows(lapply(years, function(x){
+acs1DF <- bind_rows(lapply(years, function(x){
   get_acs(
     "county",
     table = "B11016",
@@ -99,8 +100,9 @@ acsDF <- bind_rows(lapply(years, function(x){
     mutate(Year = x)}))
 
 # Again, we want to lump together household counts regardless of family types
-hhDF <- acsDF  %>%
+hhDF <- acs1DF  %>%
   mutate(hh_size = case_when(
+    variable == "B11016_001" ~ 0, # total
     variable == "B11016_003" ~ 2,
     variable == "B11016_004" ~ 3,
     variable == "B11016_005" ~ 4,
@@ -122,12 +124,21 @@ hhDF <- acsDF  %>%
 
 # We calculate the proportion of households in each household-size category, and its associated margin of error
 plotDF <- hhDF[, list(estimate = sum(estimate),
-                      moe = sum(moe)), by = 'GEOID,Year,hh_size,summary_est,summary_moe']
-plotDF <- plotDF[, prop := estimate/summary_est]
-plotDF <- plotDF[, prop_moe := moe_prop(estimate, summary_est, 
-                                    moe, summary_moe)]
+                      moe = moe_sum(moe,estimate)), by = 'GEOID,Year,hh_size']
+plotDF <- plotDF %>%
+  filter(hh_size == 0) %>%
+  rename(summary_est=estimate,
+         summary_moe = moe) %>%
+  dplyr::select(-hh_size) %>%
+  full_join(plotDF) %>%
+  mutate(
+    prop = estimate/summary_est,
+    prop_moe = moe_prop(estimate, summary_est, 
+                        moe, summary_moe)
+  ) %>%
+  filter(hh_size != 0) 
 
-#head(plotDF)
+# head(plotDF)
 
 ##############################
 ## Plot % hh size over time ##
@@ -166,10 +177,123 @@ plotDF %>%
        title = "Households in King County grouped by household size (as a %)") +
   guides(fill=FALSE)
 
-###########
-## TO-do ##
-###########
+####################################
+## How is it evolving in Seattle? ##
+####################################
+years <- 2009:2019
+# We loop through years of the ACS 5-year data and bind the rows together
+acs5DF <- bind_rows(lapply(years, function(x){
+  get_acs(
+    "tract",
+    table = "B11016",
+    summary_var = "B11016_001",
+    state = "WA",
+    county = "King",
+    year = x,
+    survey = "acs5",
+    moe = 95,
+    cache_table = TRUE) %>%
+    mutate(Year = x)}))
 
-# replicate this analysis at a more granular geographic level (census tracts)
-# using ACS 5-year tabulated data
+hhDF <- acs5DF  %>%
+  mutate(hh_size = case_when(
+    variable == "B11016_001" ~ 0, # total
+    variable == "B11016_003" ~ 2,
+    variable == "B11016_004" ~ 3,
+    variable == "B11016_005" ~ 4,
+    variable == "B11016_006" ~ 5,
+    variable == "B11016_007" ~ 6,
+    variable == "B11016_008" ~ 7,
+    variable == "B11016_010" ~ 1,
+    variable == "B11016_011" ~ 2,
+    variable == "B11016_012" ~ 3,
+    variable == "B11016_013" ~ 4,
+    variable == "B11016_014" ~ 5,
+    variable == "B11016_015" ~ 6,
+    variable == "B11016_016" ~ 7,
+  ),
+  hh_size = factor(hh_size)) %>%
+  dplyr::select(-variable) %>%
+  filter(!is.na(hh_size)) %>% 
+  data.table()
 
+##################
+## Seattle only ##
+
+library(tigris)
+options(tigris_use_cache = TRUE)
+
+# load places in Washington
+wa <- places("WA", year = 2019, class = "sf")
+# get the water bodies of King County
+king_water <- area_water("WA", "King", class = "sf") 
+# filter to Seattle
+seattle <- 
+  wa %>%
+  filter(NAME == "Seattle")
+
+# we identify the census tracts included in Seattle
+seattle_tracts <- 
+  tract_hh_size %>%
+  st_as_sf() %>%
+  st_buffer(1e-5) %>%
+  # cut the outline of Seattle
+  st_intersection(seattle) %>%
+  # remove water areas from the map
+  st_difference(st_union(king_water)) %>% 
+  dplyr::select(GEOID) %>%
+  distinct()
+
+# we subset from the overall KC tracts dataset, the one located in Seattle
+seattleDF <- hhDF %>%
+  filter(GEOID %in% seattle_tracts$GEOID)
+
+# We calculate the proportion of households in each household-size category,
+# and its associated margin of error for Seattle in general - regardless of census tracts
+seattleDF <- seattleDF[, list(estimate = sum(estimate),
+                      moe = moe_sum(moe,estimate)), by = 'Year,hh_size']
+plotDF <- seattleDF %>%
+  filter(hh_size == 0) %>%
+  rename(summary_est=estimate,
+         summary_moe = moe) %>%
+  dplyr::select(-hh_size) %>%
+  full_join(seattleDF) %>%
+  mutate(
+    prop = estimate/summary_est,
+    prop_moe = moe_prop(estimate, summary_est, 
+                         moe, summary_moe)
+  ) %>%
+  filter(hh_size != 0) 
+
+# As a proportion of the total number of households
+plotDF %>%
+  mutate(
+    hi = prop + prop_moe,
+    lo = prop - prop_moe) %>%
+  ggplot(aes(x = Year, y = prop, ymin = lo, ymax = hi, 
+             group = hh_size)) +
+  geom_line(aes(color = hh_size)) +
+  geom_point(aes(color = hh_size)) +
+  geom_ribbon(aes(fill = hh_size), alpha = .4) +
+  theme_classic() +
+  scale_x_continuous(breaks = c(2005,2010,2015,2020)) +
+  labs(y="%", color = "Household size",
+       title = "Households in Seattle grouped by household size (as a %)") +
+  guides(fill=FALSE)
+
+# Or as an absolute number
+
+plotDF %>%
+  mutate(
+    hi = estimate+ moe,
+    lo = estimate- moe) %>%
+  ggplot(aes(x = Year, y = estimate, ymin = lo, ymax = hi, 
+             group = hh_size)) +
+  geom_line(aes(color = hh_size)) +
+  geom_point(aes(color = hh_size)) +
+  geom_ribbon(aes(fill = hh_size), alpha = .4) +
+  theme_classic() +
+  scale_x_continuous(breaks = c(2005,2010,2015,2020)) +
+  labs(y="%", color = "Household size",
+       title = "Households in Seattle grouped by household size (as a %)") +
+  guides(fill=FALSE)
