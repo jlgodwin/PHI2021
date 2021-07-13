@@ -1,0 +1,1388 @@
+--------------------------------------------------------------------------------
+Codebook for NHGIS data file 'nhgis0002_ts_nominal_county'
+--------------------------------------------------------------------------------
+ 
+Contents
+    - Data Summary
+    - Data Dictionary
+    - Geographic Integration Methods
+    - Source Data
+    - Citation and Use
+ 
+Detailed notes on time series design and comparability are available at: 
+    https://www.nhgis.org/sites/www.nhgis.org/files/nhgis_time_series_tables.pdf 
+ 
+--------------------------------------------------------------------------------
+Data Summary
+--------------------------------------------------------------------------------
+ 
+Time series layout:     Time varies by row
+Geographic level:       County (by State)
+Geographic integration: Nominal
+Measurement times:      1790, 1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2008-2012
+ 
+Tables:
+ 
+1. Total Population
+   Valid years in file: 1790, 1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 1890, 1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010
+   Code: A00
+ 
+2. Total Population
+   Valid years in file: 1970, 1980, 1990, 2000, 2010, 2008-2012
+   Code: AV0
+ 
+3. Persons by Sex [2]
+   Valid years in file: 1970, 1980, 1990, 2000, 2010, 2008-2012
+   Code: AV1
+ 
+4. Persons by Age [18]
+   Valid years in file: 1970, 1980, 1990, 2000, 2010
+   Code: B57
+ 
+5. Median Age of Persons
+   Valid years in file: 1980, 1990, 2000, 2010
+   Code: AR9
+ 
+--------------------------------------------------------------------------------
+Data Dictionary
+--------------------------------------------------------------------------------
+ 
+Context Fields 
+        GISJOIN:     GIS Join Match Code
+        YEAR:        Row Source Year
+        STATE:       NHGIS Integrated State Name
+        STATEFP:     FIPS State Code
+        STATENH:     NHGIS Integrated State Code
+        COUNTY:      NHGIS Integrated County Name
+        COUNTYFP:    FIPS County Code
+        COUNTYNH:    NHGIS Integrated County Code
+        NAME:        Year-Specific Area Name
+ 
+Table 1: (A00) Total Population
+        A00AA:       Persons: Total
+ 
+Table 2: (AV0) Total Population
+        AV0AA:       Persons: Total
+ 
+Table 3: (AV1) Persons by Sex [2]
+        AV1AA:       Persons: Male
+        AV1AB:       Persons: Female
+ 
+Table 4: (B57) Persons by Age [18]
+        B57AA:       Persons: Under 5 years
+        B57AB:       Persons: 5 to 9 years
+        B57AC:       Persons: 10 to 14 years
+        B57AD:       Persons: 15 to 17 years
+        B57AE:       Persons: 18 and 19 years
+        B57AF:       Persons: 20 years
+        B57AG:       Persons: 21 years
+        B57AH:       Persons: 22 to 24 years
+        B57AI:       Persons: 25 to 29 years
+        B57AJ:       Persons: 30 to 34 years
+        B57AK:       Persons: 35 to 44 years
+        B57AL:       Persons: 45 to 54 years
+        B57AM:       Persons: 55 to 59 years
+        B57AN:       Persons: 60 and 61 years
+        B57AO:       Persons: 62 to 64 years
+        B57AP:       Persons: 65 to 74 years
+        B57AQ:       Persons: 75 to 84 years
+        B57AR:       Persons: 85 years and over
+ 
+Table 5: (AR9) Median Age of Persons
+        AR9AA:       Median age: Persons
+ 
+Margins of Error 
+(Provided for American Community Survey data only) 
+ 
+Table 1: (AV0) Total Population
+        AV0AAM:      Margin of error: Persons: Total
+ 
+Table 2: (AV1) Persons by Sex [2]
+        AV1AAM:      Margin of error: Persons: Male
+        AV1ABM:      Margin of error: Persons: Female
+ 
+--------------------------------------------------------------------------------
+Geographic Integration Methods
+--------------------------------------------------------------------------------
+ 
+Nominal Integration:
+
+    Nominally integrated tables link geographic units across time according to
+    their names and codes, disregarding any changes in unit boundaries. The
+    identified geographic units match those from each census source, so the
+    spatial definitions and total number of units may vary from one time to
+    another (e.g., a city may annex land, a tract may be split in two, a new
+    county may be created, etc.). The tables include data for a particular
+    geographic unit only at times when the unit's name or code was in use,
+    resulting in truncated time series for some areas.
+    
+    Users should be cautious when interpreting changes in nominally integrated
+    time series because a single unit code may refer to distinctly different
+    areas at different times. If you are uncertain whether any boundaries
+    changed in your areas of interest, we recommend inspecting NHGIS GIS files
+    to confirm. (NHGIS supplies GIS boundary files for all units and years in
+    nominally integrated time series *except* 1970 places and county
+    subdivisions.)
+    
+    Alternatively, for some topics and time periods, NHGIS provides
+    "geographically standardized" time series, which provide data from multiple
+    times for a single census's geographic units (e.g., 2000 and 2010 data for
+    2010 census units). A disadvantage of standardized time series is that, in
+    areas where source units do not nest perfectly within a unit of the standard
+    year (e.g., where a source 2000 unit intersects multiple 2010 units), NHGIS
+    applies interpolation to standardize the data, a process which may
+    occasionally produce substantial errors.
+
+Complete documentation on time series integration methods is available at:
+    https://www.nhgis.org/documentation/time-series
+ 
+--------------------------------------------------------------------------------
+Source Data
+--------------------------------------------------------------------------------
+ 
+Additional documentation on NHGIS data sources is available at:
+    https://www.nhgis.org/documentation/tabular-data
+
+Table 1: (A00) Total Population
+ 
+    Time series AA: Persons: Total
+        Year: 1790
+            Source dataset: 1790 Census: Population Data [US, States & Counties]
+                Source table: NT1. Total Population
+                    Universe: Persons
+                        Variable: [AAA001] Total
+        Year: 1800
+            Source dataset: 1800 Census: Population Data [US, States & Counties]
+                Source table: NT2. Total Population (from 1900 Census Report)
+                    Universe: Persons
+                        Variable: [AAU001] Total
+        Year: 1810
+            Source dataset: 1810 Census: Population Data [US, States & Counties]
+                Source table: NT2. Total Population (from 1900 Census Report)
+                    Universe: Persons
+                        Variable: [AA3001] Total
+        Year: 1820
+            Source dataset: 1820 Census: Population Data [US, States & Counties]
+                Source table: NT9. Total Population
+                    Universe: Persons
+                        Variable: [ABM001] Total
+        Year: 1830
+            Source dataset: 1830 Census: Population Data [US, States & Counties]
+                Source table: NT1. Total Population
+                    Universe: Persons
+                        Variable: [ABN001] Total
+        Year: 1840
+            Source dataset: 1840 Census: Population & Other Data [US, States & Counties]
+                Source table: NT1. Total Population
+                    Universe: Persons
+                        Variable: [ACD001] Total
+        Year: 1850
+            Source dataset: 1850 Census: Population, Agriculture & Other Data [US, States & Counties]
+                Source table: NT1. Total Population
+                    Universe: Persons
+                        Variable: [ADQ001] Total
+        Year: 1860
+            Source dataset: 1860 Census: Population, Agriculture & Other Data [US, States & Counties]
+                Source table: NT1. Total Population
+                    Universe: Persons
+                        Variable: [AG3001] Total
+        Year: 1870
+            Source dataset: 1870 Census: Population, Agriculture & Other Data [US, States & Counties]
+                Source table: NT1. Total Population
+                    Universe: Persons
+                        Variable: [AJ3001] Total
+        Year: 1880
+            Source dataset: 1880 Census: Population, Agriculture & Other Data [US, States & Counties]
+                Source table: NT1. Total Population
+                    Universe: Persons
+                        Variable: [AOT001] Total
+        Year: 1890
+            Source dataset: 1890 Census: Population, Housing, Agriculture & Manufacturing Data [US, States & Counties]
+                Source table: NT1. Total Population
+                    Universe: Persons
+                        Variable: [AUM001] Total
+        Year: 1900
+            Source dataset: 1900 Census: Population, Housing, Agriculture & Manufacturing Data [US, States & Counties]
+                Source table: NT1. Total Population
+                    Universe: Persons
+                        Variable: [AYM001] Total
+        Year: 1910
+            Source dataset: 1910 Census: Population, Housing & Agriculture Data [US, States & Counties]
+                Source table: NT1. Total Population by Year
+                    Universe: Persons
+                        Variable: [A3Y001] 1910
+        Year: 1920
+            Source dataset: 1920 Census: Population, Housing, Agriculture & Manufacturing Data [US, States & Counties]
+                Source table: NT1. Total Population
+                    Universe: Persons
+                        Variable: [A7L001] Total
+        Year: 1930
+            Source dataset: 1930 Census: Population, Agriculture & Economic Data [US, States & Counties]
+                Source table: NT1. Total Population
+                    Universe: Persons
+                        Variable: [BDP001] Total
+        Year: 1940
+            Source dataset: 1940 Census: Population, Housing, Agriculture & Economic Data [US, States & Counties]
+                Source table: NT1. Total Population
+                    Universe: Persons
+                        Variable: [BV7001] Total
+        Year: 1950
+            Source dataset: 1950 Census: Population, Housing & Agriculture Data [US, States & Counties]
+                Source table: NT1. Population
+                    Universe: Persons
+                        Variable: [B18001] Total
+        Year: 1960
+            Source dataset: 1960 Census: Population Data [US, States, Counties]
+                Source table: NT1. Total Population
+                    Universe: Persons
+                        Variable: [B5O001] Total
+        Year: 1970
+            Source dataset: 1970 Census: Count 4Pa - Sample-Based Population Data
+                Source table: NT126. 100% Population
+                    Universe: Persons
+                        Variable: [C1I001] Total
+        Year: 1980
+            Source dataset: 1980 Census: STF 1 - 100% Data
+                Source table: NT1A. Persons
+                    Universe: Persons
+                        Variable: [C7L001] Total
+        Year: 1990
+            Source dataset: 1990 Census: STF 1 - 100% Data
+                Source table: NP1. Persons
+                    Universe: Persons
+                        Variable: [ET1001] Total
+        Year: 2000
+            Source dataset: 2000 Census: SF 1a - 100% Data [Areas Larger Than Block Groups]
+                Source table: NP001A. Total Population
+                    Universe: Persons
+                        Variable: [FL5001] Total
+        Year: 2010
+            Source dataset: 2010 Census: SF 1a - P & H Tables [Blocks & Larger Areas]
+                Source table: P1. Total Population
+                    Universe: Total population
+                        Variable: [H7V001] Total
+ 
+ 
+Table 2: (AV0) Total Population
+ 
+    Time series AA: Persons: Total
+        Year: 1970
+            Source dataset: 1970 Census: Count 4Pa - Sample-Based Population Data
+                Source table: NT126. 100% Population
+                    Universe: Persons
+                        Variable: [C1I001] Total
+        Year: 1980
+            Source dataset: 1980 Census: STF 1 - 100% Data
+                Source table: NT1A. Persons
+                    Universe: Persons
+                        Variable: [C7L001] Total
+        Year: 1990
+            Source dataset: 1990 Census: STF 1 - 100% Data
+                Source table: NP1. Persons
+                    Universe: Persons
+                        Variable: [ET1001] Total
+        Year: 2000
+            Source dataset: 2000 Census: SF 1a - 100% Data [Areas Larger Than Block Groups]
+                Source table: NP001A. Total Population
+                    Universe: Persons
+                        Variable: [FL5001] Total
+        Year: 2010
+            Source dataset: 2010 Census: SF 1a - P & H Tables [Blocks & Larger Areas]
+                Source table: P1. Total Population
+                    Universe: Total population
+                        Variable: [H7V001] Total
+        Year: 2008-2012
+            Source dataset: 2012 American Community Survey: 5-Year Data [2008-2012, Block Groups & Larger Areas]
+                Source table: B01003. Total Population
+                    Universe: Total population
+                        Variable: [QSP001] Total
+ 
+ 
+Table 3: (AV1) Persons by Sex [2]
+ 
+    Time series AA: Persons: Male
+        Year: 1970
+            Source dataset: 1970 Census: Count 2 - 100% Data [Tracts, Urban Areas, Metro Areas, etc.] 
+                Source table: NT2A. Sex by Age
+                    Universe: Persons
+                        Variable: [CE6001] Male >> Under 1 year
+                        Variable: [CE6002] Male >> 1 year
+                        Variable: [CE6003] Male >> 2 years
+                        Variable: [CE6004] Male >> 3 years
+                        Variable: [CE6005] Male >> 4 years
+                        Variable: [CE6006] Male >> 5 years
+                        Variable: [CE6007] Male >> 6 years
+                        Variable: [CE6008] Male >> 7 years
+                        Variable: [CE6009] Male >> 8 years
+                        Variable: [CE6010] Male >> 9 years
+                        Variable: [CE6011] Male >> 10 years
+                        Variable: [CE6012] Male >> 11 years
+                        Variable: [CE6013] Male >> 12 years
+                        Variable: [CE6014] Male >> 13 years
+                        Variable: [CE6015] Male >> 14 years
+                        Variable: [CE6016] Male >> 15 years
+                        Variable: [CE6017] Male >> 16 years
+                        Variable: [CE6018] Male >> 17 years
+                        Variable: [CE6019] Male >> 18 years
+                        Variable: [CE6020] Male >> 19 years
+                        Variable: [CE6021] Male >> 20 years
+                        Variable: [CE6022] Male >> 21 years
+                        Variable: [CE6023] Male >> 22 years
+                        Variable: [CE6024] Male >> 23 years
+                        Variable: [CE6025] Male >> 24 years
+                        Variable: [CE6026] Male >> 25 years
+                        Variable: [CE6027] Male >> 26 years
+                        Variable: [CE6028] Male >> 27 years
+                        Variable: [CE6029] Male >> 28 years
+                        Variable: [CE6030] Male >> 29 years
+                        Variable: [CE6031] Male >> 30 years
+                        Variable: [CE6032] Male >> 31 years
+                        Variable: [CE6033] Male >> 32 years
+                        Variable: [CE6034] Male >> 33 years
+                        Variable: [CE6035] Male >> 34 years
+                        Variable: [CE6036] Male >> 35 years
+                        Variable: [CE6037] Male >> 36 years
+                        Variable: [CE6038] Male >> 37 years
+                        Variable: [CE6039] Male >> 38 years
+                        Variable: [CE6040] Male >> 39 years
+                        Variable: [CE6041] Male >> 40 years
+                        Variable: [CE6042] Male >> 41 years
+                        Variable: [CE6043] Male >> 42 years
+                        Variable: [CE6044] Male >> 43 years
+                        Variable: [CE6045] Male >> 44 years
+                        Variable: [CE6046] Male >> 45 years
+                        Variable: [CE6047] Male >> 46 years
+                        Variable: [CE6048] Male >> 47 years
+                        Variable: [CE6049] Male >> 48 years
+                        Variable: [CE6050] Male >> 49 years
+                        Variable: [CE6051] Male >> 50 years
+                        Variable: [CE6052] Male >> 51 years
+                        Variable: [CE6053] Male >> 52 years
+                        Variable: [CE6054] Male >> 53 years
+                        Variable: [CE6055] Male >> 54 years
+                        Variable: [CE6056] Male >> 55 years
+                        Variable: [CE6057] Male >> 56 years
+                        Variable: [CE6058] Male >> 57 years
+                        Variable: [CE6059] Male >> 58 years
+                        Variable: [CE6060] Male >> 59 years
+                        Variable: [CE6061] Male >> 60 years
+                        Variable: [CE6062] Male >> 61 years
+                        Variable: [CE6063] Male >> 62 years
+                        Variable: [CE6064] Male >> 63 years
+                        Variable: [CE6065] Male >> 64 years
+                        Variable: [CE6066] Male >> 65 years
+                        Variable: [CE6067] Male >> 66 years
+                        Variable: [CE6068] Male >> 67 years
+                        Variable: [CE6069] Male >> 68 years
+                        Variable: [CE6070] Male >> 69 years
+                        Variable: [CE6071] Male >> 70 years
+                        Variable: [CE6072] Male >> 71 years
+                        Variable: [CE6073] Male >> 72 years
+                        Variable: [CE6074] Male >> 73 years
+                        Variable: [CE6075] Male >> 74 years
+                        Variable: [CE6076] Male >> 75 years
+                        Variable: [CE6077] Male >> 76 years
+                        Variable: [CE6078] Male >> 77 years
+                        Variable: [CE6079] Male >> 78 years
+                        Variable: [CE6080] Male >> 79 years
+                        Variable: [CE6081] Male >> 80 years
+                        Variable: [CE6082] Male >> 81 years
+                        Variable: [CE6083] Male >> 82 years
+                        Variable: [CE6084] Male >> 83 years
+                        Variable: [CE6085] Male >> 84 years
+                        Variable: [CE6086] Male >> 85 years
+                        Variable: [CE6087] Male >> 86 years
+                        Variable: [CE6088] Male >> 87 years
+                        Variable: [CE6089] Male >> 88 years
+                        Variable: [CE6090] Male >> 89 years
+                        Variable: [CE6091] Male >> 90 years
+                        Variable: [CE6092] Male >> 91 years
+                        Variable: [CE6093] Male >> 92 years
+                        Variable: [CE6094] Male >> 93 years
+                        Variable: [CE6095] Male >> 94 years
+                        Variable: [CE6096] Male >> 95 years
+                        Variable: [CE6097] Male >> 96 years
+                        Variable: [CE6098] Male >> 97 years
+                        Variable: [CE6099] Male >> 98 years
+                        Variable: [CE6100] Male >> 99 years
+                        Variable: [CE6101] Male >> 100 years and over
+        Year: 1980
+            Source dataset: 1980 Census: STF 1 - 100% Data
+                Source table: NT6. Sex
+                    Universe: Persons
+                        Variable: [C9C001] Male
+        Year: 1990
+            Source dataset: 1990 Census: STF 1 - 100% Data
+                Source table: NP5. Sex
+                    Universe: Persons
+                        Variable: [EUX001] Male
+        Year: 2000
+            Source dataset: 2000 Census: SF 1a - 100% Data [Areas Larger Than Block Groups]
+                Source table: NP012A. Population by Sex
+                    Universe: Persons
+                        Variable: [FMY001] Male
+        Year: 2010
+            Source dataset: 2010 Census: SF 1a - P & H Tables [Blocks & Larger Areas]
+                Source table: P12. Sex by Age
+                    Universe: Total population
+                        Variable: [H76002] Male
+        Year: 2008-2012
+            Source dataset: 2012 American Community Survey: 5-Year Data [2008-2012, Block Groups & Larger Areas]
+                Source table: B01001. Sex by Age
+                    Universe: Total population
+                        Variable: [QSE002] Male
+ 
+    Time series AB: Persons: Female
+        Year: 1970
+            Source dataset: 1970 Census: Count 2 - 100% Data [Tracts, Urban Areas, Metro Areas, etc.] 
+                Source table: NT2A. Sex by Age
+                    Universe: Persons
+                        Variable: [CE6102] Female >> Under 1 year
+                        Variable: [CE6103] Female >> 1 year
+                        Variable: [CE6104] Female >> 2 years
+                        Variable: [CE6105] Female >> 3 years
+                        Variable: [CE6106] Female >> 4 years
+                        Variable: [CE6107] Female >> 5 years
+                        Variable: [CE6108] Female >> 6 years
+                        Variable: [CE6109] Female >> 7 years
+                        Variable: [CE6110] Female >> 8 years
+                        Variable: [CE6111] Female >> 9 years
+                        Variable: [CE6112] Female >> 10 years
+                        Variable: [CE6113] Female >> 11 years
+                        Variable: [CE6114] Female >> 12 years
+                        Variable: [CE6115] Female >> 13 years
+                        Variable: [CE6116] Female >> 14 years
+                        Variable: [CE6117] Female >> 15 years
+                        Variable: [CE6118] Female >> 16 years
+                        Variable: [CE6119] Female >> 17 years
+                        Variable: [CE6120] Female >> 18 years
+                        Variable: [CE6121] Female >> 19 years
+                        Variable: [CE6122] Female >> 20 years
+                        Variable: [CE6123] Female >> 21 years
+                        Variable: [CE6124] Female >> 22 years
+                        Variable: [CE6125] Female >> 23 years
+                        Variable: [CE6126] Female >> 24 years
+                        Variable: [CE6127] Female >> 25 years
+                        Variable: [CE6128] Female >> 26 years
+                        Variable: [CE6129] Female >> 27 years
+                        Variable: [CE6130] Female >> 28 years
+                        Variable: [CE6131] Female >> 29 years
+                        Variable: [CE6132] Female >> 30 years
+                        Variable: [CE6133] Female >> 31 years
+                        Variable: [CE6134] Female >> 32 years
+                        Variable: [CE6135] Female >> 33 years
+                        Variable: [CE6136] Female >> 34 years
+                        Variable: [CE6137] Female >> 35 years
+                        Variable: [CE6138] Female >> 36 years
+                        Variable: [CE6139] Female >> 37 years
+                        Variable: [CE6140] Female >> 38 years
+                        Variable: [CE6141] Female >> 39 years
+                        Variable: [CE6142] Female >> 40 years
+                        Variable: [CE6143] Female >> 41 years
+                        Variable: [CE6144] Female >> 42 years
+                        Variable: [CE6145] Female >> 43 years
+                        Variable: [CE6146] Female >> 44 years
+                        Variable: [CE6147] Female >> 45 years
+                        Variable: [CE6148] Female >> 46 years
+                        Variable: [CE6149] Female >> 47 years
+                        Variable: [CE6150] Female >> 48 years
+                        Variable: [CE6151] Female >> 49 years
+                        Variable: [CE6152] Female >> 50 years
+                        Variable: [CE6153] Female >> 51 years
+                        Variable: [CE6154] Female >> 52 years
+                        Variable: [CE6155] Female >> 53 years
+                        Variable: [CE6156] Female >> 54 years
+                        Variable: [CE6157] Female >> 55 years
+                        Variable: [CE6158] Female >> 56 years
+                        Variable: [CE6159] Female >> 57 years
+                        Variable: [CE6160] Female >> 58 years
+                        Variable: [CE6161] Female >> 59 years
+                        Variable: [CE6162] Female >> 60 years
+                        Variable: [CE6163] Female >> 61 years
+                        Variable: [CE6164] Female >> 62 years
+                        Variable: [CE6165] Female >> 63 years
+                        Variable: [CE6166] Female >> 64 years
+                        Variable: [CE6167] Female >> 65 years
+                        Variable: [CE6168] Female >> 66 years
+                        Variable: [CE6169] Female >> 67 years
+                        Variable: [CE6170] Female >> 68 years
+                        Variable: [CE6171] Female >> 69 years
+                        Variable: [CE6172] Female >> 70 years
+                        Variable: [CE6173] Female >> 71 years
+                        Variable: [CE6174] Female >> 72 years
+                        Variable: [CE6175] Female >> 73 years
+                        Variable: [CE6176] Female >> 74 years
+                        Variable: [CE6177] Female >> 75 years
+                        Variable: [CE6178] Female >> 76 years
+                        Variable: [CE6179] Female >> 77 years
+                        Variable: [CE6180] Female >> 78 years
+                        Variable: [CE6181] Female >> 79 years
+                        Variable: [CE6182] Female >> 80 years
+                        Variable: [CE6183] Female >> 81 years
+                        Variable: [CE6184] Female >> 82 years
+                        Variable: [CE6185] Female >> 83 years
+                        Variable: [CE6186] Female >> 84 years
+                        Variable: [CE6187] Female >> 85 years
+                        Variable: [CE6188] Female >> 86 years
+                        Variable: [CE6189] Female >> 87 years
+                        Variable: [CE6190] Female >> 88 years
+                        Variable: [CE6191] Female >> 89 years
+                        Variable: [CE6192] Female >> 90 years
+                        Variable: [CE6193] Female >> 91 years
+                        Variable: [CE6194] Female >> 92 years
+                        Variable: [CE6195] Female >> 93 years
+                        Variable: [CE6196] Female >> 94 years
+                        Variable: [CE6197] Female >> 95 years
+                        Variable: [CE6198] Female >> 96 years
+                        Variable: [CE6199] Female >> 97 years
+                        Variable: [CE6200] Female >> 98 years
+                        Variable: [CE6201] Female >> 99 years
+                        Variable: [CE6202] Female >> 100 years and over
+        Year: 1980
+            Source dataset: 1980 Census: STF 1 - 100% Data
+                Source table: NT6. Sex
+                    Universe: Persons
+                        Variable: [C9C002] Female
+        Year: 1990
+            Source dataset: 1990 Census: STF 1 - 100% Data
+                Source table: NP5. Sex
+                    Universe: Persons
+                        Variable: [EUX002] Female
+        Year: 2000
+            Source dataset: 2000 Census: SF 1a - 100% Data [Areas Larger Than Block Groups]
+                Source table: NP012A. Population by Sex
+                    Universe: Persons
+                        Variable: [FMY002] Female
+        Year: 2010
+            Source dataset: 2010 Census: SF 1a - P & H Tables [Blocks & Larger Areas]
+                Source table: P12. Sex by Age
+                    Universe: Total population
+                        Variable: [H76026] Female
+        Year: 2008-2012
+            Source dataset: 2012 American Community Survey: 5-Year Data [2008-2012, Block Groups & Larger Areas]
+                Source table: B01001. Sex by Age
+                    Universe: Total population
+                        Variable: [QSE026] Female
+ 
+ 
+Table 4: (B57) Persons by Age [18]
+ 
+    Time series AA: Persons: Under 5 years
+        Year: 1970
+            Source dataset: 1970 Census: Count 2 - 100% Data [Tracts, Urban Areas, Metro Areas, etc.] 
+                Source table: NT2A. Sex by Age
+                    Universe: Persons
+                        Variable: [CE6001] Male >> Under 1 year
+                        Variable: [CE6002] Male >> 1 year
+                        Variable: [CE6003] Male >> 2 years
+                        Variable: [CE6004] Male >> 3 years
+                        Variable: [CE6005] Male >> 4 years
+                        Variable: [CE6102] Female >> Under 1 year
+                        Variable: [CE6103] Female >> 1 year
+                        Variable: [CE6104] Female >> 2 years
+                        Variable: [CE6105] Female >> 3 years
+                        Variable: [CE6106] Female >> 4 years
+        Year: 1980
+            Source dataset: 1980 Census: STF 1 - 100% Data
+                Source table: NT10A. Age
+                    Universe: Persons
+                        Variable: [C67001] Under 1 year
+                        Variable: [C67002] 1-2 years
+                        Variable: [C67003] 3-4 years
+        Year: 1990
+            Source dataset: 1990 Census: STF 1 - 100% Data
+                Source table: NP11. Age
+                    Universe: Persons
+                        Variable: [ET3001] Under 1 year
+                        Variable: [ET3002] 1 and 2 years
+                        Variable: [ET3003] 3 and 4 years
+        Year: 2000
+            Source dataset: 2000 Census: SF 1a - 100% Data [Areas Larger Than Block Groups]
+                Source table: NP012B. Population by Sex by Age
+                    Universe: Persons
+                        Variable: [FMZ001] Male >> Under 5 years
+                        Variable: [FMZ024] Female >> Under 5 years
+        Year: 2010
+            Source dataset: 2010 Census: SF 1a - P & H Tables [Blocks & Larger Areas]
+                Source table: P12. Sex by Age
+                    Universe: Total population
+                        Variable: [H76003] Male: Under 5 years
+                        Variable: [H76027] Female: Under 5 years
+ 
+    Time series AB: Persons: 5 to 9 years
+        Year: 1970
+            Source dataset: 1970 Census: Count 2 - 100% Data [Tracts, Urban Areas, Metro Areas, etc.] 
+                Source table: NT2A. Sex by Age
+                    Universe: Persons
+                        Variable: [CE6006] Male >> 5 years
+                        Variable: [CE6007] Male >> 6 years
+                        Variable: [CE6008] Male >> 7 years
+                        Variable: [CE6009] Male >> 8 years
+                        Variable: [CE6010] Male >> 9 years
+                        Variable: [CE6107] Female >> 5 years
+                        Variable: [CE6108] Female >> 6 years
+                        Variable: [CE6109] Female >> 7 years
+                        Variable: [CE6110] Female >> 8 years
+                        Variable: [CE6111] Female >> 9 years
+        Year: 1980
+            Source dataset: 1980 Census: STF 1 - 100% Data
+                Source table: NT10A. Age
+                    Universe: Persons
+                        Variable: [C67004] 5 years
+                        Variable: [C67005] 6 years
+                        Variable: [C67006] 7-9 years
+        Year: 1990
+            Source dataset: 1990 Census: STF 1 - 100% Data
+                Source table: NP11. Age
+                    Universe: Persons
+                        Variable: [ET3004] 5 years
+                        Variable: [ET3005] 6 years
+                        Variable: [ET3006] 7 to 9 years
+        Year: 2000
+            Source dataset: 2000 Census: SF 1a - 100% Data [Areas Larger Than Block Groups]
+                Source table: NP012B. Population by Sex by Age
+                    Universe: Persons
+                        Variable: [FMZ002] Male >> 5 to 9 years
+                        Variable: [FMZ025] Female >> 5 to 9 years
+        Year: 2010
+            Source dataset: 2010 Census: SF 1a - P & H Tables [Blocks & Larger Areas]
+                Source table: P12. Sex by Age
+                    Universe: Total population
+                        Variable: [H76004] Male: 5 to 9 years
+                        Variable: [H76028] Female: 5 to 9 years
+ 
+    Time series AC: Persons: 10 to 14 years
+        Year: 1970
+            Source dataset: 1970 Census: Count 2 - 100% Data [Tracts, Urban Areas, Metro Areas, etc.] 
+                Source table: NT2A. Sex by Age
+                    Universe: Persons
+                        Variable: [CE6011] Male >> 10 years
+                        Variable: [CE6012] Male >> 11 years
+                        Variable: [CE6013] Male >> 12 years
+                        Variable: [CE6014] Male >> 13 years
+                        Variable: [CE6015] Male >> 14 years
+                        Variable: [CE6112] Female >> 10 years
+                        Variable: [CE6113] Female >> 11 years
+                        Variable: [CE6114] Female >> 12 years
+                        Variable: [CE6115] Female >> 13 years
+                        Variable: [CE6116] Female >> 14 years
+        Year: 1980
+            Source dataset: 1980 Census: STF 1 - 100% Data
+                Source table: NT10A. Age
+                    Universe: Persons
+                        Variable: [C67007] 10-13 years
+                        Variable: [C67008] 14 years
+        Year: 1990
+            Source dataset: 1990 Census: STF 1 - 100% Data
+                Source table: NP11. Age
+                    Universe: Persons
+                        Variable: [ET3007] 10 and 11 years
+                        Variable: [ET3008] 12 and 13 years
+                        Variable: [ET3009] 14 years
+        Year: 2000
+            Source dataset: 2000 Census: SF 1a - 100% Data [Areas Larger Than Block Groups]
+                Source table: NP012B. Population by Sex by Age
+                    Universe: Persons
+                        Variable: [FMZ003] Male >> 10 to 14 years
+                        Variable: [FMZ026] Female >> 10 to 14 years
+        Year: 2010
+            Source dataset: 2010 Census: SF 1a - P & H Tables [Blocks & Larger Areas]
+                Source table: P12. Sex by Age
+                    Universe: Total population
+                        Variable: [H76005] Male: 10 to 14 years
+                        Variable: [H76029] Female: 10 to 14 years
+ 
+    Time series AD: Persons: 15 to 17 years
+        Year: 1970
+            Source dataset: 1970 Census: Count 2 - 100% Data [Tracts, Urban Areas, Metro Areas, etc.] 
+                Source table: NT2A. Sex by Age
+                    Universe: Persons
+                        Variable: [CE6016] Male >> 15 years
+                        Variable: [CE6017] Male >> 16 years
+                        Variable: [CE6018] Male >> 17 years
+                        Variable: [CE6117] Female >> 15 years
+                        Variable: [CE6118] Female >> 16 years
+                        Variable: [CE6119] Female >> 17 years
+        Year: 1980
+            Source dataset: 1980 Census: STF 1 - 100% Data
+                Source table: NT10A. Age
+                    Universe: Persons
+                        Variable: [C67009] 15 years
+                        Variable: [C67010] 16 years
+                        Variable: [C67011] 17 years
+        Year: 1990
+            Source dataset: 1990 Census: STF 1 - 100% Data
+                Source table: NP11. Age
+                    Universe: Persons
+                        Variable: [ET3010] 15 years
+                        Variable: [ET3011] 16 years
+                        Variable: [ET3012] 17 years
+        Year: 2000
+            Source dataset: 2000 Census: SF 1a - 100% Data [Areas Larger Than Block Groups]
+                Source table: NP012B. Population by Sex by Age
+                    Universe: Persons
+                        Variable: [FMZ004] Male >> 15 to 17 years
+                        Variable: [FMZ027] Female >> 15 to 17 years
+        Year: 2010
+            Source dataset: 2010 Census: SF 1a - P & H Tables [Blocks & Larger Areas]
+                Source table: P12. Sex by Age
+                    Universe: Total population
+                        Variable: [H76006] Male: 15 to 17 years
+                        Variable: [H76030] Female: 15 to 17 years
+ 
+    Time series AE: Persons: 18 and 19 years
+        Year: 1970
+            Source dataset: 1970 Census: Count 2 - 100% Data [Tracts, Urban Areas, Metro Areas, etc.] 
+                Source table: NT2A. Sex by Age
+                    Universe: Persons
+                        Variable: [CE6019] Male >> 18 years
+                        Variable: [CE6020] Male >> 19 years
+                        Variable: [CE6120] Female >> 18 years
+                        Variable: [CE6121] Female >> 19 years
+        Year: 1980
+            Source dataset: 1980 Census: STF 1 - 100% Data
+                Source table: NT10A. Age
+                    Universe: Persons
+                        Variable: [C67012] 18 years
+                        Variable: [C67013] 19 years
+        Year: 1990
+            Source dataset: 1990 Census: STF 1 - 100% Data
+                Source table: NP11. Age
+                    Universe: Persons
+                        Variable: [ET3013] 18 years
+                        Variable: [ET3014] 19 years
+        Year: 2000
+            Source dataset: 2000 Census: SF 1a - 100% Data [Areas Larger Than Block Groups]
+                Source table: NP012B. Population by Sex by Age
+                    Universe: Persons
+                        Variable: [FMZ005] Male >> 18 and 19 years
+                        Variable: [FMZ028] Female >> 18 and 19 years
+        Year: 2010
+            Source dataset: 2010 Census: SF 1a - P & H Tables [Blocks & Larger Areas]
+                Source table: P12. Sex by Age
+                    Universe: Total population
+                        Variable: [H76007] Male: 18 and 19 years
+                        Variable: [H76031] Female: 18 and 19 years
+ 
+    Time series AF: Persons: 20 years
+        Year: 1970
+            Source dataset: 1970 Census: Count 2 - 100% Data [Tracts, Urban Areas, Metro Areas, etc.] 
+                Source table: NT2A. Sex by Age
+                    Universe: Persons
+                        Variable: [CE6021] Male >> 20 years
+                        Variable: [CE6122] Female >> 20 years
+        Year: 1980
+            Source dataset: 1980 Census: STF 1 - 100% Data
+                Source table: NT10A. Age
+                    Universe: Persons
+                        Variable: [C67014] 20 years
+        Year: 1990
+            Source dataset: 1990 Census: STF 1 - 100% Data
+                Source table: NP11. Age
+                    Universe: Persons
+                        Variable: [ET3015] 20 years
+        Year: 2000
+            Source dataset: 2000 Census: SF 1a - 100% Data [Areas Larger Than Block Groups]
+                Source table: NP012B. Population by Sex by Age
+                    Universe: Persons
+                        Variable: [FMZ006] Male >> 20 years
+                        Variable: [FMZ029] Female >> 20 years
+        Year: 2010
+            Source dataset: 2010 Census: SF 1a - P & H Tables [Blocks & Larger Areas]
+                Source table: P12. Sex by Age
+                    Universe: Total population
+                        Variable: [H76008] Male: 20 years
+                        Variable: [H76032] Female: 20 years
+ 
+    Time series AG: Persons: 21 years
+        Year: 1970
+            Source dataset: 1970 Census: Count 2 - 100% Data [Tracts, Urban Areas, Metro Areas, etc.] 
+                Source table: NT2A. Sex by Age
+                    Universe: Persons
+                        Variable: [CE6022] Male >> 21 years
+                        Variable: [CE6123] Female >> 21 years
+        Year: 1980
+            Source dataset: 1980 Census: STF 1 - 100% Data
+                Source table: NT10A. Age
+                    Universe: Persons
+                        Variable: [C67015] 21 years
+        Year: 1990
+            Source dataset: 1990 Census: STF 1 - 100% Data
+                Source table: NP11. Age
+                    Universe: Persons
+                        Variable: [ET3016] 21 years
+        Year: 2000
+            Source dataset: 2000 Census: SF 1a - 100% Data [Areas Larger Than Block Groups]
+                Source table: NP012B. Population by Sex by Age
+                    Universe: Persons
+                        Variable: [FMZ007] Male >> 21 years
+                        Variable: [FMZ030] Female >> 21 years
+        Year: 2010
+            Source dataset: 2010 Census: SF 1a - P & H Tables [Blocks & Larger Areas]
+                Source table: P12. Sex by Age
+                    Universe: Total population
+                        Variable: [H76009] Male: 21 years
+                        Variable: [H76033] Female: 21 years
+ 
+    Time series AH: Persons: 22 to 24 years
+        Year: 1970
+            Source dataset: 1970 Census: Count 2 - 100% Data [Tracts, Urban Areas, Metro Areas, etc.] 
+                Source table: NT2A. Sex by Age
+                    Universe: Persons
+                        Variable: [CE6023] Male >> 22 years
+                        Variable: [CE6024] Male >> 23 years
+                        Variable: [CE6025] Male >> 24 years
+                        Variable: [CE6124] Female >> 22 years
+                        Variable: [CE6125] Female >> 23 years
+                        Variable: [CE6126] Female >> 24 years
+        Year: 1980
+            Source dataset: 1980 Census: STF 1 - 100% Data
+                Source table: NT10A. Age
+                    Universe: Persons
+                        Variable: [C67016] 22-24 years
+        Year: 1990
+            Source dataset: 1990 Census: STF 1 - 100% Data
+                Source table: NP11. Age
+                    Universe: Persons
+                        Variable: [ET3017] 22 to 24 years
+        Year: 2000
+            Source dataset: 2000 Census: SF 1a - 100% Data [Areas Larger Than Block Groups]
+                Source table: NP012B. Population by Sex by Age
+                    Universe: Persons
+                        Variable: [FMZ008] Male >> 22 to 24 years
+                        Variable: [FMZ031] Female >> 22 to 24 years
+        Year: 2010
+            Source dataset: 2010 Census: SF 1a - P & H Tables [Blocks & Larger Areas]
+                Source table: P12. Sex by Age
+                    Universe: Total population
+                        Variable: [H76010] Male: 22 to 24 years
+                        Variable: [H76034] Female: 22 to 24 years
+ 
+    Time series AI: Persons: 25 to 29 years
+        Year: 1970
+            Source dataset: 1970 Census: Count 2 - 100% Data [Tracts, Urban Areas, Metro Areas, etc.] 
+                Source table: NT2A. Sex by Age
+                    Universe: Persons
+                        Variable: [CE6026] Male >> 25 years
+                        Variable: [CE6027] Male >> 26 years
+                        Variable: [CE6028] Male >> 27 years
+                        Variable: [CE6029] Male >> 28 years
+                        Variable: [CE6030] Male >> 29 years
+                        Variable: [CE6127] Female >> 25 years
+                        Variable: [CE6128] Female >> 26 years
+                        Variable: [CE6129] Female >> 27 years
+                        Variable: [CE6130] Female >> 28 years
+                        Variable: [CE6131] Female >> 29 years
+        Year: 1980
+            Source dataset: 1980 Census: STF 1 - 100% Data
+                Source table: NT10A. Age
+                    Universe: Persons
+                        Variable: [C67017] 25-29 years
+        Year: 1990
+            Source dataset: 1990 Census: STF 1 - 100% Data
+                Source table: NP11. Age
+                    Universe: Persons
+                        Variable: [ET3018] 25 to 29 years
+        Year: 2000
+            Source dataset: 2000 Census: SF 1a - 100% Data [Areas Larger Than Block Groups]
+                Source table: NP012B. Population by Sex by Age
+                    Universe: Persons
+                        Variable: [FMZ009] Male >> 25 to 29 years
+                        Variable: [FMZ032] Female >> 25 to 29 years
+        Year: 2010
+            Source dataset: 2010 Census: SF 1a - P & H Tables [Blocks & Larger Areas]
+                Source table: P12. Sex by Age
+                    Universe: Total population
+                        Variable: [H76011] Male: 25 to 29 years
+                        Variable: [H76035] Female: 25 to 29 years
+ 
+    Time series AJ: Persons: 30 to 34 years
+        Year: 1970
+            Source dataset: 1970 Census: Count 2 - 100% Data [Tracts, Urban Areas, Metro Areas, etc.] 
+                Source table: NT2A. Sex by Age
+                    Universe: Persons
+                        Variable: [CE6031] Male >> 30 years
+                        Variable: [CE6032] Male >> 31 years
+                        Variable: [CE6033] Male >> 32 years
+                        Variable: [CE6034] Male >> 33 years
+                        Variable: [CE6035] Male >> 34 years
+                        Variable: [CE6132] Female >> 30 years
+                        Variable: [CE6133] Female >> 31 years
+                        Variable: [CE6134] Female >> 32 years
+                        Variable: [CE6135] Female >> 33 years
+                        Variable: [CE6136] Female >> 34 years
+        Year: 1980
+            Source dataset: 1980 Census: STF 1 - 100% Data
+                Source table: NT10A. Age
+                    Universe: Persons
+                        Variable: [C67018] 30-34 years
+        Year: 1990
+            Source dataset: 1990 Census: STF 1 - 100% Data
+                Source table: NP11. Age
+                    Universe: Persons
+                        Variable: [ET3019] 30 to 34 years
+        Year: 2000
+            Source dataset: 2000 Census: SF 1a - 100% Data [Areas Larger Than Block Groups]
+                Source table: NP012B. Population by Sex by Age
+                    Universe: Persons
+                        Variable: [FMZ010] Male >> 30 to 34 years
+                        Variable: [FMZ033] Female >> 30 to 34 years
+        Year: 2010
+            Source dataset: 2010 Census: SF 1a - P & H Tables [Blocks & Larger Areas]
+                Source table: P12. Sex by Age
+                    Universe: Total population
+                        Variable: [H76012] Male: 30 to 34 years
+                        Variable: [H76036] Female: 30 to 34 years
+ 
+    Time series AK: Persons: 35 to 44 years
+        Year: 1970
+            Source dataset: 1970 Census: Count 2 - 100% Data [Tracts, Urban Areas, Metro Areas, etc.] 
+                Source table: NT2A. Sex by Age
+                    Universe: Persons
+                        Variable: [CE6036] Male >> 35 years
+                        Variable: [CE6037] Male >> 36 years
+                        Variable: [CE6038] Male >> 37 years
+                        Variable: [CE6039] Male >> 38 years
+                        Variable: [CE6040] Male >> 39 years
+                        Variable: [CE6041] Male >> 40 years
+                        Variable: [CE6042] Male >> 41 years
+                        Variable: [CE6043] Male >> 42 years
+                        Variable: [CE6044] Male >> 43 years
+                        Variable: [CE6045] Male >> 44 years
+                        Variable: [CE6137] Female >> 35 years
+                        Variable: [CE6138] Female >> 36 years
+                        Variable: [CE6139] Female >> 37 years
+                        Variable: [CE6140] Female >> 38 years
+                        Variable: [CE6141] Female >> 39 years
+                        Variable: [CE6142] Female >> 40 years
+                        Variable: [CE6143] Female >> 41 years
+                        Variable: [CE6144] Female >> 42 years
+                        Variable: [CE6145] Female >> 43 years
+                        Variable: [CE6146] Female >> 44 years
+        Year: 1980
+            Source dataset: 1980 Census: STF 1 - 100% Data
+                Source table: NT10A. Age
+                    Universe: Persons
+                        Variable: [C67019] 35-44 years
+        Year: 1990
+            Source dataset: 1990 Census: STF 1 - 100% Data
+                Source table: NP11. Age
+                    Universe: Persons
+                        Variable: [ET3020] 35 to 39 years
+                        Variable: [ET3021] 40 to 44 years
+        Year: 2000
+            Source dataset: 2000 Census: SF 1a - 100% Data [Areas Larger Than Block Groups]
+                Source table: NP012B. Population by Sex by Age
+                    Universe: Persons
+                        Variable: [FMZ011] Male >> 35 to 39 years
+                        Variable: [FMZ012] Male >> 40 to 44 years
+                        Variable: [FMZ034] Female >> 35 to 39 years
+                        Variable: [FMZ035] Female >> 40 to 44 years
+        Year: 2010
+            Source dataset: 2010 Census: SF 1a - P & H Tables [Blocks & Larger Areas]
+                Source table: P12. Sex by Age
+                    Universe: Total population
+                        Variable: [H76013] Male: 35 to 39 years
+                        Variable: [H76014] Male: 40 to 44 years
+                        Variable: [H76037] Female: 35 to 39 years
+                        Variable: [H76038] Female: 40 to 44 years
+ 
+    Time series AL: Persons: 45 to 54 years
+        Year: 1970
+            Source dataset: 1970 Census: Count 2 - 100% Data [Tracts, Urban Areas, Metro Areas, etc.] 
+                Source table: NT2A. Sex by Age
+                    Universe: Persons
+                        Variable: [CE6046] Male >> 45 years
+                        Variable: [CE6047] Male >> 46 years
+                        Variable: [CE6048] Male >> 47 years
+                        Variable: [CE6049] Male >> 48 years
+                        Variable: [CE6050] Male >> 49 years
+                        Variable: [CE6051] Male >> 50 years
+                        Variable: [CE6052] Male >> 51 years
+                        Variable: [CE6053] Male >> 52 years
+                        Variable: [CE6054] Male >> 53 years
+                        Variable: [CE6055] Male >> 54 years
+                        Variable: [CE6147] Female >> 45 years
+                        Variable: [CE6148] Female >> 46 years
+                        Variable: [CE6149] Female >> 47 years
+                        Variable: [CE6150] Female >> 48 years
+                        Variable: [CE6151] Female >> 49 years
+                        Variable: [CE6152] Female >> 50 years
+                        Variable: [CE6153] Female >> 51 years
+                        Variable: [CE6154] Female >> 52 years
+                        Variable: [CE6155] Female >> 53 years
+                        Variable: [CE6156] Female >> 54 years
+        Year: 1980
+            Source dataset: 1980 Census: STF 1 - 100% Data
+                Source table: NT10A. Age
+                    Universe: Persons
+                        Variable: [C67020] 45-54 years
+        Year: 1990
+            Source dataset: 1990 Census: STF 1 - 100% Data
+                Source table: NP11. Age
+                    Universe: Persons
+                        Variable: [ET3022] 45 to 49 years
+                        Variable: [ET3023] 50 to 54 years
+        Year: 2000
+            Source dataset: 2000 Census: SF 1a - 100% Data [Areas Larger Than Block Groups]
+                Source table: NP012B. Population by Sex by Age
+                    Universe: Persons
+                        Variable: [FMZ013] Male >> 45 to 49 years
+                        Variable: [FMZ014] Male >> 50 to 54 years
+                        Variable: [FMZ036] Female >> 45 to 49 years
+                        Variable: [FMZ037] Female >> 50 to 54 years
+        Year: 2010
+            Source dataset: 2010 Census: SF 1a - P & H Tables [Blocks & Larger Areas]
+                Source table: P12. Sex by Age
+                    Universe: Total population
+                        Variable: [H76015] Male: 45 to 49 years
+                        Variable: [H76016] Male: 50 to 54 years
+                        Variable: [H76039] Female: 45 to 49 years
+                        Variable: [H76040] Female: 50 to 54 years
+ 
+    Time series AM: Persons: 55 to 59 years
+        Year: 1970
+            Source dataset: 1970 Census: Count 2 - 100% Data [Tracts, Urban Areas, Metro Areas, etc.] 
+                Source table: NT2A. Sex by Age
+                    Universe: Persons
+                        Variable: [CE6056] Male >> 55 years
+                        Variable: [CE6057] Male >> 56 years
+                        Variable: [CE6058] Male >> 57 years
+                        Variable: [CE6059] Male >> 58 years
+                        Variable: [CE6060] Male >> 59 years
+                        Variable: [CE6157] Female >> 55 years
+                        Variable: [CE6158] Female >> 56 years
+                        Variable: [CE6159] Female >> 57 years
+                        Variable: [CE6160] Female >> 58 years
+                        Variable: [CE6161] Female >> 59 years
+        Year: 1980
+            Source dataset: 1980 Census: STF 1 - 100% Data
+                Source table: NT10A. Age
+                    Universe: Persons
+                        Variable: [C67021] 55-59 years
+        Year: 1990
+            Source dataset: 1990 Census: STF 1 - 100% Data
+                Source table: NP11. Age
+                    Universe: Persons
+                        Variable: [ET3024] 55 to 59 years
+        Year: 2000
+            Source dataset: 2000 Census: SF 1a - 100% Data [Areas Larger Than Block Groups]
+                Source table: NP012B. Population by Sex by Age
+                    Universe: Persons
+                        Variable: [FMZ015] Male >> 55 to 59 years
+                        Variable: [FMZ038] Female >> 55 to 59 years
+        Year: 2010
+            Source dataset: 2010 Census: SF 1a - P & H Tables [Blocks & Larger Areas]
+                Source table: P12. Sex by Age
+                    Universe: Total population
+                        Variable: [H76017] Male: 55 to 59 years
+                        Variable: [H76041] Female: 55 to 59 years
+ 
+    Time series AN: Persons: 60 and 61 years
+        Year: 1970
+            Source dataset: 1970 Census: Count 2 - 100% Data [Tracts, Urban Areas, Metro Areas, etc.] 
+                Source table: NT2A. Sex by Age
+                    Universe: Persons
+                        Variable: [CE6061] Male >> 60 years
+                        Variable: [CE6062] Male >> 61 years
+                        Variable: [CE6162] Female >> 60 years
+                        Variable: [CE6163] Female >> 61 years
+        Year: 1980
+            Source dataset: 1980 Census: STF 1 - 100% Data
+                Source table: NT10A. Age
+                    Universe: Persons
+                        Variable: [C67022] 60-61 years
+        Year: 1990
+            Source dataset: 1990 Census: STF 1 - 100% Data
+                Source table: NP11. Age
+                    Universe: Persons
+                        Variable: [ET3025] 60 and 61 years
+        Year: 2000
+            Source dataset: 2000 Census: SF 1a - 100% Data [Areas Larger Than Block Groups]
+                Source table: NP012B. Population by Sex by Age
+                    Universe: Persons
+                        Variable: [FMZ016] Male >> 60 and 61 years
+                        Variable: [FMZ039] Female >> 60 and 61 years
+        Year: 2010
+            Source dataset: 2010 Census: SF 1a - P & H Tables [Blocks & Larger Areas]
+                Source table: P12. Sex by Age
+                    Universe: Total population
+                        Variable: [H76018] Male: 60 and 61 years
+                        Variable: [H76042] Female: 60 and 61 years
+ 
+    Time series AO: Persons: 62 to 64 years
+        Year: 1970
+            Source dataset: 1970 Census: Count 2 - 100% Data [Tracts, Urban Areas, Metro Areas, etc.] 
+                Source table: NT2A. Sex by Age
+                    Universe: Persons
+                        Variable: [CE6063] Male >> 62 years
+                        Variable: [CE6064] Male >> 63 years
+                        Variable: [CE6065] Male >> 64 years
+                        Variable: [CE6164] Female >> 62 years
+                        Variable: [CE6165] Female >> 63 years
+                        Variable: [CE6166] Female >> 64 years
+        Year: 1980
+            Source dataset: 1980 Census: STF 1 - 100% Data
+                Source table: NT10A. Age
+                    Universe: Persons
+                        Variable: [C67023] 62-64 years
+        Year: 1990
+            Source dataset: 1990 Census: STF 1 - 100% Data
+                Source table: NP11. Age
+                    Universe: Persons
+                        Variable: [ET3026] 62 to 64 years
+        Year: 2000
+            Source dataset: 2000 Census: SF 1a - 100% Data [Areas Larger Than Block Groups]
+                Source table: NP012B. Population by Sex by Age
+                    Universe: Persons
+                        Variable: [FMZ017] Male >> 62 to 64 years
+                        Variable: [FMZ040] Female >> 62 to 64 years
+        Year: 2010
+            Source dataset: 2010 Census: SF 1a - P & H Tables [Blocks & Larger Areas]
+                Source table: P12. Sex by Age
+                    Universe: Total population
+                        Variable: [H76019] Male: 62 to 64 years
+                        Variable: [H76043] Female: 62 to 64 years
+ 
+    Time series AP: Persons: 65 to 74 years
+        Year: 1970
+            Source dataset: 1970 Census: Count 2 - 100% Data [Tracts, Urban Areas, Metro Areas, etc.] 
+                Source table: NT2A. Sex by Age
+                    Universe: Persons
+                        Variable: [CE6066] Male >> 65 years
+                        Variable: [CE6067] Male >> 66 years
+                        Variable: [CE6068] Male >> 67 years
+                        Variable: [CE6069] Male >> 68 years
+                        Variable: [CE6070] Male >> 69 years
+                        Variable: [CE6071] Male >> 70 years
+                        Variable: [CE6072] Male >> 71 years
+                        Variable: [CE6073] Male >> 72 years
+                        Variable: [CE6074] Male >> 73 years
+                        Variable: [CE6075] Male >> 74 years
+                        Variable: [CE6167] Female >> 65 years
+                        Variable: [CE6168] Female >> 66 years
+                        Variable: [CE6169] Female >> 67 years
+                        Variable: [CE6170] Female >> 68 years
+                        Variable: [CE6171] Female >> 69 years
+                        Variable: [CE6172] Female >> 70 years
+                        Variable: [CE6173] Female >> 71 years
+                        Variable: [CE6174] Female >> 72 years
+                        Variable: [CE6175] Female >> 73 years
+                        Variable: [CE6176] Female >> 74 years
+        Year: 1980
+            Source dataset: 1980 Census: STF 1 - 100% Data
+                Source table: NT10A. Age
+                    Universe: Persons
+                        Variable: [C67024] 65-74 years
+        Year: 1990
+            Source dataset: 1990 Census: STF 1 - 100% Data
+                Source table: NP11. Age
+                    Universe: Persons
+                        Variable: [ET3027] 65 to 69 years
+                        Variable: [ET3028] 70 to 74 years
+        Year: 2000
+            Source dataset: 2000 Census: SF 1a - 100% Data [Areas Larger Than Block Groups]
+                Source table: NP012B. Population by Sex by Age
+                    Universe: Persons
+                        Variable: [FMZ018] Male >> 65 and 66 years
+                        Variable: [FMZ019] Male >> 67 to 69 years
+                        Variable: [FMZ020] Male >> 70 to 74 years
+                        Variable: [FMZ041] Female >> 65 and 66 years
+                        Variable: [FMZ042] Female >> 67 to 69 years
+                        Variable: [FMZ043] Female >> 70 to 74 years
+        Year: 2010
+            Source dataset: 2010 Census: SF 1a - P & H Tables [Blocks & Larger Areas]
+                Source table: P12. Sex by Age
+                    Universe: Total population
+                        Variable: [H76020] Male: 65 and 66 years
+                        Variable: [H76021] Male: 67 to 69 years
+                        Variable: [H76022] Male: 70 to 74 years
+                        Variable: [H76044] Female: 65 and 66 years
+                        Variable: [H76045] Female: 67 to 69 years
+                        Variable: [H76046] Female: 70 to 74 years
+ 
+    Time series AQ: Persons: 75 to 84 years
+        Year: 1970
+            Source dataset: 1970 Census: Count 2 - 100% Data [Tracts, Urban Areas, Metro Areas, etc.] 
+                Source table: NT2A. Sex by Age
+                    Universe: Persons
+                        Variable: [CE6076] Male >> 75 years
+                        Variable: [CE6077] Male >> 76 years
+                        Variable: [CE6078] Male >> 77 years
+                        Variable: [CE6079] Male >> 78 years
+                        Variable: [CE6080] Male >> 79 years
+                        Variable: [CE6081] Male >> 80 years
+                        Variable: [CE6082] Male >> 81 years
+                        Variable: [CE6083] Male >> 82 years
+                        Variable: [CE6084] Male >> 83 years
+                        Variable: [CE6085] Male >> 84 years
+                        Variable: [CE6177] Female >> 75 years
+                        Variable: [CE6178] Female >> 76 years
+                        Variable: [CE6179] Female >> 77 years
+                        Variable: [CE6180] Female >> 78 years
+                        Variable: [CE6181] Female >> 79 years
+                        Variable: [CE6182] Female >> 80 years
+                        Variable: [CE6183] Female >> 81 years
+                        Variable: [CE6184] Female >> 82 years
+                        Variable: [CE6185] Female >> 83 years
+                        Variable: [CE6186] Female >> 84 years
+        Year: 1980
+            Source dataset: 1980 Census: STF 1 - 100% Data
+                Source table: NT10A. Age
+                    Universe: Persons
+                        Variable: [C67025] 75-84 years
+        Year: 1990
+            Source dataset: 1990 Census: STF 1 - 100% Data
+                Source table: NP11. Age
+                    Universe: Persons
+                        Variable: [ET3029] 75 to 79 years
+                        Variable: [ET3030] 80 to 84 years
+        Year: 2000
+            Source dataset: 2000 Census: SF 1a - 100% Data [Areas Larger Than Block Groups]
+                Source table: NP012B. Population by Sex by Age
+                    Universe: Persons
+                        Variable: [FMZ021] Male >> 75 to 79 years
+                        Variable: [FMZ022] Male >> 80 to 84 years
+                        Variable: [FMZ044] Female >> 75 to 79 years
+                        Variable: [FMZ045] Female >> 80 to 84 years
+        Year: 2010
+            Source dataset: 2010 Census: SF 1a - P & H Tables [Blocks & Larger Areas]
+                Source table: P12. Sex by Age
+                    Universe: Total population
+                        Variable: [H76023] Male: 75 to 79 years
+                        Variable: [H76024] Male: 80 to 84 years
+                        Variable: [H76047] Female: 75 to 79 years
+                        Variable: [H76048] Female: 80 to 84 years
+ 
+    Time series AR: Persons: 85 years and over
+        Year: 1970
+            Source dataset: 1970 Census: Count 2 - 100% Data [Tracts, Urban Areas, Metro Areas, etc.] 
+                Source table: NT2A. Sex by Age
+                    Universe: Persons
+                        Variable: [CE6086] Male >> 85 years
+                        Variable: [CE6087] Male >> 86 years
+                        Variable: [CE6088] Male >> 87 years
+                        Variable: [CE6089] Male >> 88 years
+                        Variable: [CE6090] Male >> 89 years
+                        Variable: [CE6091] Male >> 90 years
+                        Variable: [CE6092] Male >> 91 years
+                        Variable: [CE6093] Male >> 92 years
+                        Variable: [CE6094] Male >> 93 years
+                        Variable: [CE6095] Male >> 94 years
+                        Variable: [CE6096] Male >> 95 years
+                        Variable: [CE6097] Male >> 96 years
+                        Variable: [CE6098] Male >> 97 years
+                        Variable: [CE6099] Male >> 98 years
+                        Variable: [CE6100] Male >> 99 years
+                        Variable: [CE6101] Male >> 100 years and over
+                        Variable: [CE6187] Female >> 85 years
+                        Variable: [CE6188] Female >> 86 years
+                        Variable: [CE6189] Female >> 87 years
+                        Variable: [CE6190] Female >> 88 years
+                        Variable: [CE6191] Female >> 89 years
+                        Variable: [CE6192] Female >> 90 years
+                        Variable: [CE6193] Female >> 91 years
+                        Variable: [CE6194] Female >> 92 years
+                        Variable: [CE6195] Female >> 93 years
+                        Variable: [CE6196] Female >> 94 years
+                        Variable: [CE6197] Female >> 95 years
+                        Variable: [CE6198] Female >> 96 years
+                        Variable: [CE6199] Female >> 97 years
+                        Variable: [CE6200] Female >> 98 years
+                        Variable: [CE6201] Female >> 99 years
+                        Variable: [CE6202] Female >> 100 years and over
+        Year: 1980
+            Source dataset: 1980 Census: STF 1 - 100% Data
+                Source table: NT10A. Age
+                    Universe: Persons
+                        Variable: [C67026] 85 years and over
+        Year: 1990
+            Source dataset: 1990 Census: STF 1 - 100% Data
+                Source table: NP11. Age
+                    Universe: Persons
+                        Variable: [ET3031] 85 years and over
+        Year: 2000
+            Source dataset: 2000 Census: SF 1a - 100% Data [Areas Larger Than Block Groups]
+                Source table: NP012B. Population by Sex by Age
+                    Universe: Persons
+                        Variable: [FMZ023] Male >> 85 years and over
+                        Variable: [FMZ046] Female >> 85 years and over
+        Year: 2010
+            Source dataset: 2010 Census: SF 1a - P & H Tables [Blocks & Larger Areas]
+                Source table: P12. Sex by Age
+                    Universe: Total population
+                        Variable: [H76025] Male: 85 years and over
+                        Variable: [H76049] Female: 85 years and over
+ 
+ 
+Table 5: (AR9) Median Age of Persons
+ 
+    Time series AA: Median age: Persons
+        Year: 1980
+            Source dataset: 1980 Census: STF 1 - 100% Data
+                Source table: NT11A. Median Age
+                    Universe: Persons
+                        Variable: [C69001] Median age
+        Year: 1990
+            Source dataset: 1990 Census: STF 4b - Sample-Based Detailed Data with Race/Ethnicity Breakdown
+                Source table: NPB5A. Median Age
+                    Universe: Persons
+                        Variable: [FGM001] Median age
+        Year: 2000
+            Source dataset: 2000 Census: SF 1a - 100% Data [Areas Larger Than Block Groups]
+                Source table: NP013A. Median Age
+                    Universe: Persons
+                        Variable: [FM6001] Median age
+        Year: 2010
+            Source dataset: 2010 Census: SF 1a - P & H Tables [Blocks & Larger Areas]
+                Source table: P13. Median Age by Sex
+                    Universe: Total population
+                        Variable: [H77001] Median age: Both sexes
+ 
+--------------------------------------------------------------------------------
+Citation and Use of NHGIS Data
+--------------------------------------------------------------------------------
+ 
+All persons are granted a limited license to use this documentation and the
+accompanying data, subject to the following conditions:
+
+* REDISTRIBUTION: You will not redistribute the data without permission.
+
+  You may publish a subset of the data to meet journal requirements for accessing 
+  data related to a particular publication. Contact us for permission for any other 
+  redistribution; we will consider requests for free and commercial redistribution.
+
+* CITATION: You will cite NHGIS appropriately.
+
+    * Publications and research reports employing NHGIS data (either tabular or GIS) 
+      should include the following citation:
+
+        Steven Manson, Jonathan Schroeder, David Van Riper, Tracy Kugler, and Steven Ruggles. 
+        IPUMS National Historical Geographic Information System: Version 16.0 
+        [dataset]. Minneapolis, MN: IPUMS. 2021. 
+        http://doi.org/10.18128/D050.V16.0
+
+    * For policy briefs, online resources, or articles in the popular press, we 
+      recommend that you cite the use of NHGIS data as follows:
+
+        IPUMS NHGIS, University of Minnesota, www.nhgis.org.
+
+These terms of use are a legally binding agreement. You can use the data only in 
+accordance with these terms, and any other use is a violation of the agreement. 
+Violations may result in revocation of the agreement and prohibition from using other 
+IPUMS data. If IPUMS or our partners are harmed from your violation, you are 
+responsible for all damages, including reasonable attorney's fees and expenses.
+        
+In addition, we request that users send us a copy of any publications, research
+reports, or educational material making use of the data or documentation.
+
+Send electronic material to: nhgis@umn.edu
+
+Printed matter should be sent to:
+
+    IPUMS NHGIS
+    Institute for Social Research and Data Innovation
+    University of Minnesota
+    50 Willey Hall
+    225 19th Ave S
+    Minneapolis, MN 55455
