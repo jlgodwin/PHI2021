@@ -33,13 +33,16 @@ layout: default
   * [Slides by Neal Marquez + Me](https://jlgodwin.github.io/PHI2021/Lectures/DemographicDataSources.pdf)
 
 **R Tutorials**
-   * [tidycensus by Neal Marquez and Connor Gilroy](https://jlgodwin.github.io/PHI2021/Tutorials/tidycensus-tutorial.rmd)
-   * [IPUMS-NHGIS](https://jlgodwin.github.io/PHI2021/Tutorials/NHGIS.html) | [NHGIS.Rmd](https://jlgodwin.github.io/PHI2021/Tutorials/NHGIS.Rmd)
+   * [tidycensus by Neal Marquez and Connor Gilroy](https://jlgodwin.github.io/PHI2021/Tutorials/tidycensus-tutorial.rmd) | [Household size by Adrien Allorant](https://jlgodwin.github.io/PHI2021/Tutorials/0_ACS_data_inspection.R)
+   * [IPUMS-NHGIS](https://jlgodwin.github.io/PHI2021/Tutorials/NHGIS.html) | [NHGIS.Rmd](https://jlgodwin.github.io/PHI2021/Tutorials/NHGIS.Rmd) | [IPUMS-NHGIS extract codebook](https://jlgodwin.github.io/PHI2021/Tutorials/nhgis0002_ts_nominal_county_codebook.txt)
+   * IPUMSUSA | IPUMSUSA.Rmd | [Extract codebook xml](https://jlgodwin.github.io/PHI2021/Tutorials/usa_00001.xml) | [Extract codebook printed to pdf](https://jlgodwin.github.io/PHI2021/Tutorials/usa_00001.pdf) 
 
 # Statistics
 
 **Intro to Survey Statistics**
   * [Slides](https://jlgodwin.github.io/PHI2021/Lectures/SurveyStatistics_20210707.pdf) | [Recording I: up to design-based (long)](https://washington.zoom.us/rec/play/mMe0TIT2WGp-uJ5tO0QkfnZ02DdHavr7KAA_EHHCmgiSNtY48sUnvgQxmxSHXEPNBRf0wwPMtyzR12QO.-5sGPdjCRj7tpff2) [Recording II: design-based and model-based (short)](https://washington.zoom.us/rec/play/X6bKP7a24MO2oQ9EeMhWpO6mcqbQTQNkJScZyEObyhko23pnP9gu0ccV9cpuYzUmnBLlGvo3XenyIVRf.BW-WU4q44gs1yUtG) | [Annotated Slides](https://jlgodwin.github.io/PHI2021/Lectures/SurveyStatistics_20210707_Annotated.pdf)
+
+**Replicate weights**
  
 # Housing and households
 
@@ -47,4 +50,7 @@ layout: default
 
 **Evictions**
   * [Looming Eviction Cliff](https://jlgodwin.github.io/PHI2021/Readings/TheLoomingEvictionCliff.pdf) | [US 2020 Eviction Trends](https://jlgodwin.github.io/PHI2021/Readings/USEvictionFilingPatternsin2020.pdf) | [Right to Counsel-NYC](https://jlgodwin.github.io/PHI2021/Readings/PreliminaryEffectsofRighttoCounselonEvictions.pdf) | [Predictors of Eviction](https://jlgodwin.github.io/PHI2021/Readings/PredictorsofEviction.pdf)
+
+**R**
+  * [Household size by Adrien Allorant](https://jlgodwin.github.io/PHI2021/Tutorials/0_ACS_data_inspection.R)
  
