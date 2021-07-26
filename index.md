@@ -9,6 +9,7 @@ layout: default
 * [Demographic Data](#census-and-demographic-data)
 * [Statistics](#statistics)
 * [Housing and households](#housing-and-households)
+* [Disaster and Resiliency](#disaster-and-resiliency)
 
 # Demography
 
@@ -54,3 +55,6 @@ layout: default
 **R**
   * [Household size by Adrien Allorant](https://jlgodwin.github.io/PHI2021/Tutorials/0_ACS_data_inspection.R)
  
+# Disaster and Resiliency
+
+* [Making Healthy Places-Resiliency to Disaster](https://jlgodwin.github.io/PHI2021/Readings/MakingHealthyPlaces_ResiliencytoDisaster_Beatley2011.pdf) | [Resilience and disaster risk reduction](https://jlgodwin.github.io/PHI2021/Readings/ResilienceandDisaster_Alexander_2013.pdf) | [Disaster Resiliency-Concepts, Measures, and Critques](https://jlgodwin.github.io/PHI2021/Readings/Ch7_DisasterResilience_Tierney_2019.pdf)
