@@ -1,3 +1,5 @@
+# Libraries ####
+
 library(tidycensus)
 library(tidyverse)
 library(sf)
@@ -5,22 +7,22 @@ library(stringr)
 library(ipumsr)
 library(gridExtra)
 
-myKey <- "493b01690c601ceeadbfc1bfc0089bae12b3f476"
+## tidycensus key ####
 census_api_key(myKey) 
 
-#####################
-# -- ACS 2015-19 -- #
-#####################
 
-# Download the Variable dictionary
+# ACS 2015-2019
+### Variable Dictionary ####
 var_df <- load_variables(2018, "acs5", cache = TRUE)
 
-al <- tract_edu_white <- get_acs("county",
-                                 table = "B01001",
-                                 year = 2018,
-                                 state = "AL",
-                                 geometry = TRUE, 
-                                 survey = "acs5")
+al <- get_acs("county",
+              table = "B01001",
+              year = 2018,
+              state = "AL",
+              geometry = TRUE, 
+              survey = "acs5")
+
+
 al_total <- al %>%
   filter(variable == "B01001_001") %>%
   left_join(var_df,
@@ -80,7 +82,8 @@ gg_adult <- al_total %>%
   geom_sf(aes(fill = estimate_Total/estimate), size = .25) +
   facet_wrap(vars(label)) +
   scale_fill_viridis_c(direction = -1,
-                       name = "Proportion", ,                        limits = c(0,.7)) +
+                       name = "Proportion",
+                       limits = c(0,.7)) +
   ggtitle("Proportion above age 10") +
   theme_void()
 
@@ -91,7 +94,8 @@ gg_child <- al_total %>%
   geom_sf(aes(fill = 1- (estimate_Total/estimate)), size = .25) +
   facet_wrap(vars(label)) +
   scale_fill_viridis_c(direction = -1,
-                       name = "Proportion", ,                        limits = c(0,.7)) +
+                       name = "Proportion",
+                       limits = c(0,.7)) +
   ggtitle("Proportion below age 10") +
   theme_void()
 
@@ -139,7 +143,7 @@ al_census_race$white.id <- ifelse(al_census_race$RACE == "White alone", 1, 0)
 al_census_race$black.id <- ifelse(al_census_race$RACE %in% c("Black alone"),
                                   1,0)
 al_census_race$black2.id <- ifelse(al_census_race$RACE %in% c("Black alone or in combination"),
-                                  1,0)
+                                   1,0)
 
 
 al_vaxx <- read.csv("ALVax.csv") 
@@ -512,7 +516,7 @@ gg_prop_vaxxed <-  al_map %>%
   left_join(al_vaxx %>% 
               select(County, OneDose, Vaxxed),
             by = c("NAME" = "County"))
-  st_as_sf() %>%
+st_as_sf() %>%
   ggplot() +
   geom_sf(aes(fill = ((Vaxxed/total_adult_all)*total_adult)/total)) +
   scale_fill_viridis_c(direction = -1,
