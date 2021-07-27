@@ -1,3 +1,6 @@
+# setwd() ####
+setwd('~/Dropbox/PHI2021/Github/PHI-2021/Tutorials/')
+
 # Libraries ####
 
 library(tidycensus)
@@ -12,10 +15,11 @@ source('tidycensus_APIkey.R')
 census_api_key(myKey) 
 
 
-# ACS 2015-2019
-### Variable Dictionary ####
+# ACS 2015-2019 ####
+## Variable Dictionary ####
 var_df <- load_variables(2018, "acs5", cache = TRUE)
 
+## County Population ####
 al <- get_acs("county",
               table = "B01001",
               year = 2018,
@@ -23,7 +27,7 @@ al <- get_acs("county",
               geometry = TRUE, 
               survey = "acs5")
 
-
+### County Pop Totals ####
 al_total <- al %>%
   filter(variable == "B01001_001") %>%
   left_join(var_df,
@@ -31,6 +35,8 @@ al_total <- al %>%
 al_total$label <- gsub("Estimate!!", "", al_total$label)
 
 
+
+#### ggplot objects ####
 gg_total <- al_total %>%
   st_as_sf() %>%
   ggplot() +
@@ -45,6 +51,7 @@ gg_total <- al_total %>%
   ggtitle("All ages") +
   theme_void()
 
+### County Adult totals ####
 al_adult <- al[(al$variable %in%
                   c(paste0("B01001_0", c(10:25, 29:49)),
                     paste0("B01001_00", c(5:9)))),] %>%
@@ -56,6 +63,8 @@ al_adult$sex <- ifelse(grepl("Male", al_adult$label),
 al_adult$label <- gsub("Estimate!!Total!!Male!!", "", al_adult$label)
 al_adult$label <- gsub("Estimate!!Total!!Female!!", "", al_adult$label)
 
+## Get only data.frame (not geometry)
+## to manipulate smaller objects
 al_adult_nums <- al_adult %>%
   as.data.frame() %>%
   select(-c("geometry",
@@ -65,6 +74,7 @@ al_adult_nums <- al_adult %>%
   mutate(estimate_Total = estimate_Male + estimate_Female,
          moe_Total = moe_Male + moe_Female)
 
+## Calculate adult county totals
 al_adult_total <- al_adult_nums %>%
   group_by(GEOID) %>%
   summarise(estimate_Male = sum(estimate_Male),
@@ -74,9 +84,11 @@ al_adult_total <- al_adult_nums %>%
             moe_Female = sum(moe_Female),
             moe_Total = sum(moe_Total))
 
+#### Merge with county totals ####
 al_total <- al_total %>%
   left_join(al_adult_total) 
 
+#### ggplot objects ####
 gg_adult <- al_total %>%
   st_as_sf() %>%
   ggplot() +
@@ -88,35 +100,44 @@ gg_adult <- al_total %>%
   ggtitle("Proportion above age 10") +
   theme_void()
 
+### County child totals in progress
+# gg_child <- al_total %>%
+#   st_as_sf() %>%
+#   ggplot() +
+#   geom_sf(aes(fill = 1- (estimate_Total/estimate)), size = .25) +
+#   facet_wrap(vars(label)) +
+#   scale_fill_viridis_c(direction = -1,
+#                        name = "Proportion",
+#                        limits = c(0,.7)) +
+#   ggtitle("Proportion below age 10") +
+#   theme_void()
+# 
+# sum(al_adult_total$estimate_Total)/
+#   sum(al_total$estimate)
 
-gg_child <- al_total %>%
-  st_as_sf() %>%
-  ggplot() +
-  geom_sf(aes(fill = 1- (estimate_Total/estimate)), size = .25) +
-  facet_wrap(vars(label)) +
-  scale_fill_viridis_c(direction = -1,
-                       name = "Proportion",
-                       limits = c(0,.7)) +
-  ggtitle("Proportion below age 10") +
-  theme_void()
 
-sum(al_adult_total$estimate_Total)/
-  sum(al_total$estimate)
+# Census ####
 
+## County pop map ####
 
-## 
+## Decided to do this with geometry = TRUE
+## and the rest with geometry = FALSE
+## as it's one row per county
 al_map <- get_estimates("county",
                         product = "population",
                         geometry = TRUE,
                         state = "AL") %>%
   filter(variable == "POP")
 
+## County age pop ####
 al_census <- get_estimates("county",
                            product = "characteristics",
                            breakdown = c("AGEGROUP"),
                            breakdown_labels = TRUE,
                            geometry = FALSE,
                            state = "AL")
+
+## County agexrace pop ####
 al_census_race <-  get_estimates("county",
                                  product = "characteristics",
                                  breakdown = c("AGEGROUP", "RACE"),
@@ -124,6 +145,7 @@ al_census_race <-  get_estimates("county",
                                  geometry = FALSE,
                                  state = "AL")
 
+### breakdown indicators ####
 children.ages <- c("Age 0 to 4 years",
                    "Age 5 to 9 years",
                    "Age 10 to 14 years")
@@ -134,23 +156,30 @@ adults.ages <- c(paste("Age",
                        "years", sep = " "),
                  "Age 85 years and older")
 
-al_census_race$all.ages.id <- ifelse(al_census_race$AGEGROUP == "All ages", 1, 0)
+### Creating my own indicators ####
 al_census$all.ages.id <- ifelse(al_census$AGEGROUP == "All ages", 1, 0)
-al_census_race$child.id <-  ifelse(al_census_race$AGEGROUP %in% children.ages, 1, 0)
 al_census$child.id <- ifelse(al_census$AGEGROUP %in% children.ages, 1, 0)
-al_census_race$adult.id <- ifelse(al_census_race$AGEGROUP %in% adults.ages, 1, 0)
 al_census$adult.id <- ifelse(al_census$AGEGROUP %in% adults.ages, 1, 0)
+
+al_census_race$all.ages.id <- ifelse(al_census_race$AGEGROUP == "All ages", 1, 0)
+al_census_race$child.id <-  ifelse(al_census_race$AGEGROUP %in% children.ages, 1, 0)
+al_census_race$adult.id <- ifelse(al_census_race$AGEGROUP %in% adults.ages, 1, 0)
 al_census_race$white.id <- ifelse(al_census_race$RACE == "White alone", 1, 0)
-al_census_race$black.id <- ifelse(al_census_race$RACE %in% c("Black alone"),
-                                  1,0)
-al_census_race$black2.id <- ifelse(al_census_race$RACE %in% c("Black alone or in combination"),
-                                   1,0)
+al_census_race$black.id <- ifelse(al_census_race$RACE %in% c("Black alone"), 1,0)
+al_census_race$black2.id <- ifelse(al_census_race$RACE %in%
+                                     c("Black alone or in combination"), 1,0)
 
-
+## Load Vaccine data ####
 al_vaxx <- read.csv("ALVax.csv") 
+
+## remove whole state and "Unknown" county
 al_vaxx <- al_vaxx[!(al_vaxx$County %in% c("Alabama", "Unknown")),]
+
+## make County column match NAME column in Census data
 al_vaxx$County <- paste0(al_vaxx$County, " County, Alabama")
 
+## Totals using indicators ####
+### All races ####
 al_census_allrace <- al_census %>%
   group_by(GEOID) %>%
   mutate(total = value*all.ages.id,
@@ -161,6 +190,7 @@ al_census_allrace <- al_census %>%
             total_child = sum(total_child),
             total_adult = sum(total_adult))
 
+### White alone ####
 al_census_white <- al_census_race %>%
   group_by(GEOID) %>%
   mutate(total = value*all.ages.id*white.id,
@@ -175,6 +205,7 @@ al_census_white <- al_census_race %>%
                    "NAME" = "NAME"),
             suffix = c("", "_all"))
 
+### Black alone ####
 
 al_census_black <- al_census_race %>%
   group_by(GEOID) %>%
@@ -189,6 +220,8 @@ al_census_black <- al_census_race %>%
             by = c("GEOID"= "GEOID",
                    "NAME" = "NAME"),
             suffix = c("", "_all"))
+
+### Black alone or in combination ####
 
 al_census_black2 <- al_census_race %>%
   group_by(GEOID) %>%
@@ -205,6 +238,7 @@ al_census_black2 <- al_census_race %>%
             suffix = c("", "_all"))
 
 
+#### ggplot objects: totals ####
 gg_total <- al_map %>%
   left_join(al_census_allrace) %>%
   st_as_sf() %>%
@@ -261,6 +295,8 @@ gg_total_black2 <- al_map %>%
                                     "100K", "250K", "500K", "675K")) + 
   ggtitle("Total Population: Black + Black, multiracial") +
   theme_void()
+
+#### ggplot objects: proportions ####
 
 gg_prop_white <- al_map %>%
   left_join(al_census_white) %>%
@@ -389,7 +425,7 @@ gg_prop_child_black2 <- al_map %>%
   ggtitle("Proportion Children: Black + Black, multiracial") +
   theme_void()
 
-
+#### ggplot objects: prop unvaxxed ####
 
 gg_prop_unvaxxed_const <-  al_map %>%
   left_join(al_census_allrace) %>%
@@ -500,6 +536,8 @@ gg_prop_unvaxxed_black2 <-  al_map %>%
   ggtitle("Proportion: Unvaxxed, Black + Black, multiracial",
           subtitle = "Using County Vax Rates") +
   theme_void()
+
+#### ggplot objects: prop vaxxed ####
 
 gg_prop_vaxxed_const <-  al_map %>%
   left_join(al_census_allrace) %>%
