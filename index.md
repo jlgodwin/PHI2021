@@ -32,6 +32,7 @@ layout: default
 
 **Demographic Data Sources**
   * [Slides by Neal Marquez + Me](https://jlgodwin.github.io/PHI2021/Lectures/DemographicDataSources.pdf)
+  * [PUMS Data Dictionary](https://jlgodwin.github.io/PHI2021/Readings/PUMS_Data_Dictionary_20152019.pdf) | [ACS MOE documentation](https://jlgodwin.github.io/PHI2021/Readings/ACS_Error.pdf)
 
 **R Tutorials**
    * [tidycensus by Neal Marquez and Connor Gilroy](https://jlgodwin.github.io/PHI2021/Tutorials/tidycensus-tutorial.rmd) | [Household size by Adrien Allorant](https://jlgodwin.github.io/PHI2021/Tutorials/0_ACS_data_inspection.R)
