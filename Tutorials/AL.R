@@ -8,6 +8,7 @@ library(ipumsr)
 library(gridExtra)
 
 ## tidycensus key ####
+source('tidycensus_APIkey.R')
 census_api_key(myKey) 
 
 
