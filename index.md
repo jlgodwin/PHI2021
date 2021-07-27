@@ -10,6 +10,7 @@ layout: default
 * [Statistics](#statistics)
 * [Housing and households](#housing-and-households)
 * [Disaster and Resiliency](#disaster-and-resiliency)
+* [COVID-19](#covid-19)
 
 # Demography
 
@@ -60,5 +61,5 @@ layout: default
 
 * [Making Healthy Places-Resiliency to Disaster](https://jlgodwin.github.io/PHI2021/Readings/MakingHealthyPlaces_ResiliencytoDisaster_Beatley2011.pdf) | [Resilience and disaster risk reduction](https://jlgodwin.github.io/PHI2021/Readings/ResilienceandDisaster_Alexander_2013.pdf) | [Disaster Resiliency-Concepts, Measures, and Critques](https://jlgodwin.github.io/PHI2021/Readings/Ch7_DisasterResilience_Tierney_2019.pdf)
 
-# COVID-related
+# COVID-19
 * [COVID19 and the built environment](https://jlgodwin.github.io/PHI2021/Readings/Frumkin_2021_COVID_BuiltEnvironment.pdf)
