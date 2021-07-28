@@ -283,7 +283,7 @@ gg_total_black <- al_map %>%
   theme_void()
 
 gg_total_black2 <- al_map %>%
-  left_join(al_census_black) %>%
+  left_join(al_census_black2) %>%
   st_as_sf() %>%
   ggplot() +
   geom_sf(aes(fill = total)) +
@@ -303,7 +303,8 @@ gg_prop_white <- al_map %>%
   st_as_sf() %>%
   ggplot() +
   geom_sf(aes(fill = total/total_all)) +
-  scale_fill_viridis_c(direction = -1,
+  scale_fill_distiller(palette = "Blues",
+                       direction = 1,
                        name = "Proportion",
                        limits = c(0,1)) +
   ggtitle("Proportion White") +
@@ -314,21 +315,22 @@ gg_prop_black <- al_map %>%
   st_as_sf() %>%
   ggplot() +
   geom_sf(aes(fill = total/total_all)) +
-  scale_fill_viridis_c(direction = -1,
-                       name = "Proportion",
-                       limits = c(0,1)) +
+  scale_fill_distiller(palette = "Blues",
+                       direction = 1,
+                       name = "Proportion") +
   ggtitle("Proportion Black") +
   theme_void()
 
 gg_prop_black2 <- al_map %>%
-  left_join(al_census_black) %>%
+  left_join(al_census_black2) %>%
   st_as_sf() %>%
   ggplot() +
   geom_sf(aes(fill = total/total_all)) +
-  scale_fill_viridis_c(direction = -1,
-                       name = "Proportion",
-                       limits = c(0,1)) +
-  ggtitle("Proportion Black + Black, multiracial") +
+  scale_fill_distiller(palette = "Blues",
+                       direction = 1,
+                       name = "Proportion") +
+  ggtitle("Proportion Black",
+          subtitle = " ") +
   theme_void()
 
 gg_prop_adult <- al_map %>%
@@ -336,7 +338,8 @@ gg_prop_adult <- al_map %>%
   st_as_sf() %>%
   ggplot() +
   geom_sf(aes(fill = total_adult/total)) +
-  scale_fill_viridis_c(direction = -1,
+  scale_fill_distiller(palette = "Blues",
+                       direction = 1,
                        name = "Proportion",
                        limits = c(0,1)) +
   ggtitle("Proportion Adult") +
@@ -348,7 +351,8 @@ gg_prop_adult_white <- al_map %>%
   st_as_sf() %>%
   ggplot() +
   geom_sf(aes(fill = total_adult/total_all)) +
-  scale_fill_viridis_c(direction = -1,
+  scale_fill_distiller(palette = "Blues",
+                       direction = 1,
                        name = "Proportion",
                        limits = c(0,1)) +
   ggtitle("Proportion Adult: White") +
@@ -360,7 +364,8 @@ gg_prop_adult_black <- al_map %>%
   st_as_sf() %>%
   ggplot() +
   geom_sf(aes(fill = total_adult/total_all)) +
-  scale_fill_viridis_c(direction = -1,
+  scale_fill_distiller(palette = "Blues",
+                       direction = 1,
                        name = "Proportion",
                        limits = c(0,1)) +
   ggtitle("Proportion Adult: Black") +
@@ -369,11 +374,12 @@ gg_prop_adult_black <- al_map %>%
 
 
 gg_prop_adult_black2 <- al_map %>%
-  left_join(al_census_black) %>%
+  left_join(al_census_black2) %>%
   st_as_sf() %>%
   ggplot() +
   geom_sf(aes(fill = total_adult/total_all)) +
-  scale_fill_viridis_c(direction = -1,
+  scale_fill_distiller(palette = "Blues",
+                       direction = 1,
                        name = "Proportion",
                        limits = c(0,1)) +
   ggtitle("Proportion Adult: Black + Black, multiracial") +
@@ -385,7 +391,8 @@ gg_prop_child <- al_map %>%
   st_as_sf() %>%
   ggplot() +
   geom_sf(aes(fill = total_child/total_all)) +
-  scale_fill_viridis_c(direction = -1,
+  scale_fill_distiller(palette = "Blues",
+                       direction = 1,
                        name = "Proportion",
                        limits = c(0,1)) + 
   ggtitle("Proportion Children") +
@@ -397,7 +404,8 @@ gg_prop_child_white <- al_map %>%
   st_as_sf() %>%
   ggplot() +
   geom_sf(aes(fill = total_child/total_all)) +
-  scale_fill_viridis_c(direction = -1,
+  scale_fill_distiller(palette = "Blues",
+                       direction = 1,
                        name = "Proportion",
                        limits = c(0,1)) + 
   ggtitle("Proportion Children: White") +
@@ -408,7 +416,8 @@ gg_prop_child_black <- al_map %>%
   st_as_sf() %>%
   ggplot() +
   geom_sf(aes(fill = total_child/total_all)) +
-  scale_fill_viridis_c(direction = -1,
+  scale_fill_distiller(palette = "Blues",
+                       direction = 1,
                        name = "Proportion",
                        limits = c(0,1)) + 
   ggtitle("Proportion Children: Black") +
@@ -419,10 +428,78 @@ gg_prop_child_black2 <- al_map %>%
   st_as_sf() %>%
   ggplot() +
   geom_sf(aes(fill = total_child/total_all)) +
-  scale_fill_viridis_c(direction = -1,
+  scale_fill_distiller(palette = "Blues",
+                       direction = 1,
                        name = "Proportion",
                        limits = c(0,1)) + 
   ggtitle("Proportion Children: Black + Black, multiracial") +
+  theme_void()
+
+#### ggplot objects: totals unvaxxed ####
+gg_total_unvaxxed_const <- al_map %>%
+  left_join(al_census_allrace) %>%
+  st_as_sf() %>%
+  ggplot() +
+  geom_sf(aes(fill = (total_child + (1-.33)*total_adult))) +
+  scale_fill_viridis_c(direction = -1,
+                       name = "Total",
+                       breaks = c(0, 10000, 50000,
+                                  100000, 250000, 500000, 675000),
+                       labels =   c("0", "10K","50K",
+                                    "100K", "250K", "500K", "675K")) + 
+  ggtitle("Total: Unvaxxed",
+          subtitle = "Using 33% for all counties") +
+  theme_void()
+
+gg_total_unvaxxed <- al_map %>%
+  left_join(al_census_allrace) %>%
+  left_join(al_vaxx %>% 
+              select(County, OneDose, Vaxxed),
+            by = c("NAME" = "County")) %>%
+  st_as_sf() %>%
+  ggplot() +
+  geom_sf(aes(fill = (total_child + total_adult - Vaxxed))) +
+  scale_fill_viridis_c(direction = -1,
+                       name = "Total",
+                       breaks = c(0, 10000, 50000,
+                                  100000, 250000, 500000, 675000),
+                       labels =   c("0", "10K","50K",
+                                    "100K", "250K", "500K", "675K")) + 
+  ggtitle("Total: Unvaxxed",
+          subtitle = "Using County Vax Rates") +
+  theme_void()
+
+
+gg_total_unvaxxed_adult <- al_map %>%
+  left_join(al_census_allrace) %>%
+  left_join(al_vaxx %>% 
+              select(County, OneDose, Vaxxed),
+            by = c("NAME" = "County")) %>%
+  st_as_sf() %>%
+  ggplot() +
+  geom_sf(aes(fill = (total_adult - Vaxxed))) +
+  scale_fill_fermenter(palette = "Reds",
+                       direction = 1,
+                       name = "Total",
+                       breaks = c(0, 10000, 50000,
+                                  100000, 150000, 250000, 300000)) + 
+  ggtitle("Total: Unvaxxed Adults",
+          subtitle = "Using County Vax Rates") +
+  theme_void()
+
+
+gg_total_unvaxxed_child <- al_map %>%
+  left_join(al_census_allrace)  %>%
+  st_as_sf() %>%
+  ggplot() +
+  geom_sf(aes(fill = (total_child))) +
+  scale_fill_fermenter(palette = "Reds",
+                       direction = 1,
+                       name = "Total",
+                       breaks = c(0, 5000, 10000, 25000,
+                                  50000, 75000, 150000)) + 
+  ggtitle("Total: Unvaxxed Children",
+          subtitle = "Using County Vax Rates") +
   theme_void()
 
 #### ggplot objects: prop unvaxxed ####
@@ -432,7 +509,8 @@ gg_prop_unvaxxed_const <-  al_map %>%
   st_as_sf() %>%
   ggplot() +
   geom_sf(aes(fill = (total_child + (1-.33)*total_adult)/total)) +
-  scale_fill_viridis_c(direction = -1,
+  scale_fill_distiller(palette = "Blues",
+                       direction = 1,
                        name = "Proportion",
                        limits = c(0,1)) + 
   ggtitle("Proportion: Unvaxxed",
@@ -446,8 +524,9 @@ gg_prop_unvaxxed <-  al_map %>%
             by = c("NAME" = "County")) %>%
   st_as_sf() %>%
   ggplot() +
-  geom_sf(aes(fill = (total_child + (1- (Vaxxed/total))*total_adult)/total)) +
-  scale_fill_viridis_c(direction = -1,
+  geom_sf(aes(fill = (total_child + (1- (Vaxxed/total_adult))*total_adult)/total)) +
+  scale_fill_distiller(palette = "Blues",
+                       direction = 1,
                        name = "Proportion",
                        limits = c(0,1)) + 
   ggtitle("Proportion: Unvaxxed",
@@ -460,7 +539,8 @@ gg_prop_unvaxxed_const_white <-  al_map %>%
   st_as_sf() %>%
   ggplot() +
   geom_sf(aes(fill = (total_child + (1-.33)*total_adult)/total_all)) +
-  scale_fill_viridis_c(direction = -1,
+  scale_fill_distiller(palette = "Blues",
+                       direction = 1,
                        name = "Proportion",
                        limits = c(0,1)) + 
   ggtitle("Proportion: Unvaxxed, White",
@@ -476,7 +556,8 @@ gg_prop_unvaxxed_white <-  al_map %>%
   st_as_sf() %>%
   ggplot() +
   geom_sf(aes(fill = (total_child + (1-(Vaxxed/total_adult_all))*total_adult)/total_all)) +
-  scale_fill_viridis_c(direction = -1,
+  scale_fill_distiller(palette = "Blues",
+                       direction = 1,
                        name = "Proportion",
                        limits = c(0,1)) + 
   ggtitle("Proportion: Unvaxxed, White",
@@ -488,7 +569,8 @@ gg_prop_unvaxxed_const_black <-  al_map %>%
   st_as_sf() %>%
   ggplot() +
   geom_sf(aes(fill = (total_child + (1-.33)*total_adult)/total_all)) +
-  scale_fill_viridis_c(direction = -1,
+  scale_fill_distiller(palette = "Blues",
+                       direction = 1,
                        name = "Proportion",
                        limits = c(0,.7)) + 
   ggtitle("Proportion: Unvaxxed, Black",
@@ -503,7 +585,8 @@ gg_prop_unvaxxed_black <-  al_map %>%
   st_as_sf() %>%
   ggplot() +
   geom_sf(aes(fill = (total_child + (1-(Vaxxed/total_adult_all))*total_adult)/total_all)) +
-  scale_fill_viridis_c(direction = -1,
+  scale_fill_distiller(palette = "Blues",
+                       direction = 1,
                        name = "Proportion",
                        limits = c(0,.7)) + 
   ggtitle("Proportion: Unvaxxed, Black",
@@ -515,7 +598,8 @@ gg_prop_unvaxxed_const_black2 <-  al_map %>%
   st_as_sf() %>%
   ggplot() +
   geom_sf(aes(fill = (total_child + (1-.33)*total_adult)/total_all)) +
-  scale_fill_viridis_c(direction = -1,
+  scale_fill_distiller(palette = "Blues",
+                       direction = 1,
                        name = "Proportion",
                        limits = c(0,.7)) + 
   ggtitle("Proportion: Unvaxxed, Black + Black, multiracial",
@@ -530,7 +614,8 @@ gg_prop_unvaxxed_black2 <-  al_map %>%
   st_as_sf() %>%
   ggplot() +
   geom_sf(aes(fill = (total_child + (1-(Vaxxed/total_adult_all))*total_adult)/total_all)) +
-  scale_fill_viridis_c(direction = -1,
+  scale_fill_distiller(palette = "Blues",
+                       direction = 1,
                        name = "Proportion",
                        limits = c(0,.7)) +
   ggtitle("Proportion: Unvaxxed, Black + Black, multiracial",
@@ -544,24 +629,28 @@ gg_prop_vaxxed_const <-  al_map %>%
   st_as_sf() %>%
   ggplot() +
   geom_sf(aes(fill = (.33*total_adult)/total)) +
-  scale_fill_viridis_c(direction = -1,
+  scale_fill_distiller(palette = "Blues",
+                       direction = 1,
                        name = "Proportion",
                        limits = c(0,.7)) + 
-  ggtitle("Proportion Vaxxed") +
+  ggtitle("Proportion Vaxxed",
+          subtitle = "Using 33% for all counties") +
   theme_void()
 
 gg_prop_vaxxed <-  al_map %>%
   left_join(al_census_allrace) %>%
   left_join(al_vaxx %>% 
               select(County, OneDose, Vaxxed),
-            by = c("NAME" = "County"))
-st_as_sf() %>%
+            by = c("NAME" = "County")) %>%
+  st_as_sf() %>%
   ggplot() +
-  geom_sf(aes(fill = ((Vaxxed/total_adult_all)*total_adult)/total)) +
-  scale_fill_viridis_c(direction = -1,
+  geom_sf(aes(fill = ((Vaxxed/total_adult)*total_adult)/total)) +
+  scale_fill_distiller(palette = "Greens",
+                       direction = 1,
                        name = "Proportion",
-                       limits = c(0,.7)) + 
-  ggtitle("Proportion Vaxxed") +
+                       limits = c(0.1,.45)) + 
+  ggtitle("Proportion Vaxxed",
+          subtitle = "Using County Vax Rates") +
   theme_void()
 
 gg_prop_vaxxed_const_white <-  al_map %>%
@@ -569,10 +658,29 @@ gg_prop_vaxxed_const_white <-  al_map %>%
   st_as_sf() %>%
   ggplot() +
   geom_sf(aes(fill = (.33*total_adult)/total_all)) +
-  scale_fill_viridis_c(direction = -1,
+  scale_fill_distiller(palette = "Blues",
+                       direction = 1,
                        name = "Proportion",
                        limits = c(0,.7)) + 
-  ggtitle("Proportion: Vaxxed, White") +
+  ggtitle("Proportion: Vaxxed, White",
+          subtitle = "Using 33% for all counties") +
+  theme_void()
+
+
+gg_prop_vaxxed_white <-  al_map %>%
+  left_join(al_census_white) %>%
+  left_join(al_vaxx %>% 
+              select(County, OneDose, Vaxxed),
+            by = c("NAME" = "County")) %>%
+  st_as_sf() %>%
+  ggplot() +
+  geom_sf(aes(fill = ((Vaxxed/total_adult_all)*total_adult)/total_all)) +
+  scale_fill_distiller(palette = "Blues",
+                       direction = 1,
+                       name = "Proportion",
+                       limits = c(0,.7)) + 
+  ggtitle("Proportion: Vaxxed, White",
+          subtitle = "Using County Vax Rates") +
   theme_void()
 
 gg_prop_vaxxed_const_black <-  al_map %>%
@@ -580,10 +688,28 @@ gg_prop_vaxxed_const_black <-  al_map %>%
   st_as_sf() %>%
   ggplot() +
   geom_sf(aes(fill = (.33*total_adult)/total_all)) +
-  scale_fill_viridis_c(direction = -1,
+  scale_fill_distiller(palette = "Blues",
+                       direction = 1,
                        name = "Proportion",
                        limits = c(0,.7)) + 
-  ggtitle("Proportion: Vaxxed, Black") +
+  ggtitle("Proportion: Vaxxed, Black",
+          subtitle = "Using 33% for all counties") +
+  theme_void()
+
+gg_prop_vaxxed_black <-  al_map %>%
+  left_join(al_census_black) %>%
+  left_join(al_vaxx %>% 
+              select(County, OneDose, Vaxxed),
+            by = c("NAME" = "County")) %>%
+  st_as_sf() %>%
+  ggplot() +
+  geom_sf(aes(fill = ((Vaxxed/total_adult_all)*total_adult)/total_all)) +
+  scale_fill_distiller(palette = "Blues",
+                       direction = 1,
+                       name = "Proportion",
+                       limits = c(0,.7)) + 
+  ggtitle("Proportion: Vaxxed, Black",
+          subtitle = "Using County Vax Rates") +
   theme_void()
 
 gg_prop_vaxxed_const_black2 <-  al_map %>%
@@ -591,10 +717,66 @@ gg_prop_vaxxed_const_black2 <-  al_map %>%
   st_as_sf() %>%
   ggplot() +
   geom_sf(aes(fill = (.33*total_adult)/total_all)) +
-  scale_fill_viridis_c(direction = -1,
+  scale_fill_distiller(palette = "Blues",
+                       direction = 1,
                        name = "Proportion",
                        limits = c(0,.7)) + 
-  ggtitle("Proportion: Vaxxed, Black + Black, multiracial") +
+  ggtitle("Proportion: Vaxxed, Black + Black, multiracial",
+          subtitle = "Using 33% for all counties") +
   theme_void()
 
+gg_prop_vaxxed_black2 <-  al_map %>%
+  left_join(al_census_black2) %>%
+  left_join(al_vaxx %>% 
+              select(County, OneDose, Vaxxed),
+            by = c("NAME" = "County")) %>%
+  st_as_sf() %>%
+  ggplot() +
+  geom_sf(aes(fill = ((Vaxxed/total_adult_all)*total_adult)/total_all)) +
+  scale_fill_distiller(palette = "Blues",
+                       direction = 1,
+                       name = "Proportion",
+                       limits = c(0,.7)) + 
+  ggtitle("Proportion: Vaxxed, Black + Black, multiracial",
+          subtitle = "Using County Vax Rates") +
+  theme_void()
+
+
+## Plots to save ####
+
+### Proportion Vaxxed ####
+
+#### By race ####
+pdf('PropVaxxed.pdf',
+    height = 8, width = 8)
+grid.arrange(gg_total, gg_prop_vaxxed,
+             gg_prop_vaxxed_white,
+             gg_prop_vaxxed_black, ncol = 2)
+dev.off()
+
+#### By race ####
+pdf('PropVaxxed.pdf',
+    height = 8, width = 8)
+grid.arrange(gg_total, gg_prop_vaxxed,
+             gg_prop_vaxxed_white,
+             gg_prop_vaxxed_black, ncol = 2)
+dev.off()
+
+### Proportion Unvaxxed ####
+#### By race ####
+pdf('PropUnvaxxed.pdf',
+    height = 8, width = 8)
+grid.arrange(gg_total, gg_prop_unvaxxed,
+             gg_prop_unvaxxed_white,
+             gg_prop_unvaxxed_black, ncol = 2)
+dev.off()
+
+### Totals Unvaxxed + Prop Vax + Prop Black ####
+pdf('TotalsUnvaxxed.pdf',
+    height = 8, width = 8)
+grid.arrange(gg_prop_vaxxed,
+             gg_prop_black2,
+             gg_total_unvaxxed_adult,
+             gg_total_unvaxxed_child, ncol = 2)
+dev.off()
 
