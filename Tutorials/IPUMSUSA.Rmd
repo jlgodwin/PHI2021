@@ -1,0 +1,231 @@
+---
+title: "IPUMS-USA"
+author: "Jessica Godwin"
+date: ""
+output: html_document
+---
+
+# Setup
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidycensus)
+library(tidyverse)
+library(sf)
+library(stringr)
+library(ipumsr)
+library(rgdal)
+library(spdep)
+library(survey)
+library(dplyr)
+library(tidyr)
+library(RColorBrewer)
+library(classInt)
+
+if(FALSE){
+  setwd("~/Dropbox/PHI2021/Github/PHI-2021/Tutorials//")
+}
+```
+
+# Load data
+```{r dataload}
+ddi <- read_ipums_ddi("usa_00001.xml")
+data <- read_ipums_micro(ddi)
+```
+
+# Explore: design and metadata variables
+
+```{r expdesign}
+View(ddi$var_info)
+
+# Geography
+table(data$STATEFIP)
+
+table(data$COUNTYFIP)
+ddi$var_info %>%
+  filter(var_name == "COUNTYFIP") %>%
+  select(val_labels) %>%
+  pluck(1) %>% as.data.frame() %>%
+  filter(val %in% data$COUNTYFIP)
+
+table(data$REGION)
+ddi$var_info %>%
+  filter(var_name == "REGION") %>%
+  select(val_labels) %>%
+  pluck(1) %>% as.data.frame() %>%
+  filter(val %in% data$REGION)
+
+table(data$METRO)
+ddi$var_info %>%
+  filter(var_name == "METRO") %>%
+  select(val_labels) %>%
+  pluck(1) %>% as.data.frame() %>%
+  filter(val %in% data$METRO)
+
+table(data$METAREA)
+ddi$var_info %>%
+  filter(var_name == "METAREA") %>%
+  select(val_labels) %>%
+  pluck(1) %>% as.data.frame() %>%
+  filter(val %in% data$METAREA)
+
+table(data$METAREAD)
+ddi$var_info %>%
+  filter(var_name == "METAREAD") %>%
+  select(val_labels) %>%
+  pluck(1) %>% as.data.frame() %>%
+  filter(val %in% data$METAREAD)
+
+table(data$CITY)
+ddi$var_info %>%
+  filter(var_name == "CITY") %>%
+  select(val_labels) %>%
+  pluck(1) %>% as.data.frame() %>%
+  filter(val %in% data$CITY)
+
+
+table(data$PUMA)
+ddi$var_info %>%
+  filter(var_name == "PUMA") %>%
+  select(val_labels) %>%
+  pluck(1) %>% as.data.frame() %>%
+  filter(val %in% data$PUMA)
+
+# Time
+table(data$YEAR)
+table(data$MULTYEAR)
+
+# Which ACS Sample?
+table(data$SAMPLE)
+ddi$var_info %>%
+  filter(var_name == "SAMPLE") %>%
+  select(val_labels) %>%
+  pluck(1) %>% as.data.frame() %>%
+  filter(val %in% data$SAMPLE)
+
+# Survey/sampling design variables
+
+## HH number
+length(table(data$SERIAL))
+nrow(data)
+
+## strata
+table(data$STRATA)
+
+## cluster: appears households ARE clusters-
+## need to read more about how these relate
+## to replicate weighting OR
+## if I limite extract to one survey
+## and dial up to maximum sample size
+## if we would get more households per cluster
+length(table(data$CLUSTER))
+nrow(data)
+
+## household weight
+summary(data$HHWT)
+```
+
+# Exploratory: household structure data
+
+```{r exphh}
+KC <- data %>%
+  filter(COUNTYFIP == 53)
+
+## HH type
+table(KC$HHTYPE)
+ddi$var_info %>%
+  filter(var_name == "HHTYPE") %>%
+  select(val_labels) %>%
+  pluck(1) %>% as.data.frame() %>%
+  filter(val %in% KC$HHTYPE)
+
+## HH type
+table(KC$CBHHTYPE)
+ddi$var_info %>%
+  filter(var_name == "CBHHTYPE") %>%
+  select(val_labels) %>%
+  pluck(1) %>% as.data.frame() %>%
+  filter(val %in% KC$CBHHTYPE)
+
+## Group quarters
+table(KC$GQ)
+ddi$var_info %>%
+  filter(var_name == "GQ") %>%
+  select(val_labels) %>%
+  pluck(1) %>% as.data.frame() %>%
+  filter(val %in% KC$GQ)
+
+table(KC$GQTYPE)
+ddi$var_info %>%
+  filter(var_name == "GQTYPE") %>%
+  select(val_labels) %>%
+  pluck(1) %>% as.data.frame() %>%
+  filter(val %in% KC$GQTYPE)
+
+table(KC$GQTYPED)
+ddi$var_info %>%
+  filter(var_name == "GQTYPED") %>%
+  select(val_labels) %>%
+  pluck(1) %>% as.data.frame() %>%
+  filter(val %in% KC$GQTYPED)
+
+
+## Vacancy
+table(KC$VACANCY)
+ddi$var_info %>%
+  filter(var_name == "VACANCY") %>%
+  select(val_labels) %>%
+  pluck(1) %>% as.data.frame() %>%
+  filter(val %in% KC$VACANCY)
+
+## Rooms, Bedrooms, Units
+
+table(KC$UNITSSTR)
+ddi$var_info %>%
+  filter(var_name == "UNITSSTR") %>%
+  select(val_labels) %>%
+  pluck(1) %>% as.data.frame() %>%
+  filter(val %in% KC$UNITSSTR)
+
+table(KC$BEDROOMS)
+ddi$var_info %>%
+  filter(var_name == "BEDROOMS") %>%
+  select(val_labels) %>%
+  pluck(1) %>% as.data.frame() %>%
+  filter(val %in% KC$BEDROOMS)
+
+table(KC$ROOMS)
+ddi$var_info %>%
+  filter(var_name == "ROOMS") %>%
+  select(val_labels) %>%
+  pluck(1) %>% as.data.frame() %>%
+  filter(val %in% KC$ROOMS)
+
+
+## Year built
+
+table(KC$BUILTYR2)
+ddi$var_info %>%
+  filter(var_name == "BUILTYR2") %>%
+  select(val_labels) %>%
+  pluck(1) %>% as.data.frame() %>%
+  filter(val %in% KC$BUILTYR2)
+```
+
+# Exploratory: household (people) characteristics
+
+```{r exphhmembers}
+table(KC$MULTGEN)
+ddi$var_info %>%
+  filter(var_name == "MULTGEN") %>%
+  select(val_labels) %>%
+  pluck(1) %>% as.data.frame() %>%
+  filter(val %in% KC$MULTGEN)
+
+table(KC$MULTGEND)
+ddi$var_info %>%
+  filter(var_name == "MULTGEND") %>%
+  select(val_labels) %>%
+  pluck(1) %>% as.data.frame() %>%
+  filter(val %in% KC$MULTGEND)
+```
