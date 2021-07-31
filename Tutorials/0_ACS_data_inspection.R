@@ -138,44 +138,94 @@ plotDF <- plotDF %>%
   ) %>%
   filter(hh_size != 0) 
 
-# head(plotDF)
+# Census data
 
+census00DF <- get_decennial("county",
+                          table = c("H013"),
+                          summary_var = "H013001",
+                          year = 2000,
+                          state = "WA",
+                          county = "King",
+                          geometry = FALSE)
+census10DF <- get_decennial("county",
+                            table = c("H013"),
+                            summary_var = "H013001",
+                            year = 2010,
+                            state = "WA",
+                            county = "King",
+                            geometry = FALSE)
+censusDF <- census00DF %>%
+  mutate(Year = 2000) %>%
+  rbind(census10DF %>%
+          mutate(Year = 2010)) %>%
+  mutate(
+    hh_size = case_when(
+      # variable == "H013001" ~ 0, # total
+      variable == "H013002" ~ 1,
+      variable == "H013003" ~ 2,
+      variable == "H013004" ~ 3,
+      variable == "H013005" ~ 4,
+      variable == "H013006" ~ 5,
+      variable == "H013007" ~ 6,
+      variable == "H013008" ~ 7
+    ),
+    hh_size = factor(hh_size)) %>%
+  dplyr::select(-variable) %>%
+  rename(estimate=value,
+         summary_est = summary_value) %>%
+  filter(!is.na(hh_size)) %>% 
+  data.table()
+
+censusDF[, prop := estimate/summary_est]
+
+mergeDF <- censusDF %>%
+  dplyr::select(-NAME)
+
+plotDF <- rbind(plotDF, mergeDF, fill = T) %>%
+  mutate(Source = ifelse(is.na(moe), "Census", "ACS"),
+             hi = prop + prop_moe,
+             lo = prop - prop_moe)
 ##############################
 ## Plot % hh size over time ##
 ##############################
 
 # As a proportion of the total number of households
-plotDF %>%
-  mutate(
-    hi = prop + prop_moe,
-    lo = prop - prop_moe) %>%
+p1 <- plotDF %>%
   ggplot(aes(x = Year, y = prop, ymin = lo, ymax = hi, 
-             group = hh_size)) +
-  geom_line(aes(color = hh_size)) +
+             group = hh_size, shape = Source)) +
+  geom_line(data = plotDF %>% filter(Source == "ACS"),aes(color = hh_size)) +
   geom_point(aes(color = hh_size)) +
   geom_ribbon(aes(fill = hh_size), alpha = .4) +
   theme_classic() +
-  scale_x_continuous(breaks = c(2005,2010,2015,2020)) +
+  scale_x_continuous(breaks = c(2000,2005,2010,2015,2020)) +
   labs(y="%", color = "Household size",
        title = "Households in King County grouped by household size (as a %)") +
   guides(fill=FALSE)
 
+ggsave(filename = "/Users/adrienallorant/Documents/UW/PHI2021/output/KC_prop_time.png",
+       height = 9, width = 6, plot = p1)
 # Or as an absolute number
 
-plotDF %>%
+plotDF <- plotDF %>%
   mutate(
     hi = estimate+ moe,
-    lo = estimate- moe) %>%
+    lo = estimate- moe
+  )
+
+p2 <- plotDF %>%
   ggplot(aes(x = Year, y = estimate, ymin = lo, ymax = hi, 
-             group = hh_size)) +
-  geom_line(aes(color = hh_size)) +
+           group = hh_size, shape = Source)) +
+  geom_line(data = plotDF %>% filter(Source == "ACS"),aes(color = hh_size)) +
   geom_point(aes(color = hh_size)) +
   geom_ribbon(aes(fill = hh_size), alpha = .4) +
   theme_classic() +
-  scale_x_continuous(breaks = c(2005,2010,2015,2020)) +
+  scale_x_continuous(breaks = c(2000,2005,2010,2015,2020)) +
   labs(y="%", color = "Household size",
        title = "Households in King County grouped by household size (as a %)") +
   guides(fill=FALSE)
+
+ggsave(filename = "/Users/adrienallorant/Documents/UW/PHI2021/output/KC_absnumber_time.png",
+       height = 9, width = 6, plot = p2)
 
 ####################################
 ## How is it evolving in Seattle? ##
@@ -217,6 +267,42 @@ hhDF <- acs5DF  %>%
   filter(!is.na(hh_size)) %>% 
   data.table()
 
+# Census data
+
+census00DF <- get_decennial("tract",
+                            table = c("H013"),
+                            summary_var = "H013001",
+                            year = 2000,
+                            state = "WA",
+                            geometry = FALSE)
+census10DF <- get_decennial("tract",
+                            table = c("H013"),
+                            summary_var = "H013001",
+                            year = 2010,
+                            state = "WA",
+                            geometry = FALSE)
+censusDF <- census00DF %>%
+  mutate(Year = 2000) %>%
+  rbind(census10DF %>%
+          mutate(Year = 2010)) %>%
+  mutate(
+    hh_size = case_when(
+      # variable == "H013001" ~ 0, # total
+      variable == "H013002" ~ 1,
+      variable == "H013003" ~ 2,
+      variable == "H013004" ~ 3,
+      variable == "H013005" ~ 4,
+      variable == "H013006" ~ 5,
+      variable == "H013007" ~ 6,
+      variable == "H013008" ~ 7
+    ),
+    hh_size = factor(hh_size)) %>%
+  dplyr::select(-variable) %>%
+  rename(estimate=value,
+         summary_est = summary_value) %>%
+  filter(!is.na(hh_size)) %>% 
+  data.table()
+
 ##################
 ## Seattle only ##
 
@@ -248,10 +334,24 @@ seattle_tracts <-
 seattleDF <- hhDF %>%
   filter(GEOID %in% seattle_tracts$GEOID)
 
+seattleDFcensus <- censusDF %>%
+  filter(GEOID %in% seattle_tracts$GEOID)
+
 # We calculate the proportion of households in each household-size category,
 # and its associated margin of error for Seattle in general - regardless of census tracts
 seattleDF <- seattleDF[, list(estimate = sum(estimate),
                       moe = moe_sum(moe,estimate)), by = 'Year,hh_size']
+seattleDFcensus <- seattleDFcensus[, list(estimate = sum(estimate)), by = 'Year,hh_size']
+
+seattleDFcensus <- seattleDFcensus %>%
+  left_join(
+  seattleDFcensus %>%
+  group_by(Year) %>%
+  summarize(summary_est = sum(estimate))) %>%
+  mutate(
+    prop = estimate/summary_est
+  )
+
 plotDF <- seattleDF %>%
   filter(hh_size == 0) %>%
   rename(summary_est=estimate,
@@ -261,26 +361,49 @@ plotDF <- seattleDF %>%
   mutate(
     prop = estimate/summary_est,
     prop_moe = moe_prop(estimate, summary_est, 
-                         moe, summary_moe)
+                         moe, summary_moe),
+    hi = prop + prop_moe,
+    lo = prop - prop_moe
   ) %>%
   filter(hh_size != 0) 
 
+plotDF <- rbind(plotDF, seattleDFcensus, fill = T) %>%
+  mutate(Source = ifelse(is.na(moe), "Census","ACS"))
 # As a proportion of the total number of households
-plotDF %>%
-  mutate(
-    hi = prop + prop_moe,
-    lo = prop - prop_moe) %>%
+p3 <- plotDF %>%
   ggplot(aes(x = Year, y = prop, ymin = lo, ymax = hi, 
-             group = hh_size)) +
-  geom_line(aes(color = hh_size)) +
+             group = hh_size, shape = Source)) +
+  geom_line(data = plotDF %>% filter(Source == "ACS"),aes(color = hh_size)) +
   geom_point(aes(color = hh_size)) +
   geom_ribbon(aes(fill = hh_size), alpha = .4) +
   theme_classic() +
-  scale_x_continuous(breaks = c(2005,2010,2015,2020)) +
+  scale_x_continuous(breaks = c(2000,2005,2010,2015,2020)) +
   labs(y="%", color = "Household size",
        title = "Households in Seattle grouped by household size (as a %)") +
   guides(fill=FALSE)
 
+ggsave(filename = "/Users/adrienallorant/Documents/UW/PHI2021/output/Seattle_prop_time.png",
+       height = 9, width = 6, plot = p3)
+
+plotDF <- plotDF %>%
+  mutate(
+    hi = estimate+ moe,
+    lo = estimate- moe) 
+
+p4 <- plotDF %>%
+  ggplot(aes(x = Year, y = estimate, ymin = lo, ymax = hi, 
+             group = hh_size, shape = Source)) +
+  geom_line(data = plotDF %>% filter(Source == "ACS"),aes(color = hh_size)) +
+  geom_point(aes(color = hh_size)) +
+  geom_ribbon(aes(fill = hh_size), alpha = .4) +
+  theme_classic() +
+  scale_x_continuous(breaks = c(2000,2005,2010,2015,2020)) +
+  labs(y="%", color = "Household size",
+       title = "Households in Seattle grouped by household size (as a %)") +
+  guides(fill=FALSE)
+
+ggsave(filename = "/Users/adrienallorant/Documents/UW/PHI2021/output/Seattle_absnumber_time.png",
+       height = 9, width = 6, plot = p4)
 # Or as an absolute number
 
 plotDF %>%
@@ -297,3 +420,43 @@ plotDF %>%
   labs(y="%", color = "Household size",
        title = "Households in Seattle grouped by household size (as a %)") +
   guides(fill=FALSE)
+
+#####################
+## Average hh size ##
+#####################
+
+years <- 2009:2019
+# We loop through years of the ACS 5-year data and bind the rows together
+averagehhsize <- bind_rows(lapply(years, function(x){
+  get_acs(
+    "tract",
+    var = "B25010_001",
+    state = "WA",
+    county = "King",
+    year = x,
+    survey = "acs5",
+    moe = 95,
+    cache_table = TRUE) %>%
+    mutate(Year = x)}))
+
+geom <- get_acs(
+  "tract",
+  var = "B25010_001",
+  state = "WA",
+  county = "King",
+  year = 2019,
+  survey = "acs5",
+  moe = 95,
+  geometry = TRUE) %>%
+  dplyr::select(GEOID)
+
+
+averagehhsize %>%
+  left_join(geom) %>%
+  st_as_sf() %>%
+  ggplot() +
+  geom_sf(aes(fill = estimate), size = .25) +
+  facet_wrap(~ Year) +
+  scale_fill_viridis_c() + 
+  theme_void()
+
