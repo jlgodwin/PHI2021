@@ -754,3 +754,358 @@ Asian_college_grad_CoV_plot <- Asian_college_grad %>%
   scale_fill_viridis_c() + 
   theme_void()
 
+##### Part 5 - Native Hawaiian and Pacific Islander Educational Attainment
+tract_edu_NHPI <- get_acs("tract",
+                           table = "C15002E",
+                           year = 2018,
+                           state = "WA",
+                           county = "King",
+                           geometry = TRUE, 
+                           survey = "acs5")
+
+table_C15002E <- var_df %>%
+  filter(str_starts(name, "C15002E")) %>%
+  mutate(short_label = str_split(label, "!!"), 
+         short_label = map_chr(short_label, tail, 1)) %>%
+  dplyr::select(name, short_label)
+
+#create my own indicators
+table_C15002E$less_than_hs <- ifelse(table_C15002E$short_label == "Less than high school diploma", 1, 0)
+table_C15002E$hs_grad <- ifelse(table_C15002E$short_label == "High school graduate (includes equivalency)", 1, 0)
+table_C15002E$some_college <- ifelse(table_C15002E$short_label == "Some college or associate's degree", 1, 0)
+table_C15002E$college_grad <- ifelse(table_C15002E$short_label == "Bachelor's degree or higher", 1, 0)
+
+tract_edu_NHPI_lab <- tract_edu_NHPI %>%
+  left_join(table_C15002E, by = c("variable" = "name")) 
+
+######## Part 5A - NHPI less than HS attainment
+### create NHPI less than HS dataset 
+NHPI_less_than_hs <- tract_edu_NHPI_lab %>%
+  filter(less_than_hs == 1) %>%
+  group_by(GEOID, less_than_hs) %>% 
+  summarize(
+    estimate = sum(estimate),
+    moe = sum(moe)
+  ) %>%
+  data.table()
+
+## calculate SE and CoV 
+NHPI_less_than_hs<- NHPI_less_than_hs %>% 
+  mutate(SE = moe/qnorm(.95)) %>% 
+  mutate(CoV = SE/estimate)
+
+##create NHPI less than HS educational attainment plot for estimate only - how do i get 1 to go away?
+NHPI_less_than_hs_estimate_plot <- NHPI_less_than_hs %>%
+  st_as_sf() %>%
+  ggplot() +
+  geom_sf(aes(fill = estimate)) +
+  labs(title = "Less than High School Education, American Indian/Alaska Native",
+       subtitle = "Using Estimate Value")+
+  facet_wrap(vars(less_than_hs)) +
+  scale_fill_viridis_c() + 
+  theme_void()
+
+##create NHPI less than HS educational attainment plot for CoV - fix labels
+NHPI_less_than_hs_CoV_plot <- NHPI_less_than_hs %>% 
+  st_as_sf() %>%
+  ggplot() +
+  geom_sf(aes(fill = CoV)) +
+  labs(title = "Less than High School Education, American Indian/Alaska Native",
+       subtitle = "Coefficient of Variance",
+       fill = "Coefficient of Variance") +
+  facet_wrap(vars(less_than_hs)) +
+  scale_fill_viridis_c() + 
+  theme_void()
+
+#####Part 5B - NHPI high school grad/equivalent
+NHPI_hs <- tract_edu_NHPI_lab %>%
+  filter(hs_grad == 1) %>%
+  group_by(GEOID, hs_grad) %>% 
+  summarize(
+    estimate = sum(estimate),
+    moe = sum(moe)
+  ) %>%
+  data.table()
+
+## calculate SE and CoV 
+NHPI_hs<- NHPI_hs %>% 
+  mutate(SE = moe/qnorm(.95)) %>% 
+  mutate(CoV = SE/estimate)
+
+##create NHPI HS grad/equiv educational attainment plot for estimate only - how do i get 1 to go away?
+NHPI_hs_estimate_plot <- NHPI_hs %>%
+  st_as_sf() %>%
+  ggplot() +
+  geom_sf(aes(fill = estimate)) +
+  labs(title = "High School Graduate or Equivalent Education, American Indian/Alaska Native",
+       subtitle = "Using Estimate Value")+
+  facet_wrap(vars(hs_grad)) +
+  scale_fill_viridis_c() + 
+  theme_void()
+
+##create NHPI HS grad/equivalent educational attainment plot for CoV - fix labels
+NHPI_hs_CoV_plot <- NHPI_hs %>% 
+  st_as_sf() %>%
+  ggplot() +
+  geom_sf(aes(fill = CoV)) +
+  labs(title = "High School Graduate or Equivalent Education, American Indian/Alaska Native",
+       subtitle = "Coefficient of Variance",
+       fill = "Coefficient of Variance") +
+  facet_wrap(vars(hs_grad)) +
+  scale_fill_viridis_c() + 
+  theme_void()
+
+### part 5C - NHPI some college/AA attainment 
+NHPI_SC_AA <- tract_edu_NHPI_lab %>%
+  filter(some_college == 1) %>%
+  group_by(GEOID, some_college) %>% 
+  summarize(
+    estimate = sum(estimate),
+    moe = sum(moe)
+  ) %>%
+  data.table()
+
+## calculate SE and CoV 
+NHPI_SC_AA<- NHPI_SC_AA %>% 
+  mutate(SE = moe/qnorm(.95)) %>% 
+  mutate(CoV = SE/estimate)
+
+##create NHPI some college/AA plot for estimate only 
+NHPI_SC_AA_estimate_plot <- NHPI_SC_AA %>%
+  st_as_sf() %>%
+  ggplot() +
+  geom_sf(aes(fill = estimate)) +
+  labs(title = "Some College or Associate's Degree, American Indian/Alaska Native",
+       subtitle = "Using Estimate Value")+
+  facet_wrap(vars(some_college)) +
+  scale_fill_viridis_c() + 
+  theme_void()
+
+##create NHPI some college/AA educational attainment plot for CoV - fix labels
+NHPI_SC_AA_CoV_plot <- NHPI_SC_AA %>% 
+  st_as_sf() %>%
+  ggplot() +
+  geom_sf(aes(fill = CoV)) +
+  labs(title = "Some College or Associate's Degree, American Indian/Alaska Native",
+       subtitle = "Coefficient of Variance",
+       fill = "Coefficient of Variance") +
+  facet_wrap(vars(some_college)) +
+  scale_fill_viridis_c() + 
+  theme_void()
+
+####Part 5D: NHPI Bachelor's or higher degree attainment
+
+NHPI_college_grad <- tract_edu_NHPI_lab %>%
+  filter(college_grad == 1) %>%
+  group_by(GEOID, college_grad) %>% 
+  summarize(
+    estimate = sum(estimate),
+    moe = sum(moe)
+  ) %>%
+  data.table()
+
+## calculate SE and CoV 
+NHPI_college_grad<- NHPI_college_grad %>% 
+  mutate(SE = moe/qnorm(.95)) %>% 
+  mutate(CoV = SE/estimate)
+
+##create NHPI college grad plot for estimate only - how do i get 1 to go away?
+NHPI_college_grad_estimate_plot <- NHPI_college_grad %>%
+  st_as_sf() %>%
+  ggplot() +
+  geom_sf(aes(fill = estimate)) +
+  labs(title = "Bachelor's Degree or Higher, American Indian/Alaska Native",
+       subtitle = "Using Estimate Value")+
+  facet_wrap(vars(college_grad)) +
+  scale_fill_viridis_c() + 
+  theme_void()
+
+##create NHPI college grad educational attainment plot for CoV - fix labels
+NHPI_college_grad_CoV_plot <- NHPI_college_grad %>% 
+  st_as_sf() %>%
+  ggplot() +
+  geom_sf(aes(fill = CoV)) +
+  labs(title = "Bachelor's Degree or Higher, American Indian/Alaska Native",
+       subtitle = "Coefficient of Variance",
+       fill = "Coefficient of Variance") +
+  facet_wrap(vars(college_grad)) +
+  scale_fill_viridis_c() + 
+  theme_void()
+
+######### PART 6 - OTHER RACE EDUCATIONAL ATTAINMENT 
+tract_edu_other <- get_acs("tract",
+                          table = "C15002F",
+                          year = 2018,
+                          state = "WA",
+                          county = "King",
+                          geometry = TRUE, 
+                          survey = "acs5")
+
+table_C15002F <- var_df %>%
+  filter(str_starts(name, "C15002F")) %>%
+  mutate(short_label = str_split(label, "!!"), 
+         short_label = map_chr(short_label, tail, 1)) %>%
+  dplyr::select(name, short_label)
+
+#create my own indicators
+table_C15002F$less_than_hs <- ifelse(table_C15002F$short_label == "Less than high school diploma", 1, 0)
+table_C15002F$hs_grad <- ifelse(table_C15002F$short_label == "High school graduate (includes equivalency)", 1, 0)
+table_C15002F$some_college <- ifelse(table_C15002F$short_label == "Some college or associate's degree", 1, 0)
+table_C15002F$college_grad <- ifelse(table_C15002F$short_label == "Bachelor's degree or higher", 1, 0)
+
+tract_edu_other_lab <- tract_edu_other %>%
+  left_join(table_C15002F, by = c("variable" = "name")) 
+
+######## Part 6A - other less than HS attainment
+### create other less than HS dataset 
+other_less_than_hs <- tract_edu_other_lab %>%
+  filter(less_than_hs == 1) %>%
+  group_by(GEOID, less_than_hs) %>% 
+  summarize(
+    estimate = sum(estimate),
+    moe = sum(moe)
+  ) %>%
+  data.table()
+
+## calculate SE and CoV 
+other_less_than_hs<- other_less_than_hs %>% 
+  mutate(SE = moe/qnorm(.95)) %>% 
+  mutate(CoV = SE/estimate)
+
+##create other less than HS educational attainment plot for estimate only - how do i get 1 to go away?
+other_less_than_hs_estimate_plot <- other_less_than_hs %>%
+  st_as_sf() %>%
+  ggplot() +
+  geom_sf(aes(fill = estimate)) +
+  labs(title = "Less than High School Education, American Indian/Alaska Native",
+       subtitle = "Using Estimate Value")+
+  facet_wrap(vars(less_than_hs)) +
+  scale_fill_viridis_c() + 
+  theme_void()
+
+##create other less than HS educational attainment plot for CoV - fix labels
+other_less_than_hs_CoV_plot <- other_less_than_hs %>% 
+  st_as_sf() %>%
+  ggplot() +
+  geom_sf(aes(fill = CoV)) +
+  labs(title = "Less than High School Education, American Indian/Alaska Native",
+       subtitle = "Coefficient of Variance",
+       fill = "Coefficient of Variance") +
+  facet_wrap(vars(less_than_hs)) +
+  scale_fill_viridis_c() + 
+  theme_void()
+
+#####Part 5B - other high school grad/equivalent
+other_hs <- tract_edu_other_lab %>%
+  filter(hs_grad == 1) %>%
+  group_by(GEOID, hs_grad) %>% 
+  summarize(
+    estimate = sum(estimate),
+    moe = sum(moe)
+  ) %>%
+  data.table()
+
+## calculate SE and CoV 
+other_hs<- other_hs %>% 
+  mutate(SE = moe/qnorm(.95)) %>% 
+  mutate(CoV = SE/estimate)
+
+##create other HS grad/equiv educational attainment plot for estimate only - how do i get 1 to go away?
+other_hs_estimate_plot <- other_hs %>%
+  st_as_sf() %>%
+  ggplot() +
+  geom_sf(aes(fill = estimate)) +
+  labs(title = "High School Graduate or Equivalent Education, American Indian/Alaska Native",
+       subtitle = "Using Estimate Value")+
+  facet_wrap(vars(hs_grad)) +
+  scale_fill_viridis_c() + 
+  theme_void()
+
+##create other HS grad/equivalent educational attainment plot for CoV - fix labels
+other_hs_CoV_plot <- other_hs %>% 
+  st_as_sf() %>%
+  ggplot() +
+  geom_sf(aes(fill = CoV)) +
+  labs(title = "High School Graduate or Equivalent Education, American Indian/Alaska Native",
+       subtitle = "Coefficient of Variance",
+       fill = "Coefficient of Variance") +
+  facet_wrap(vars(hs_grad)) +
+  scale_fill_viridis_c() + 
+  theme_void()
+
+### part 5C - other some college/AA attainment 
+other_SC_AA <- tract_edu_other_lab %>%
+  filter(some_college == 1) %>%
+  group_by(GEOID, some_college) %>% 
+  summarize(
+    estimate = sum(estimate),
+    moe = sum(moe)
+  ) %>%
+  data.table()
+
+## calculate SE and CoV 
+other_SC_AA<- other_SC_AA %>% 
+  mutate(SE = moe/qnorm(.95)) %>% 
+  mutate(CoV = SE/estimate)
+
+##create other some college/AA plot for estimate only 
+other_SC_AA_estimate_plot <- other_SC_AA %>%
+  st_as_sf() %>%
+  ggplot() +
+  geom_sf(aes(fill = estimate)) +
+  labs(title = "Some College or Associate's Degree, American Indian/Alaska Native",
+       subtitle = "Using Estimate Value")+
+  facet_wrap(vars(some_college)) +
+  scale_fill_viridis_c() + 
+  theme_void()
+
+##create other some college/AA educational attainment plot for CoV - fix labels
+other_SC_AA_CoV_plot <- other_SC_AA %>% 
+  st_as_sf() %>%
+  ggplot() +
+  geom_sf(aes(fill = CoV)) +
+  labs(title = "Some College or Associate's Degree, American Indian/Alaska Native",
+       subtitle = "Coefficient of Variance",
+       fill = "Coefficient of Variance") +
+  facet_wrap(vars(some_college)) +
+  scale_fill_viridis_c() + 
+  theme_void()
+
+####Part 5D: other Bachelor's or higher degree attainment
+
+other_college_grad <- tract_edu_other_lab %>%
+  filter(college_grad == 1) %>%
+  group_by(GEOID, college_grad) %>% 
+  summarize(
+    estimate = sum(estimate),
+    moe = sum(moe)
+  ) %>%
+  data.table()
+
+## calculate SE and CoV 
+other_college_grad<- other_college_grad %>% 
+  mutate(SE = moe/qnorm(.95)) %>% 
+  mutate(CoV = SE/estimate)
+
+##create other college grad plot for estimate only - how do i get 1 to go away?
+other_college_grad_estimate_plot <- other_college_grad %>%
+  st_as_sf() %>%
+  ggplot() +
+  geom_sf(aes(fill = estimate)) +
+  labs(title = "Bachelor's Degree or Higher, American Indian/Alaska Native",
+       subtitle = "Using Estimate Value")+
+  facet_wrap(vars(college_grad)) +
+  scale_fill_viridis_c() + 
+  theme_void()
+
+##create other college grad educational attainment plot for CoV - fix labels
+other_college_grad_CoV_plot <- other_college_grad %>% 
+  st_as_sf() %>%
+  ggplot() +
+  geom_sf(aes(fill = CoV)) +
+  labs(title = "Bachelor's Degree or Higher, American Indian/Alaska Native",
+       subtitle = "Coefficient of Variance",
+       fill = "Coefficient of Variance") +
+  facet_wrap(vars(college_grad)) +
+  scale_fill_viridis_c() + 
+  theme_void()
