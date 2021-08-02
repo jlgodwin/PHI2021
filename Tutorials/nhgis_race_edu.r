@@ -537,7 +537,7 @@ AIAN_SC_AA_CoV_plot <- AIAN_SC_AA %>%
   scale_fill_viridis_c() + 
   theme_void()
 
-####Part 2D: AIAN Bachelor's or higher degree attainment
+####Part 3D: AIAN Bachelor's or higher degree attainment
 
 AIAN_college_grad <- tract_edu_AIAN_lab %>%
   filter(college_grad == 1) %>%
@@ -621,7 +621,7 @@ Asian_less_than_hs_estimate_plot <- Asian_less_than_hs %>%
   st_as_sf() %>%
   ggplot() +
   geom_sf(aes(fill = estimate)) +
-  labs(title = "Less than High School Education, American Indian/Alaska Native",
+  labs(title = "Less than High School Education, Native Hawaiian/Pacific Islander",
        subtitle = "Using Estimate Value")+
   facet_wrap(vars(less_than_hs)) +
   scale_fill_viridis_c() + 
@@ -632,7 +632,7 @@ Asian_less_than_hs_CoV_plot <- Asian_less_than_hs %>%
   st_as_sf() %>%
   ggplot() +
   geom_sf(aes(fill = CoV)) +
-  labs(title = "Less than High School Education, American Indian/Alaska Native",
+  labs(title = "Less than High School Education, Native Hawaiian/Pacific Islander",
        subtitle = "Coefficient of Variance",
        fill = "Coefficient of Variance") +
   facet_wrap(vars(less_than_hs)) +
@@ -659,7 +659,7 @@ Asian_hs_estimate_plot <- Asian_hs %>%
   st_as_sf() %>%
   ggplot() +
   geom_sf(aes(fill = estimate)) +
-  labs(title = "High School Graduate or Equivalent Education, American Indian/Alaska Native",
+  labs(title = "High School Graduate or Equivalent Education, Native Hawaiian/Pacific Islander",
        subtitle = "Using Estimate Value")+
   facet_wrap(vars(hs_grad)) +
   scale_fill_viridis_c() + 
@@ -670,7 +670,7 @@ Asian_hs_CoV_plot <- Asian_hs %>%
   st_as_sf() %>%
   ggplot() +
   geom_sf(aes(fill = CoV)) +
-  labs(title = "High School Graduate or Equivalent Education, American Indian/Alaska Native",
+  labs(title = "High School Graduate or Equivalent Education, Native Hawaiian/Pacific Islander",
        subtitle = "Coefficient of Variance",
        fill = "Coefficient of Variance") +
   facet_wrap(vars(hs_grad)) +
@@ -697,7 +697,7 @@ Asian_SC_AA_estimate_plot <- Asian_SC_AA %>%
   st_as_sf() %>%
   ggplot() +
   geom_sf(aes(fill = estimate)) +
-  labs(title = "Some College or Associate's Degree, American Indian/Alaska Native",
+  labs(title = "Some College or Associate's Degree, Native Hawaiian/Pacific Islander",
        subtitle = "Using Estimate Value")+
   facet_wrap(vars(some_college)) +
   scale_fill_viridis_c() + 
@@ -708,7 +708,7 @@ Asian_SC_AA_CoV_plot <- Asian_SC_AA %>%
   st_as_sf() %>%
   ggplot() +
   geom_sf(aes(fill = CoV)) +
-  labs(title = "Some College or Associate's Degree, American Indian/Alaska Native",
+  labs(title = "Some College or Associate's Degree, Native Hawaiian/Pacific Islander",
        subtitle = "Coefficient of Variance",
        fill = "Coefficient of Variance") +
   facet_wrap(vars(some_college)) +
@@ -736,7 +736,7 @@ Asian_college_grad_estimate_plot <- Asian_college_grad %>%
   st_as_sf() %>%
   ggplot() +
   geom_sf(aes(fill = estimate)) +
-  labs(title = "Bachelor's Degree or Higher, American Indian/Alaska Native",
+  labs(title = "Bachelor's Degree or Higher, Native Hawaiian/Pacific Islander",
        subtitle = "Using Estimate Value")+
   facet_wrap(vars(college_grad)) +
   scale_fill_viridis_c() + 
@@ -747,7 +747,7 @@ Asian_college_grad_CoV_plot <- Asian_college_grad %>%
   st_as_sf() %>%
   ggplot() +
   geom_sf(aes(fill = CoV)) +
-  labs(title = "Bachelor's Degree or Higher, American Indian/Alaska Native",
+  labs(title = "Bachelor's Degree or Higher, Native Hawaiian/Pacific Islander",
        subtitle = "Coefficient of Variance",
        fill = "Coefficient of Variance") +
   facet_wrap(vars(college_grad)) +
@@ -799,7 +799,7 @@ NHPI_less_than_hs_estimate_plot <- NHPI_less_than_hs %>%
   st_as_sf() %>%
   ggplot() +
   geom_sf(aes(fill = estimate)) +
-  labs(title = "Less than High School Education, American Indian/Alaska Native",
+  labs(title = "Less than High School Education, Native Hawaiian/Pacific Islander",
        subtitle = "Using Estimate Value")+
   facet_wrap(vars(less_than_hs)) +
   scale_fill_viridis_c() + 
@@ -810,7 +810,7 @@ NHPI_less_than_hs_CoV_plot <- NHPI_less_than_hs %>%
   st_as_sf() %>%
   ggplot() +
   geom_sf(aes(fill = CoV)) +
-  labs(title = "Less than High School Education, American Indian/Alaska Native",
+  labs(title = "Less than High School Education, Native Hawaiian/Pacific Islander",
        subtitle = "Coefficient of Variance",
        fill = "Coefficient of Variance") +
   facet_wrap(vars(less_than_hs)) +
@@ -837,7 +837,7 @@ NHPI_hs_estimate_plot <- NHPI_hs %>%
   st_as_sf() %>%
   ggplot() +
   geom_sf(aes(fill = estimate)) +
-  labs(title = "High School Graduate or Equivalent Education, American Indian/Alaska Native",
+  labs(title = "High School Graduate or Equivalent Education, Native Hawaiian/Pacific Islander",
        subtitle = "Using Estimate Value")+
   facet_wrap(vars(hs_grad)) +
   scale_fill_viridis_c() + 
@@ -848,7 +848,7 @@ NHPI_hs_CoV_plot <- NHPI_hs %>%
   st_as_sf() %>%
   ggplot() +
   geom_sf(aes(fill = CoV)) +
-  labs(title = "High School Graduate or Equivalent Education, American Indian/Alaska Native",
+  labs(title = "High School Graduate or Equivalent Education, Native Hawaiian/Pacific Islander",
        subtitle = "Coefficient of Variance",
        fill = "Coefficient of Variance") +
   facet_wrap(vars(hs_grad)) +
@@ -875,7 +875,7 @@ NHPI_SC_AA_estimate_plot <- NHPI_SC_AA %>%
   st_as_sf() %>%
   ggplot() +
   geom_sf(aes(fill = estimate)) +
-  labs(title = "Some College or Associate's Degree, American Indian/Alaska Native",
+  labs(title = "Some College or Associate's Degree, Native Hawaiian/Pacific Islander",
        subtitle = "Using Estimate Value")+
   facet_wrap(vars(some_college)) +
   scale_fill_viridis_c() + 
@@ -886,7 +886,7 @@ NHPI_SC_AA_CoV_plot <- NHPI_SC_AA %>%
   st_as_sf() %>%
   ggplot() +
   geom_sf(aes(fill = CoV)) +
-  labs(title = "Some College or Associate's Degree, American Indian/Alaska Native",
+  labs(title = "Some College or Associate's Degree, Native Hawaiian/Pacific Islander",
        subtitle = "Coefficient of Variance",
        fill = "Coefficient of Variance") +
   facet_wrap(vars(some_college)) +
@@ -914,7 +914,7 @@ NHPI_college_grad_estimate_plot <- NHPI_college_grad %>%
   st_as_sf() %>%
   ggplot() +
   geom_sf(aes(fill = estimate)) +
-  labs(title = "Bachelor's Degree or Higher, American Indian/Alaska Native",
+  labs(title = "Bachelor's Degree or Higher, Native Hawaiian/Pacific Islander",
        subtitle = "Using Estimate Value")+
   facet_wrap(vars(college_grad)) +
   scale_fill_viridis_c() + 
@@ -925,7 +925,7 @@ NHPI_college_grad_CoV_plot <- NHPI_college_grad %>%
   st_as_sf() %>%
   ggplot() +
   geom_sf(aes(fill = CoV)) +
-  labs(title = "Bachelor's Degree or Higher, American Indian/Alaska Native",
+  labs(title = "Bachelor's Degree or Higher, Native Hawaiian/Pacific Islander",
        subtitle = "Coefficient of Variance",
        fill = "Coefficient of Variance") +
   facet_wrap(vars(college_grad)) +
@@ -977,7 +977,7 @@ other_less_than_hs_estimate_plot <- other_less_than_hs %>%
   st_as_sf() %>%
   ggplot() +
   geom_sf(aes(fill = estimate)) +
-  labs(title = "Less than High School Education, American Indian/Alaska Native",
+  labs(title = "Less than High School Education, Other Race",
        subtitle = "Using Estimate Value")+
   facet_wrap(vars(less_than_hs)) +
   scale_fill_viridis_c() + 
@@ -988,7 +988,7 @@ other_less_than_hs_CoV_plot <- other_less_than_hs %>%
   st_as_sf() %>%
   ggplot() +
   geom_sf(aes(fill = CoV)) +
-  labs(title = "Less than High School Education, American Indian/Alaska Native",
+  labs(title = "Less than High School Education, Other Race",
        subtitle = "Coefficient of Variance",
        fill = "Coefficient of Variance") +
   facet_wrap(vars(less_than_hs)) +
@@ -1015,7 +1015,7 @@ other_hs_estimate_plot <- other_hs %>%
   st_as_sf() %>%
   ggplot() +
   geom_sf(aes(fill = estimate)) +
-  labs(title = "High School Graduate or Equivalent Education, American Indian/Alaska Native",
+  labs(title = "High School Graduate or Equivalent Education, Other Race",
        subtitle = "Using Estimate Value")+
   facet_wrap(vars(hs_grad)) +
   scale_fill_viridis_c() + 
@@ -1026,7 +1026,7 @@ other_hs_CoV_plot <- other_hs %>%
   st_as_sf() %>%
   ggplot() +
   geom_sf(aes(fill = CoV)) +
-  labs(title = "High School Graduate or Equivalent Education, American Indian/Alaska Native",
+  labs(title = "High School Graduate or Equivalent Education, Other Race",
        subtitle = "Coefficient of Variance",
        fill = "Coefficient of Variance") +
   facet_wrap(vars(hs_grad)) +
@@ -1053,7 +1053,7 @@ other_SC_AA_estimate_plot <- other_SC_AA %>%
   st_as_sf() %>%
   ggplot() +
   geom_sf(aes(fill = estimate)) +
-  labs(title = "Some College or Associate's Degree, American Indian/Alaska Native",
+  labs(title = "Some College or Associate's Degree, Other Race",
        subtitle = "Using Estimate Value")+
   facet_wrap(vars(some_college)) +
   scale_fill_viridis_c() + 
@@ -1064,7 +1064,7 @@ other_SC_AA_CoV_plot <- other_SC_AA %>%
   st_as_sf() %>%
   ggplot() +
   geom_sf(aes(fill = CoV)) +
-  labs(title = "Some College or Associate's Degree, American Indian/Alaska Native",
+  labs(title = "Some College or Associate's Degree, Other Race",
        subtitle = "Coefficient of Variance",
        fill = "Coefficient of Variance") +
   facet_wrap(vars(some_college)) +
@@ -1092,7 +1092,7 @@ other_college_grad_estimate_plot <- other_college_grad %>%
   st_as_sf() %>%
   ggplot() +
   geom_sf(aes(fill = estimate)) +
-  labs(title = "Bachelor's Degree or Higher, American Indian/Alaska Native",
+  labs(title = "Bachelor's Degree or Higher, Other Race",
        subtitle = "Using Estimate Value")+
   facet_wrap(vars(college_grad)) +
   scale_fill_viridis_c() + 
@@ -1103,7 +1103,185 @@ other_college_grad_CoV_plot <- other_college_grad %>%
   st_as_sf() %>%
   ggplot() +
   geom_sf(aes(fill = CoV)) +
-  labs(title = "Bachelor's Degree or Higher, American Indian/Alaska Native",
+  labs(title = "Bachelor's Degree or Higher, Other Race",
+       subtitle = "Coefficient of Variance",
+       fill = "Coefficient of Variance") +
+  facet_wrap(vars(college_grad)) +
+  scale_fill_viridis_c() + 
+  theme_void()
+
+###### Part 7 - 2 or more races educational attainment
+tract_edu_multiracial <- get_acs("tract",
+                           table = "C15002G",
+                           year = 2018,
+                           state = "WA",
+                           county = "King",
+                           geometry = TRUE, 
+                           survey = "acs5")
+
+table_C15002G <- var_df %>%
+  filter(str_starts(name, "C15002G")) %>%
+  mutate(short_label = str_split(label, "!!"), 
+         short_label = map_chr(short_label, tail, 1)) %>%
+  dplyr::select(name, short_label)
+
+#create my own indicators
+table_C15002G$less_than_hs <- ifelse(table_C15002G$short_label == "Less than high school diploma", 1, 0)
+table_C15002G$hs_grad <- ifelse(table_C15002G$short_label == "High school graduate (includes equivalency)", 1, 0)
+table_C15002G$some_college <- ifelse(table_C15002G$short_label == "Some college or associate's degree", 1, 0)
+table_C15002G$college_grad <- ifelse(table_C15002G$short_label == "Bachelor's degree or higher", 1, 0)
+
+tract_edu_multiracial_lab <- tract_edu_multiracial %>%
+  left_join(table_C15002G, by = c("variable" = "name")) 
+
+######## Part 6A - multiracial less than HS attainment
+### create multiracial less than HS dataset 
+multiracial_less_than_hs <- tract_edu_multiracial_lab %>%
+  filter(less_than_hs == 1) %>%
+  group_by(GEOID, less_than_hs) %>% 
+  summarize(
+    estimate = sum(estimate),
+    moe = sum(moe)
+  ) %>%
+  data.table()
+
+## calculate SE and CoV 
+multiracial_less_than_hs<- multiracial_less_than_hs %>% 
+  mutate(SE = moe/qnorm(.95)) %>% 
+  mutate(CoV = SE/estimate)
+
+##create multiracial less than HS educational attainment plot for estimate only - how do i get 1 to go away?
+multiracial_less_than_hs_estimate_plot <- multiracial_less_than_hs %>%
+  st_as_sf() %>%
+  ggplot() +
+  geom_sf(aes(fill = estimate)) +
+  labs(title = "Less than High School Education, 2 or More Races",
+       subtitle = "Using Estimate Value")+
+  facet_wrap(vars(less_than_hs)) +
+  scale_fill_viridis_c() + 
+  theme_void()
+
+##create multiracial less than HS educational attainment plot for CoV - fix labels
+multiracial_less_than_hs_CoV_plot <- multiracial_less_than_hs %>% 
+  st_as_sf() %>%
+  ggplot() +
+  geom_sf(aes(fill = CoV)) +
+  labs(title = "Less than High School Education, 2 or More Races",
+       subtitle = "Coefficient of Variance",
+       fill = "Coefficient of Variance") +
+  facet_wrap(vars(less_than_hs)) +
+  scale_fill_viridis_c() + 
+  theme_void()
+
+#####Part 5B - multiracial high school grad/equivalent
+multiracial_hs <- tract_edu_multiracial_lab %>%
+  filter(hs_grad == 1) %>%
+  group_by(GEOID, hs_grad) %>% 
+  summarize(
+    estimate = sum(estimate),
+    moe = sum(moe)
+  ) %>%
+  data.table()
+
+## calculate SE and CoV 
+multiracial_hs<- multiracial_hs %>% 
+  mutate(SE = moe/qnorm(.95)) %>% 
+  mutate(CoV = SE/estimate)
+
+##create multiracial HS grad/equiv educational attainment plot for estimate only - how do i get 1 to go away?
+multiracial_hs_estimate_plot <- multiracial_hs %>%
+  st_as_sf() %>%
+  ggplot() +
+  geom_sf(aes(fill = estimate)) +
+  labs(title = "High School Graduate or Equivalent Education, 2 or More Races",
+       subtitle = "Using Estimate Value")+
+  facet_wrap(vars(hs_grad)) +
+  scale_fill_viridis_c() + 
+  theme_void()
+
+##create multiracial HS grad/equivalent educational attainment plot for CoV - fix labels
+multiracial_hs_CoV_plot <- multiracial_hs %>% 
+  st_as_sf() %>%
+  ggplot() +
+  geom_sf(aes(fill = CoV)) +
+  labs(title = "High School Graduate or Equivalent Education, 2 or More Races",
+       subtitle = "Coefficient of Variance",
+       fill = "Coefficient of Variance") +
+  facet_wrap(vars(hs_grad)) +
+  scale_fill_viridis_c() + 
+  theme_void()
+
+### part 5C - multiracial some college/AA attainment 
+multiracial_SC_AA <- tract_edu_multiracial_lab %>%
+  filter(some_college == 1) %>%
+  group_by(GEOID, some_college) %>% 
+  summarize(
+    estimate = sum(estimate),
+    moe = sum(moe)
+  ) %>%
+  data.table()
+
+## calculate SE and CoV 
+multiracial_SC_AA<- multiracial_SC_AA %>% 
+  mutate(SE = moe/qnorm(.95)) %>% 
+  mutate(CoV = SE/estimate)
+
+##create multiracial some college/AA plot for estimate only 
+multiracial_SC_AA_estimate_plot <- multiracial_SC_AA %>%
+  st_as_sf() %>%
+  ggplot() +
+  geom_sf(aes(fill = estimate)) +
+  labs(title = "Some College or Associate's Degree, 2 or More Races",
+       subtitle = "Using Estimate Value")+
+  facet_wrap(vars(some_college)) +
+  scale_fill_viridis_c() + 
+  theme_void()
+
+##create multiracial some college/AA educational attainment plot for CoV - fix labels
+multiracial_SC_AA_CoV_plot <- multiracial_SC_AA %>% 
+  st_as_sf() %>%
+  ggplot() +
+  geom_sf(aes(fill = CoV)) +
+  labs(title = "Some College or Associate's Degree, 2 or More Races",
+       subtitle = "Coefficient of Variance",
+       fill = "Coefficient of Variance") +
+  facet_wrap(vars(some_college)) +
+  scale_fill_viridis_c() + 
+  theme_void()
+
+####Part 5D: multiracial Bachelor's or higher degree attainment
+
+multiracial_college_grad <- tract_edu_multiracial_lab %>%
+  filter(college_grad == 1) %>%
+  group_by(GEOID, college_grad) %>% 
+  summarize(
+    estimate = sum(estimate),
+    moe = sum(moe)
+  ) %>%
+  data.table()
+
+## calculate SE and CoV 
+multiracial_college_grad<- multiracial_college_grad %>% 
+  mutate(SE = moe/qnorm(.95)) %>% 
+  mutate(CoV = SE/estimate)
+
+##create multiracial college grad plot for estimate only - how do i get 1 to go away?
+multiracial_college_grad_estimate_plot <- multiracial_college_grad %>%
+  st_as_sf() %>%
+  ggplot() +
+  geom_sf(aes(fill = estimate)) +
+  labs(title = "Bachelor's Degree or Higher, 2 or More Races",
+       subtitle = "Using Estimate Value")+
+  facet_wrap(vars(college_grad)) +
+  scale_fill_viridis_c() + 
+  theme_void()
+
+##create multiracial college grad educational attainment plot for CoV - fix labels
+multiracial_college_grad_CoV_plot <- multiracial_college_grad %>% 
+  st_as_sf() %>%
+  ggplot() +
+  geom_sf(aes(fill = CoV)) +
+  labs(title = "Bachelor's Degree or Higher, 2 or More Races",
        subtitle = "Coefficient of Variance",
        fill = "Coefficient of Variance") +
   facet_wrap(vars(college_grad)) +
