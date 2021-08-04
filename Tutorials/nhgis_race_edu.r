@@ -84,8 +84,8 @@ white_less_than_hs_CoV_plot <- white_less_than_hs %>%
   ggplot() +
   geom_sf(aes(fill = CoV)) +
   labs(title = "Less than High School Education, White Alone",
-       subtitle = "Coefficient of Variance",
-       fill = "Coefficient of Variance") +
+       subtitle = "Coefficient of variation",
+       fill = "Coefficient of variation") +
   facet_wrap(vars(less_than_hs)) +
   scale_fill_viridis_c() + 
   theme_void()
@@ -125,8 +125,8 @@ white_hs_CoV_plot <- white_hs %>%
   ggplot() +
   geom_sf(aes(fill = CoV), size = .25) +
   labs(title = "High School Graduate or Equivalent, White Alone",
-       subtitle = "Coefficient of Variance",
-       fill = "Coefficient of Variance") +
+       subtitle = "Coefficient of variation",
+       fill = "Coefficient of variation") +
   facet_wrap(vars(hs_grad)) +
   scale_fill_viridis_c() + 
   theme_void()
@@ -166,8 +166,8 @@ white_SC_AA_CoV_plot <- White_some_college_AA %>%
   ggplot() +
   geom_sf(aes(fill = CoV), size = .25) +
   labs(title = "Some College or Associate's Degree, White Alone",
-       subtitle = "Coefficient of Variance",
-       fill = "Coefficient of Variance") +
+       subtitle = "Coefficient of variation",
+       fill = "Coefficient of variation") +
   facet_wrap(vars(some_college)) +
   scale_fill_viridis_c() + 
   theme_void()
@@ -207,8 +207,8 @@ white_uni_CoV_plot <- white_uni_degree %>%
   ggplot() +
   geom_sf(aes(fill = CoV), size = .25) +
   labs(title = "Bachelor's Degree or Higher, White Alone",
-       subtitle = "Coefficient of Variance",
-       fill = "Coefficient of Variance") +
+       subtitle = "Coefficient of variation",
+       fill = "Coefficient of variation") +
   facet_wrap(vars(college_grad)) +
   scale_fill_viridis_c() + 
   theme_void()
@@ -276,8 +276,8 @@ Black_less_than_hs_CoV_plot <- Black_less_than_hs %>%
   ggplot() +
   geom_sf(aes(fill = CoV)) +
   labs(title = "Less than High School Education, Black Alone",
-       subtitle = "Coefficient of Variance",
-       fill = "Coefficient of Variance") +
+       subtitle = "Coefficient of variation",
+       fill = "Coefficient of variation") +
   facet_wrap(vars(less_than_hs)) +
   scale_fill_viridis_c() + 
   theme_void()
@@ -314,8 +314,8 @@ Black_hs_CoV_plot <- Black_hs %>%
   ggplot() +
   geom_sf(aes(fill = CoV)) +
   labs(title = "High School Graduate or Equivalent Education, Black Alone",
-       subtitle = "Coefficient of Variance",
-       fill = "Coefficient of Variance") +
+       subtitle = "Coefficient of variation",
+       fill = "Coefficient of variation") +
   facet_wrap(vars(hs_grad)) +
   scale_fill_viridis_c() + 
   theme_void()
@@ -352,8 +352,8 @@ Black_SC_AA_CoV_plot <- Black_SC_AA %>%
   ggplot() +
   geom_sf(aes(fill = CoV)) +
   labs(title = "Some College or Associate's Degree, Black Alone Black Alone",
-       subtitle = "Coefficient of Variance",
-       fill = "Coefficient of Variance") +
+       subtitle = "Coefficient of variation",
+       fill = "Coefficient of variation") +
   facet_wrap(vars(some_college)) +
   scale_fill_viridis_c() + 
   theme_void()
@@ -391,8 +391,8 @@ Black_college_grad_CoV_plot <- Black_college_grad %>%
   ggplot() +
   geom_sf(aes(fill = CoV)) +
   labs(title = "Bachelor's Degree or Higher, Black Alone",
-       subtitle = "Coefficient of Variance",
-       fill = "Coefficient of Variance") +
+       subtitle = "Coefficient of variation",
+       fill = "Coefficient of variation") +
   facet_wrap(vars(college_grad)) +
   scale_fill_viridis_c() + 
   theme_void()
@@ -455,8 +455,8 @@ AIAN_less_than_hs_CoV_plot <- AIAN_less_than_hs %>%
   ggplot() +
   geom_sf(aes(fill = CoV)) +
   labs(title = "Less than High School Education, American Indian/Alaska Native",
-       subtitle = "Coefficient of Variance",
-       fill = "Coefficient of Variance") +
+       subtitle = "Coefficient of variation",
+       fill = "Coefficient of variation") +
   facet_wrap(vars(less_than_hs)) +
   scale_fill_viridis_c() + 
   theme_void()
@@ -493,8 +493,8 @@ AIAN_hs_CoV_plot <- AIAN_hs %>%
   ggplot() +
   geom_sf(aes(fill = CoV)) +
   labs(title = "High School Graduate or Equivalent Education, American Indian/Alaska Native",
-       subtitle = "Coefficient of Variance",
-       fill = "Coefficient of Variance") +
+       subtitle = "Coefficient of variation",
+       fill = "Coefficient of variation") +
   facet_wrap(vars(hs_grad)) +
   scale_fill_viridis_c() + 
   theme_void()
@@ -531,8 +531,8 @@ AIAN_SC_AA_CoV_plot <- AIAN_SC_AA %>%
   ggplot() +
   geom_sf(aes(fill = CoV)) +
   labs(title = "Some College or Associate's Degree, American Indian/Alaska Native",
-       subtitle = "Coefficient of Variance",
-       fill = "Coefficient of Variance") +
+       subtitle = "Coefficient of variation",
+       fill = "Coefficient of variation") +
   facet_wrap(vars(some_college)) +
   scale_fill_viridis_c() + 
   theme_void()
@@ -570,8 +570,8 @@ AIAN_college_grad_CoV_plot <- AIAN_college_grad %>%
   ggplot() +
   geom_sf(aes(fill = CoV)) +
   labs(title = "Bachelor's Degree or Higher, American Indian/Alaska Native",
-       subtitle = "Coefficient of Variance",
-       fill = "Coefficient of Variance") +
+       subtitle = "Coefficient of variation",
+       fill = "Coefficient of variation") +
   facet_wrap(vars(college_grad)) +
   scale_fill_viridis_c() + 
   theme_void()
@@ -633,8 +633,8 @@ Asian_less_than_hs_CoV_plot <- Asian_less_than_hs %>%
   ggplot() +
   geom_sf(aes(fill = CoV)) +
   labs(title = "Less than High School Education, Native Hawaiian/Pacific Islander",
-       subtitle = "Coefficient of Variance",
-       fill = "Coefficient of Variance") +
+       subtitle = "Coefficient of variation",
+       fill = "Coefficient of variation") +
   facet_wrap(vars(less_than_hs)) +
   scale_fill_viridis_c() + 
   theme_void()
@@ -671,8 +671,8 @@ Asian_hs_CoV_plot <- Asian_hs %>%
   ggplot() +
   geom_sf(aes(fill = CoV)) +
   labs(title = "High School Graduate or Equivalent Education, Native Hawaiian/Pacific Islander",
-       subtitle = "Coefficient of Variance",
-       fill = "Coefficient of Variance") +
+       subtitle = "Coefficient of variation",
+       fill = "Coefficient of variation") +
   facet_wrap(vars(hs_grad)) +
   scale_fill_viridis_c() + 
   theme_void()
@@ -709,8 +709,8 @@ Asian_SC_AA_CoV_plot <- Asian_SC_AA %>%
   ggplot() +
   geom_sf(aes(fill = CoV)) +
   labs(title = "Some College or Associate's Degree, Native Hawaiian/Pacific Islander",
-       subtitle = "Coefficient of Variance",
-       fill = "Coefficient of Variance") +
+       subtitle = "Coefficient of variation",
+       fill = "Coefficient of variation") +
   facet_wrap(vars(some_college)) +
   scale_fill_viridis_c() + 
   theme_void()
@@ -748,8 +748,8 @@ Asian_college_grad_CoV_plot <- Asian_college_grad %>%
   ggplot() +
   geom_sf(aes(fill = CoV)) +
   labs(title = "Bachelor's Degree or Higher, Native Hawaiian/Pacific Islander",
-       subtitle = "Coefficient of Variance",
-       fill = "Coefficient of Variance") +
+       subtitle = "Coefficient of variation",
+       fill = "Coefficient of variation") +
   facet_wrap(vars(college_grad)) +
   scale_fill_viridis_c() + 
   theme_void()
@@ -811,8 +811,8 @@ NHPI_less_than_hs_CoV_plot <- NHPI_less_than_hs %>%
   ggplot() +
   geom_sf(aes(fill = CoV)) +
   labs(title = "Less than High School Education, Native Hawaiian/Pacific Islander",
-       subtitle = "Coefficient of Variance",
-       fill = "Coefficient of Variance") +
+       subtitle = "Coefficient of variation",
+       fill = "Coefficient of variation") +
   facet_wrap(vars(less_than_hs)) +
   scale_fill_viridis_c() + 
   theme_void()
@@ -849,8 +849,8 @@ NHPI_hs_CoV_plot <- NHPI_hs %>%
   ggplot() +
   geom_sf(aes(fill = CoV)) +
   labs(title = "High School Graduate or Equivalent Education, Native Hawaiian/Pacific Islander",
-       subtitle = "Coefficient of Variance",
-       fill = "Coefficient of Variance") +
+       subtitle = "Coefficient of variation",
+       fill = "Coefficient of variation") +
   facet_wrap(vars(hs_grad)) +
   scale_fill_viridis_c() + 
   theme_void()
@@ -887,8 +887,8 @@ NHPI_SC_AA_CoV_plot <- NHPI_SC_AA %>%
   ggplot() +
   geom_sf(aes(fill = CoV)) +
   labs(title = "Some College or Associate's Degree, Native Hawaiian/Pacific Islander",
-       subtitle = "Coefficient of Variance",
-       fill = "Coefficient of Variance") +
+       subtitle = "Coefficient of variation",
+       fill = "Coefficient of variation") +
   facet_wrap(vars(some_college)) +
   scale_fill_viridis_c() + 
   theme_void()
@@ -926,8 +926,8 @@ NHPI_college_grad_CoV_plot <- NHPI_college_grad %>%
   ggplot() +
   geom_sf(aes(fill = CoV)) +
   labs(title = "Bachelor's Degree or Higher, Native Hawaiian/Pacific Islander",
-       subtitle = "Coefficient of Variance",
-       fill = "Coefficient of Variance") +
+       subtitle = "Coefficient of variation",
+       fill = "Coefficient of variation") +
   facet_wrap(vars(college_grad)) +
   scale_fill_viridis_c() + 
   theme_void()
@@ -989,8 +989,8 @@ other_less_than_hs_CoV_plot <- other_less_than_hs %>%
   ggplot() +
   geom_sf(aes(fill = CoV)) +
   labs(title = "Less than High School Education, Other Race",
-       subtitle = "Coefficient of Variance",
-       fill = "Coefficient of Variance") +
+       subtitle = "Coefficient of variation",
+       fill = "Coefficient of variation") +
   facet_wrap(vars(less_than_hs)) +
   scale_fill_viridis_c() + 
   theme_void()
@@ -1027,8 +1027,8 @@ other_hs_CoV_plot <- other_hs %>%
   ggplot() +
   geom_sf(aes(fill = CoV)) +
   labs(title = "High School Graduate or Equivalent Education, Other Race",
-       subtitle = "Coefficient of Variance",
-       fill = "Coefficient of Variance") +
+       subtitle = "Coefficient of variation",
+       fill = "Coefficient of variation") +
   facet_wrap(vars(hs_grad)) +
   scale_fill_viridis_c() + 
   theme_void()
@@ -1065,8 +1065,8 @@ other_SC_AA_CoV_plot <- other_SC_AA %>%
   ggplot() +
   geom_sf(aes(fill = CoV)) +
   labs(title = "Some College or Associate's Degree, Other Race",
-       subtitle = "Coefficient of Variance",
-       fill = "Coefficient of Variance") +
+       subtitle = "Coefficient of variation",
+       fill = "Coefficient of variation") +
   facet_wrap(vars(some_college)) +
   scale_fill_viridis_c() + 
   theme_void()
@@ -1104,8 +1104,8 @@ other_college_grad_CoV_plot <- other_college_grad %>%
   ggplot() +
   geom_sf(aes(fill = CoV)) +
   labs(title = "Bachelor's Degree or Higher, Other Race",
-       subtitle = "Coefficient of Variance",
-       fill = "Coefficient of Variance") +
+       subtitle = "Coefficient of variation",
+       fill = "Coefficient of variation") +
   facet_wrap(vars(college_grad)) +
   scale_fill_viridis_c() + 
   theme_void()
@@ -1167,8 +1167,8 @@ multiracial_less_than_hs_CoV_plot <- multiracial_less_than_hs %>%
   ggplot() +
   geom_sf(aes(fill = CoV)) +
   labs(title = "Less than High School Education, 2 or More Races",
-       subtitle = "Coefficient of Variance",
-       fill = "Coefficient of Variance") +
+       subtitle = "Coefficient of variation",
+       fill = "Coefficient of variation") +
   facet_wrap(vars(less_than_hs)) +
   scale_fill_viridis_c() + 
   theme_void()
@@ -1205,8 +1205,8 @@ multiracial_hs_CoV_plot <- multiracial_hs %>%
   ggplot() +
   geom_sf(aes(fill = CoV)) +
   labs(title = "High School Graduate or Equivalent Education, 2 or More Races",
-       subtitle = "Coefficient of Variance",
-       fill = "Coefficient of Variance") +
+       subtitle = "Coefficient of variation",
+       fill = "Coefficient of variation") +
   facet_wrap(vars(hs_grad)) +
   scale_fill_viridis_c() + 
   theme_void()
@@ -1243,8 +1243,8 @@ multiracial_SC_AA_CoV_plot <- multiracial_SC_AA %>%
   ggplot() +
   geom_sf(aes(fill = CoV)) +
   labs(title = "Some College or Associate's Degree, 2 or More Races",
-       subtitle = "Coefficient of Variance",
-       fill = "Coefficient of Variance") +
+       subtitle = "Coefficient of variation",
+       fill = "Coefficient of variation") +
   facet_wrap(vars(some_college)) +
   scale_fill_viridis_c() + 
   theme_void()
@@ -1282,8 +1282,8 @@ multiracial_college_grad_CoV_plot <- multiracial_college_grad %>%
   ggplot() +
   geom_sf(aes(fill = CoV)) +
   labs(title = "Bachelor's Degree or Higher, 2 or More Races",
-       subtitle = "Coefficient of Variance",
-       fill = "Coefficient of Variance") +
+       subtitle = "Coefficient of Variation",
+       fill = "Coefficient of Variation") +
   facet_wrap(vars(college_grad)) +
   scale_fill_viridis_c() + 
   theme_void()
