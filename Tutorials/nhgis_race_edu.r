@@ -1287,3 +1287,44 @@ multiracial_college_grad_CoV_plot <- multiracial_college_grad %>%
   facet_wrap(vars(college_grad)) +
   scale_fill_viridis_c() + 
   theme_void()
+
+years <- c(2010:2019)
+
+raw_inc_df <- bind_rows(lapply(years, function(x){
+  get_acs("tract",
+            table = "C15002A",
+            year = x,
+            state = "WA",
+            county = "King",
+            geometry = TRUE, 
+            survey = "acs5",
+            moe = 90,
+            cache_table = TRUE) %>%
+            mutate(Year = x)}))
+inc_df <- raw_inc_df %>%
+  mutate(
+    inc_upr = estimate + moe,
+    inc_lwr = estimate - moe)
+
+less_than_hs_white <- list()
+  for(year in years[1:2]){
+  less_than_hs_white[[as.character(year)]] <- inc_df %>% filter(Year == year) %>% 
+  left_join(table_C15002A, by = c("variable" = "name"))%>%
+    filter(less_than_hs == 1) %>%
+    group_by(GEOID, less_than_hs) %>% 
+    summarize(
+      estimate = sum(estimate),
+      moe = sum(moe)
+    ) %>%
+    data.table()%>% 
+    mutate(SE = moe/qnorm(.95)) %>% 
+    mutate(CoV = SE/estimate) %>% 
+    st_as_sf() %>%
+    ggplot() +
+    geom_sf(aes(fill = estimate)) +
+    labs(title = "Less than High School Education, White Alone",
+         subtitle = "Using Estimate Value") +
+    scale_fill_viridis_c() + 
+    theme_void()
+  }
+  
