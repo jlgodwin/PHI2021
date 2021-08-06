@@ -20,18 +20,26 @@ var_df$concept <- gsub(paste0("SEX BY EDUCATIONAL ",
                               "POPULATION 25 YEARS ", 
                               "AND OVER \\("), "", 
                        var_df$concept[grepl("C15002", var_df$name)])
+
+years <- c(2010:2019)
+
+raw_inc_df <- lapply(years, function(x){
+  get_acs("tract",
+          table = "C15002A",
+          year = x,
+          state = "WA",
+          county = "King",
+          geometry = TRUE, 
+          survey = "acs5",
+          moe = 90,
+          cache_table = TRUE) %>%
+    mutate(Year = x)})
+
 ###########################################
 # -- load King County tract-level data -- #
 ###########################################
 ##PART 1
 ## create white only tract-level dataset for King county
-tract_edu_white <- get_acs("tract",
-                           table = "C15002A",
-                           year = 2018,
-                           state = "WA",
-                           county = "King",
-                           geometry = TRUE, 
-                           survey = "acs5")
 
 table_C15002A <- var_df %>%
   filter(str_starts(name, "C15002A")) %>%
@@ -45,91 +53,120 @@ table_C15002A$hs_grad <- ifelse(table_C15002A$short_label == "High school gradua
 table_C15002A$some_college <- ifelse(table_C15002A$short_label == "Some college or associate's degree", 1, 0)
 table_C15002A$college_grad <- ifelse(table_C15002A$short_label == "Bachelor's degree or higher", 1, 0)
 
-tract_edu_white_lab <- tract_edu_white %>%
-  left_join(table_C15002A, by = c("variable" = "name")) 
 
 ####### PART 1A - Less than HS attainment data
-# create less than HS attainment data set for White individuals
-white_less_than_hs <- tract_edu_white_lab %>%
-  filter(less_than_hs == 1) %>%
-  group_by(GEOID, less_than_hs) %>% 
-  summarize(
-    estimate = sum(estimate),
-    moe = sum(moe)
-  ) %>%
-  data.table()
 
-## calculate SE and CoV 
-white_less_than_hs<- white_less_than_hs %>% 
-  mutate(SE = moe/qnorm(.95)) %>% 
-  mutate(CoV = SE/estimate)
+##### create estimate plot for less than HS, White alone
+less_than_hs_white_estimate <- list()
+for(year in years){
+  year.idx <- match(year, years)
+  less_than_hs_white_estimate[[as.character(year)]] <- raw_inc_df[[year.idx]] %>% 
+    left_join(table_C15002A, by = c("variable" = "name"))%>%
+    filter(less_than_hs == 1) %>%
+    group_by(GEOID, less_than_hs) %>% 
+    summarize(
+      estimate = sum(estimate),
+      moe = sum(moe)
+    ) %>%
+    data.table()%>% 
+    mutate(SE = moe/qnorm(.95)) %>% 
+    mutate(CoV = SE/estimate) %>% 
+    st_as_sf() %>%
+    ggplot() +
+    geom_sf(aes(fill = estimate)) +
+    labs(title = "Less than High School Education, White",
+         subtitle = "Using Estimate Value") +
+    scale_fill_viridis_c() + 
+    theme_void()
+}
 
-## do we need summary estimate still? not quite sure what this is for?
-##white_less_than_hs <- white_less_than_hs[, summary_est := sum(estimate), by = 'GEOID']
+##create White less than HS educational attainment plot for CoV - NEED TO FIX
+less_than_hs_white_CoV <- list()
+for(year in years){
+  year.idx <- match(year, years)
+  less_than_hs_white_CoV[[as.character(year)]] <- raw_inc_df[[year.idx]] %>% 
+    left_join(table_C15002A, by = c("variable" = "name"))%>%
+    filter(less_than_hs == 1) %>%
+    group_by(GEOID, less_than_hs) %>% 
+    summarize(
+      estimate = sum(estimate),
+      moe = sum(moe))%>%
+    data.table()%>% 
+    mutate(SE = moe/qnorm(.95)) %>% 
+    mutate(CoV = SE/estimate) %>% 
+    st_as_sf() %>%
+    ggplot() +
+    geom_sf(aes(fill = CoV)) +
+    labs(subtitle = "Coefficient of variation",
+         fill = "CoV") +
+    scale_fill_viridis_c() + 
+    theme_void()
+}
 
-##create White less than HS educational attainment plot for estimate only - how do i get 1 to go away?
-white_less_than_hs_estimate_plot <- white_less_than_hs %>%
-  st_as_sf() %>%
-  ggplot() +
-  geom_sf(aes(fill = estimate)) +
-  labs(title = "Less than High School Education, White Alone",
-       subtitle = "Using Estimate Value")+
-  facet_wrap(vars(less_than_hs)) +
-  scale_fill_viridis_c() + 
-  theme_void()
-
-##create White less than HS educational attainment plot for CoV - fix labels
-white_less_than_hs_CoV_plot <- white_less_than_hs %>% 
-  st_as_sf() %>%
-  ggplot() +
-  geom_sf(aes(fill = CoV)) +
-  labs(title = "Less than High School Education, White Alone",
-       subtitle = "Coefficient of variation",
-       fill = "Coefficient of variation") +
-  facet_wrap(vars(less_than_hs)) +
-  scale_fill_viridis_c() + 
-  theme_void()
+pdf('Less_than_hs_white_over_time.pdf', 
+    width = 8, height = 4)
+for(year in years){
+  grid.arrange(less_than_hs_white_estimate[[as.character(year)]], 
+               less_than_hs_white_CoV[[as.character(year)]], ncol = 2)
+}
+dev.off()
 
 ########
 ##PART 1B - White HS Grad/Equivalent Data
-##create White HS grad/equivalent attainment dataset
-white_hs <- tract_edu_white_lab %>%
-  filter(hs_grad == 1) %>%
-  group_by(GEOID, hs_grad) %>% 
-  summarize(
-    estimate = sum(estimate),
-    moe = sum(moe)
-  ) %>%
-  data.table()
 
-## calculate SE and CoV 
-white_hs<- white_hs %>% 
-  mutate(SE = moe/qnorm(.95)) %>% 
-  mutate(CoV = SE/estimate)
+hs_white_estimate <- list()
+for(year in years){
+  year.idx <- match(year, years)
+  hs_white_estimate[[as.character(year)]] <- raw_inc_df[[year.idx]] %>% 
+    left_join(table_C15002A, by = c("variable" = "name"))%>%
+    filter(less_than_hs == 1) %>%
+    group_by(GEOID, less_than_hs) %>% 
+    summarize(
+      estimate = sum(estimate),
+      moe = sum(moe)
+    ) %>%
+    data.table()%>% 
+    mutate(SE = moe/qnorm(.95)) %>% 
+    mutate(CoV = SE/estimate) %>% 
+    st_as_sf() %>%
+    ggplot() +
+    geom_sf(aes(fill = estimate)) +
+    labs(title = "High School Graduate or Equivalent, White",
+         subtitle = "Using Estimate Value") +
+    scale_fill_viridis_c() + 
+    theme_void()
+}
 
-##create White HS/equivalent educational attainment plot for estimate only - fix labels
-white_hs_estimate_plot <- white_hs %>%
-  st_as_sf() %>%
-  ggplot() +
-  geom_sf(aes(fill = estimate), size = .25) +
-  labs(title = "High School Graduate or Equivalent, White Alone",
-       subtitle = "Using Estimate Value",
-       fill = "Estimate") +
-  facet_wrap(vars(hs_grad)) +
-  scale_fill_viridis_c() + 
-  theme_void()
+##create White less than HS educational attainment plot for CoV - NEED TO FIX
+hs_white_CoV <- list()
+for(year in years){
+  year.idx <- match(year, years)
+  hs_white_CoV[[as.character(year)]] <- raw_inc_df[[year.idx]] %>% 
+    left_join(table_C15002A, by = c("variable" = "name"))%>%
+    filter(less_than_hs == 1) %>%
+    group_by(GEOID, less_than_hs) %>% 
+    summarize(
+      estimate = sum(estimate),
+      moe = sum(moe))%>%
+    data.table()%>% 
+    mutate(SE = moe/qnorm(.95)) %>% 
+    mutate(CoV = SE/estimate) %>% 
+    st_as_sf() %>%
+    ggplot() +
+    geom_sf(aes(fill = CoV)) +
+    labs(subtitle = "Coefficient of variation",
+         fill = "CoV") +
+    scale_fill_viridis_c() + 
+    theme_void()
+}
 
-##create White HS/equiv educational attainment plot for CoV - fix labels
-white_hs_CoV_plot <- white_hs %>% 
-  st_as_sf() %>%
-  ggplot() +
-  geom_sf(aes(fill = CoV), size = .25) +
-  labs(title = "High School Graduate or Equivalent, White Alone",
-       subtitle = "Coefficient of variation",
-       fill = "Coefficient of variation") +
-  facet_wrap(vars(hs_grad)) +
-  scale_fill_viridis_c() + 
-  theme_void()
+pdf('hs_white_over_time.pdf', 
+    width = 8, height = 4)
+for(year in years){
+  grid.arrange(hs_white_estimate[[as.character(year)]], 
+               hs_white_CoV[[as.character(year)]], ncol = 2)
+}
+dev.off()
 
 ####################
 ### Part 1C: White Some College/AA edu attainment data
@@ -756,12 +793,12 @@ Asian_college_grad_CoV_plot <- Asian_college_grad %>%
 
 ##### Part 5 - Native Hawaiian and Pacific Islander Educational Attainment
 tract_edu_NHPI <- get_acs("tract",
-                           table = "C15002E",
-                           year = 2018,
-                           state = "WA",
-                           county = "King",
-                           geometry = TRUE, 
-                           survey = "acs5")
+                          table = "C15002E",
+                          year = 2018,
+                          state = "WA",
+                          county = "King",
+                          geometry = TRUE, 
+                          survey = "acs5")
 
 table_C15002E <- var_df %>%
   filter(str_starts(name, "C15002E")) %>%
@@ -934,12 +971,12 @@ NHPI_college_grad_CoV_plot <- NHPI_college_grad %>%
 
 ######### PART 6 - OTHER RACE EDUCATIONAL ATTAINMENT 
 tract_edu_other <- get_acs("tract",
-                          table = "C15002F",
-                          year = 2018,
-                          state = "WA",
-                          county = "King",
-                          geometry = TRUE, 
-                          survey = "acs5")
+                           table = "C15002F",
+                           year = 2018,
+                           state = "WA",
+                           county = "King",
+                           geometry = TRUE, 
+                           survey = "acs5")
 
 table_C15002F <- var_df %>%
   filter(str_starts(name, "C15002F")) %>%
@@ -1112,12 +1149,12 @@ other_college_grad_CoV_plot <- other_college_grad %>%
 
 ###### Part 7 - 2 or more races educational attainment
 tract_edu_multiracial <- get_acs("tract",
-                           table = "C15002G",
-                           year = 2018,
-                           state = "WA",
-                           county = "King",
-                           geometry = TRUE, 
-                           survey = "acs5")
+                                 table = "C15002G",
+                                 year = 2018,
+                                 state = "WA",
+                                 county = "King",
+                                 geometry = TRUE, 
+                                 survey = "acs5")
 
 table_C15002G <- var_df %>%
   filter(str_starts(name, "C15002G")) %>%
@@ -1287,44 +1324,3 @@ multiracial_college_grad_CoV_plot <- multiracial_college_grad %>%
   facet_wrap(vars(college_grad)) +
   scale_fill_viridis_c() + 
   theme_void()
-
-years <- c(2010:2019)
-
-raw_inc_df <- bind_rows(lapply(years, function(x){
-  get_acs("tract",
-            table = "C15002A",
-            year = x,
-            state = "WA",
-            county = "King",
-            geometry = TRUE, 
-            survey = "acs5",
-            moe = 90,
-            cache_table = TRUE) %>%
-            mutate(Year = x)}))
-inc_df <- raw_inc_df %>%
-  mutate(
-    inc_upr = estimate + moe,
-    inc_lwr = estimate - moe)
-
-less_than_hs_white <- list()
-  for(year in years[1:2]){
-  less_than_hs_white[[as.character(year)]] <- inc_df %>% filter(Year == year) %>% 
-  left_join(table_C15002A, by = c("variable" = "name"))%>%
-    filter(less_than_hs == 1) %>%
-    group_by(GEOID, less_than_hs) %>% 
-    summarize(
-      estimate = sum(estimate),
-      moe = sum(moe)
-    ) %>%
-    data.table()%>% 
-    mutate(SE = moe/qnorm(.95)) %>% 
-    mutate(CoV = SE/estimate) %>% 
-    st_as_sf() %>%
-    ggplot() +
-    geom_sf(aes(fill = estimate)) +
-    labs(title = "Less than High School Education, White Alone",
-         subtitle = "Using Estimate Value") +
-    scale_fill_viridis_c() + 
-    theme_void()
-  }
-  
