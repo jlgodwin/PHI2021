@@ -38,7 +38,8 @@ layout: default
 **R Tutorials**
    * [tidycensus by Neal Marquez and Connor Gilroy](https://jlgodwin.github.io/PHI2021/Tutorials/tidycensus-tutorial.rmd) | [Household size by Adrien Allorant](https://jlgodwin.github.io/PHI2021/Tutorials/0_ACS_data_inspection.R)
    * [IPUMS-NHGIS](https://jlgodwin.github.io/PHI2021/Tutorials/NHGIS.html) | [NHGIS.Rmd](https://jlgodwin.github.io/PHI2021/Tutorials/NHGIS.Rmd) | [IPUMS-NHGIS extract codebook](https://jlgodwin.github.io/PHI2021/Tutorials/nhgis0002_ts_nominal_county_codebook.txt)
-   * IPUMSUSA | IPUMSUSA.Rmd | [Extract codebook xml](https://jlgodwin.github.io/PHI2021/Tutorials/usa_00001.xml) | [Extract codebook printed to pdf](https://jlgodwin.github.io/PHI2021/Tutorials/usa_00001.pdf) 
+   * IPUMSUSA | [IPUMSUSA.Rmd](https://jlgodwin.github.io/PHI2021/Tutorials/IPUMSUSA.Rmd) | [Extract codebook xml](https://jlgodwin.github.io/PHI2021/Tutorials/usa_00001.xml) | [Extract codebook printed to pdf](https://jlgodwin.github.io/PHI2021/Tutorials/usa_00001.pdf) 
+   * [tract_to_HRA](https://jlgodwin.github.io/PHI2021/Tutorials/tract_to_HRA.html) | [tract_to_HRA.Rmd](https://jlgodwin.github.io/PHI2021/Tutorials/tract_to_HRA.Rmd) | [tract_to_hra.rda](https://jlgodwin.github.io/PHI2021/Data/tracts_to_hra.rda)
 
 # Statistics
 
