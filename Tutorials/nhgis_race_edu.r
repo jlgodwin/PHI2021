@@ -119,8 +119,8 @@ for(year in years){
   year.idx <- match(year, years)
   hs_white_estimate[[as.character(year)]] <- raw_inc_df[[year.idx]] %>% 
     left_join(table_C15002A, by = c("variable" = "name"))%>%
-    filter(less_than_hs == 1) %>%
-    group_by(GEOID, less_than_hs) %>% 
+    filter(hs_grad == 1) %>%
+    group_by(GEOID, hs_grad) %>% 
     summarize(
       estimate = sum(estimate),
       moe = sum(moe)
@@ -143,8 +143,8 @@ for(year in years){
   year.idx <- match(year, years)
   hs_white_CoV[[as.character(year)]] <- raw_inc_df[[year.idx]] %>% 
     left_join(table_C15002A, by = c("variable" = "name"))%>%
-    filter(less_than_hs == 1) %>%
-    group_by(GEOID, less_than_hs) %>% 
+    filter(hs_grad == 1) %>%
+    group_by(GEOID, hs_grad) %>% 
     summarize(
       estimate = sum(estimate),
       moe = sum(moe))%>%
@@ -170,95 +170,128 @@ dev.off()
 
 ####################
 ### Part 1C: White Some College/AA edu attainment data
-## create White some college/AA dataset for plots
-White_some_college_AA <- tract_edu_white_lab %>%
-  filter(some_college == 1) %>%
-  group_by(GEOID, some_college) %>% 
-  summarize(
-    estimate = sum(estimate),
-    moe = sum(moe)
-  ) %>%
-  data.table()
+SC_AA_white_estimate <- list()
+for(year in years){
+  year.idx <- match(year, years)
+  SC_AA_white_estimate[[as.character(year)]] <- raw_inc_df[[year.idx]] %>% 
+    left_join(table_C15002A, by = c("variable" = "name"))%>%
+    filter(some_college == 1) %>%
+    group_by(GEOID, some_college) %>% 
+    summarize(
+      estimate = sum(estimate),
+      moe = sum(moe)
+    ) %>%
+    data.table()%>% 
+    mutate(SE = moe/qnorm(.95)) %>% 
+    mutate(CoV = SE/estimate) %>% 
+    st_as_sf() %>%
+    ggplot() +
+    geom_sf(aes(fill = estimate)) +
+    labs(title = "Some College or Associate's Degree, White",
+         subtitle = "Estimate Value") +
+    scale_fill_viridis_c() + 
+    theme_void()
+}
+##create White less than HS educational attainment plot for CoV - NEED TO FIX
+SC_AA_white_CoV <- list()
+for(year in years){
+  year.idx <- match(year, years)
+  SC_AA_white_CoV[[as.character(year)]] <- raw_inc_df[[year.idx]] %>% 
+    left_join(table_C15002A, by = c("variable" = "name"))%>%
+    filter(some_college == 1) %>%
+    group_by(GEOID, some_college) %>% 
+    summarize(
+      estimate = sum(estimate),
+      moe = sum(moe))%>%
+    data.table()%>% 
+    mutate(SE = moe/qnorm(.95)) %>% 
+    mutate(CoV = SE/estimate) %>% 
+    st_as_sf() %>%
+    ggplot() +
+    geom_sf(aes(fill = CoV)) +
+    labs(subtitle = "Coefficient of variation",
+         fill = "CoV") +
+    scale_fill_viridis_c() + 
+    theme_void()
+}
 
-## calculate SE and CoV 
-White_some_college_AA<- White_some_college_AA %>% 
-  mutate(SE = moe/qnorm(.95)) %>% 
-  mutate(CoV = SE/estimate)
-
-##create White some college/AA educational attainment plot for estimate only - fix labels
-white_SC_AA_estimate_plot <- White_some_college_AA %>%
-  st_as_sf() %>%
-  ggplot() +
-  geom_sf(aes(fill = estimate), size = .25) +
-  facet_wrap(vars(some_college)) +
-  labs(title = "Some College or Associate's Degree, White Alone",
-       subtitle = "Using Estimate Value",
-       fill = "Estimate") +
-  scale_fill_viridis_c() + 
-  theme_void()
-
-##create White some college/AA educational attainment plot for CoV - fix labels
-white_SC_AA_CoV_plot <- White_some_college_AA %>% 
-  st_as_sf() %>%
-  ggplot() +
-  geom_sf(aes(fill = CoV), size = .25) +
-  labs(title = "Some College or Associate's Degree, White Alone",
-       subtitle = "Coefficient of variation",
-       fill = "Coefficient of variation") +
-  facet_wrap(vars(some_college)) +
-  scale_fill_viridis_c() + 
-  theme_void()
+pdf('some_college_AA_white_over_time.pdf', 
+    width = 8, height = 4)
+for(year in years){
+  grid.arrange(SC_AA_white_estimate[[as.character(year)]], 
+               SC_AA_white_CoV[[as.character(year)]], ncol = 2)
+}
+dev.off()
 
 ############################
 ### PART 1D: White Bachelor's Degree or Higher Data
-#### create White Bachelor's + dataset
-white_uni_degree <- tract_edu_white_lab %>%
-  filter(college_grad == 1) %>%
-  group_by(GEOID, college_grad) %>% 
-  summarize(
-    estimate = sum(estimate),
-    moe = sum(moe)
-  ) %>%
-  data.table()
+uni_white_estimate <- list()
+for(year in years){
+  year.idx <- match(year, years)
+  uni_white_estimate[[as.character(year)]] <- raw_inc_df[[year.idx]] %>% 
+    left_join(table_C15002A, by = c("variable" = "name"))%>%
+    filter(college_grad == 1) %>%
+    group_by(GEOID, college_grad) %>% 
+    summarize(
+      estimate = sum(estimate),
+      moe = sum(moe)
+    ) %>%
+    data.table()%>% 
+    mutate(SE = moe/qnorm(.95)) %>% 
+    mutate(CoV = SE/estimate) %>% 
+    st_as_sf() %>%
+    ggplot() +
+    geom_sf(aes(fill = estimate)) +
+    labs(title = "Bachelor's Degree or Higher, White",
+         subtitle = "Estimate Value") +
+    scale_fill_viridis_c() + 
+    theme_void()
+}
+##create White less than HS educational attainment plot for CoV - NEED TO FIX
+uni_white_CoV <- list()
+for(year in years){
+  year.idx <- match(year, years)
+  uni_white_CoV[[as.character(year)]] <- raw_inc_df[[year.idx]] %>% 
+    left_join(table_C15002A, by = c("variable" = "name"))%>%
+    filter(college_grad == 1) %>%
+    group_by(GEOID, college_grad) %>% 
+    summarize(
+      estimate = sum(estimate),
+      moe = sum(moe))%>%
+    data.table()%>% 
+    mutate(SE = moe/qnorm(.95)) %>% 
+    mutate(CoV = SE/estimate) %>% 
+    st_as_sf() %>%
+    ggplot() +
+    geom_sf(aes(fill = CoV)) +
+    labs(subtitle = "Coefficient of variation",
+         fill = "CoV") +
+    scale_fill_viridis_c() + 
+    theme_void()
+}
 
-## calculate SE and CoV 
-white_uni_degree<- white_uni_degree %>% 
-  mutate(SE = moe/qnorm(.95)) %>% 
-  mutate(CoV = SE/estimate)
+pdf('college_grad_white_over_time.pdf', 
+    width = 8, height = 4)
+for(year in years){
+  grid.arrange(uni_white_estimate[[as.character(year)]], 
+               uni_white_CoV[[as.character(year)]], ncol = 2)
+}
+dev.off()
 
-##create White bachelor's or higher educational attainment plot for estimate only - fix labels
-white_uni_estimate_plot <- white_uni_degree %>%
-  st_as_sf() %>%
-  ggplot() +
-  geom_sf(aes(fill = estimate), size = .25) +
-  labs(title = "Bachelor's Degree or Higher, White Alone",
-       subtitle = "Using Estimate Value",
-       fill = "Estimate") +
-  facet_wrap(vars(college_grad)) +
-  scale_fill_viridis_c() + 
-  theme_void()
-
-##create White bachelor's or higher educational attainment plot for CoV - fix labels
-white_uni_CoV_plot <- white_uni_degree %>% 
-  st_as_sf() %>%
-  ggplot() +
-  geom_sf(aes(fill = CoV), size = .25) +
-  labs(title = "Bachelor's Degree or Higher, White Alone",
-       subtitle = "Coefficient of variation",
-       fill = "Coefficient of variation") +
-  facet_wrap(vars(college_grad)) +
-  scale_fill_viridis_c() + 
-  theme_void()
 ##########################################
 ##Part 2:
 # create Black/African American data set/plot
-tract_edu_Black <- get_acs("tract",
-                           table = "C15002B",
-                           year = 2018,
-                           state = "WA",
-                           county = "King",
-                           geometry = TRUE, 
-                           survey = "acs5")
+raw_inc_df <- lapply(years, function(x){
+  get_acs("tract",
+          table = "C15002B",
+          year = x,
+          state = "WA",
+          county = "King",
+          geometry = TRUE, 
+          survey = "acs5",
+          moe = 90,
+          cache_table = TRUE) %>%
+    mutate(Year = x)})
 
 table_C15002B <- var_df %>%
   filter(str_starts(name, "C15002B")) %>%
@@ -272,167 +305,226 @@ table_C15002B$hs_grad <- ifelse(table_C15002B$short_label == "High school gradua
 table_C15002B$some_college <- ifelse(table_C15002B$short_label == "Some college or associate's degree", 1, 0)
 table_C15002B$college_grad <- ifelse(table_C15002B$short_label == "Bachelor's degree or higher", 1, 0)
 
-tract_edu_Black_lab <- tract_edu_Black %>%
-  left_join(table_C15002B, by = c("variable" = "name")) 
-table_C15002B <- var_df %>%
-  filter(str_starts(name, "C15002B")) %>%
-  mutate(short_label = str_split(label, "!!"), 
-         short_label = map_chr(short_label, tail, 1)) %>%
-  dplyr::select(name, short_label)
-
 ######## Part 2A - Black less than HS attainment
-### create Black less than HS dataset 
-Black_less_than_hs <- tract_edu_Black_lab %>%
-  filter(less_than_hs == 1) %>%
-  group_by(GEOID, less_than_hs) %>% 
-  summarize(
-    estimate = sum(estimate),
-    moe = sum(moe)
-  ) %>%
-  data.table()
+less_than_hs_black_estimate <- list()
+for(year in years){
+  year.idx <- match(year, years)
+  less_than_hs_black_estimate[[as.character(year)]] <- raw_inc_df[[year.idx]] %>% 
+    left_join(table_C15002B, by = c("variable" = "name"))%>%
+    filter(less_than_hs == 1) %>%
+    group_by(GEOID, less_than_hs) %>% 
+    summarize(
+      estimate = sum(estimate),
+      moe = sum(moe)
+    ) %>%
+    data.table()%>% 
+    mutate(SE = moe/qnorm(.95)) %>% 
+    mutate(CoV = SE/estimate) %>% 
+    st_as_sf() %>%
+    ggplot() +
+    geom_sf(aes(fill = estimate)) +
+    labs(title = "Less than High School Education, Black",
+         subtitle = "Estimate Value") +
+    scale_fill_viridis_c() + 
+    theme_void()
+}
 
-## calculate SE and CoV 
-Black_less_than_hs<- Black_less_than_hs %>% 
-  mutate(SE = moe/qnorm(.95)) %>% 
-  mutate(CoV = SE/estimate)
+##create White less than HS educational attainment plot for CoV - NEED TO FIX
+less_than_hs_black_CoV <- list()
+for(year in years){
+  year.idx <- match(year, years)
+  less_than_hs_black_CoV[[as.character(year)]] <- raw_inc_df[[year.idx]] %>% 
+    left_join(table_C15002B, by = c("variable" = "name"))%>%
+    filter(less_than_hs == 1) %>%
+    group_by(GEOID, less_than_hs) %>% 
+    summarize(
+      estimate = sum(estimate),
+      moe = sum(moe))%>%
+    data.table()%>% 
+    mutate(SE = moe/qnorm(.95)) %>% 
+    mutate(CoV = SE/estimate) %>% 
+    st_as_sf() %>%
+    ggplot() +
+    geom_sf(aes(fill = CoV)) +
+    labs(subtitle = "Coefficient of variation",
+         fill = "CoV") +
+    scale_fill_viridis_c() + 
+    theme_void()
+}
 
-##create Black less than HS educational attainment plot for estimate only - how do i get 1 to go away?
-Black_less_than_hs_estimate_plot <- Black_less_than_hs %>%
-  st_as_sf() %>%
-  ggplot() +
-  geom_sf(aes(fill = estimate)) +
-  labs(title = "Less than High School Education, Black Alone",
-       subtitle = "Using Estimate Value")+
-  facet_wrap(vars(less_than_hs)) +
-  scale_fill_viridis_c() + 
-  theme_void()
-
-##create Black less than HS educational attainment plot for CoV - fix labels
-Black_less_than_hs_CoV_plot <- Black_less_than_hs %>% 
-  st_as_sf() %>%
-  ggplot() +
-  geom_sf(aes(fill = CoV)) +
-  labs(title = "Less than High School Education, Black Alone",
-       subtitle = "Coefficient of variation",
-       fill = "Coefficient of variation") +
-  facet_wrap(vars(less_than_hs)) +
-  scale_fill_viridis_c() + 
-  theme_void()
+pdf('Less_than_hs_black_over_time.pdf', 
+    width = 8, height = 4)
+for(year in years){
+  grid.arrange(less_than_hs_black_estimate[[as.character(year)]], 
+               less_than_hs_black_CoV[[as.character(year)]], ncol = 2)
+}
+dev.off()
 
 ###### Part 2B: Black HS grad/equivalent attainment 
-Black_hs <- tract_edu_Black_lab %>%
-  filter(hs_grad == 1) %>%
-  group_by(GEOID, hs_grad) %>% 
-  summarize(
-    estimate = sum(estimate),
-    moe = sum(moe)
-  ) %>%
-  data.table()
+hs_black_estimate <- list()
+for(year in years){
+  year.idx <- match(year, years)
+  hs_black_estimate[[as.character(year)]] <- raw_inc_df[[year.idx]] %>% 
+    left_join(table_C15002B, by = c("variable" = "name"))%>%
+    filter(hs_grad == 1) %>%
+    group_by(GEOID, hs_grad) %>% 
+    summarize(
+      estimate = sum(estimate),
+      moe = sum(moe)
+    ) %>%
+    data.table()%>% 
+    mutate(SE = moe/qnorm(.95)) %>% 
+    mutate(CoV = SE/estimate) %>% 
+    st_as_sf() %>%
+    ggplot() +
+    geom_sf(aes(fill = estimate)) +
+    labs(title = "High School Graduate or Equivalent, Black",
+         subtitle = "Estimate Value") +
+    scale_fill_viridis_c() + 
+    theme_void()
+}
 
-## calculate SE and CoV 
-Black_hs<- Black_hs %>% 
-  mutate(SE = moe/qnorm(.95)) %>% 
-  mutate(CoV = SE/estimate)
+##create Black less than HS educational attainment plot for CoV - NEED TO FIX
+hs_black_CoV <- list()
+for(year in years){
+  year.idx <- match(year, years)
+  hs_black_CoV[[as.character(year)]] <- raw_inc_df[[year.idx]] %>% 
+    left_join(table_C15002B, by = c("variable" = "name"))%>%
+    filter(hs_grad == 1) %>%
+    group_by(GEOID, hs_grad) %>% 
+    summarize(
+      estimate = sum(estimate),
+      moe = sum(moe))%>%
+    data.table()%>% 
+    mutate(SE = moe/qnorm(.95)) %>% 
+    mutate(CoV = SE/estimate) %>% 
+    st_as_sf() %>%
+    ggplot() +
+    geom_sf(aes(fill = CoV)) +
+    labs(subtitle = "Coefficient of variation",
+         fill = "CoV") +
+    scale_fill_viridis_c() + 
+    theme_void()
+}
 
-##create Black HS grad/equiv educational attainment plot for estimate only - how do i get 1 to go away?
-Black_hs_estimate_plot <- Black_hs %>%
-  st_as_sf() %>%
-  ggplot() +
-  geom_sf(aes(fill = estimate)) +
-  labs(title = "High School Graduate or Equivalent Education, Black Alone",
-       subtitle = "Using Estimate Value")+
-  facet_wrap(vars(hs_grad)) +
-  scale_fill_viridis_c() + 
-  theme_void()
-
-##create Black less than HS educational attainment plot for CoV - fix labels
-Black_hs_CoV_plot <- Black_hs %>% 
-  st_as_sf() %>%
-  ggplot() +
-  geom_sf(aes(fill = CoV)) +
-  labs(title = "High School Graduate or Equivalent Education, Black Alone",
-       subtitle = "Coefficient of variation",
-       fill = "Coefficient of variation") +
-  facet_wrap(vars(hs_grad)) +
-  scale_fill_viridis_c() + 
-  theme_void()
+pdf('hs_grad_black_over_time.pdf', 
+    width = 8, height = 4)
+for(year in years){
+  grid.arrange(hs_black_estimate[[as.character(year)]], 
+               hs_black_CoV[[as.character(year)]], ncol = 2)
+}
+dev.off()
 
 ### part 2C - Black some college/AA attainment 
-Black_SC_AA <- tract_edu_Black_lab %>%
-  filter(some_college == 1) %>%
-  group_by(GEOID, some_college) %>% 
-  summarize(
-    estimate = sum(estimate),
-    moe = sum(moe)
-  ) %>%
-  data.table()
+SC_AA_black_estimate <- list()
+for(year in years){
+  year.idx <- match(year, years)
+  SC_AA_black_estimate[[as.character(year)]] <- raw_inc_df[[year.idx]] %>% 
+    left_join(table_C15002B, by = c("variable" = "name"))%>%
+    filter(some_college == 1) %>%
+    group_by(GEOID, some_college) %>% 
+    summarize(
+      estimate = sum(estimate),
+      moe = sum(moe)
+    ) %>%
+    data.table()%>% 
+    mutate(SE = moe/qnorm(.95)) %>% 
+    mutate(CoV = SE/estimate) %>% 
+    st_as_sf() %>%
+    ggplot() +
+    geom_sf(aes(fill = estimate)) +
+    labs(title = "Some College or Associate's Degree, Black",
+         subtitle = "Estimate Value") +
+    scale_fill_viridis_c() + 
+    theme_void()
+}
 
-## calculate SE and CoV 
-Black_SC_AA<- Black_SC_AA %>% 
-  mutate(SE = moe/qnorm(.95)) %>% 
-  mutate(CoV = SE/estimate)
+##create Black less than HS educational attainment plot for CoV - NEED TO FIX
+SC_AA_black_CoV <- list()
+for(year in years){
+  year.idx <- match(year, years)
+  SC_AA_black_CoV[[as.character(year)]] <- raw_inc_df[[year.idx]] %>% 
+    left_join(table_C15002B, by = c("variable" = "name"))%>%
+    filter(some_college == 1) %>%
+    group_by(GEOID, some_college) %>% 
+    summarize(
+      estimate = sum(estimate),
+      moe = sum(moe))%>%
+    data.table()%>% 
+    mutate(SE = moe/qnorm(.95)) %>% 
+    mutate(CoV = SE/estimate) %>% 
+    st_as_sf() %>%
+    ggplot() +
+    geom_sf(aes(fill = CoV)) +
+    labs(subtitle = "Coefficient of variation",
+         fill = "CoV") +
+    scale_fill_viridis_c() + 
+    theme_void()
+}
 
-##create Black some college/AA plot for estimate only - how do i get 1 to go away?
-Black_SC_AA_estimate_plot <- Black_SC_AA %>%
-  st_as_sf() %>%
-  ggplot() +
-  geom_sf(aes(fill = estimate)) +
-  labs(title = "Some College or Associate's Degree, Black Alone",
-       subtitle = "Using Estimate Value")+
-  facet_wrap(vars(some_college)) +
-  scale_fill_viridis_c() + 
-  theme_void()
-
-##create Black some college/AA educational attainment plot for CoV - fix labels
-Black_SC_AA_CoV_plot <- Black_SC_AA %>% 
-  st_as_sf() %>%
-  ggplot() +
-  geom_sf(aes(fill = CoV)) +
-  labs(title = "Some College or Associate's Degree, Black Alone Black Alone",
-       subtitle = "Coefficient of variation",
-       fill = "Coefficient of variation") +
-  facet_wrap(vars(some_college)) +
-  scale_fill_viridis_c() + 
-  theme_void()
+pdf('some_college_black_over_time.pdf', 
+    width = 8, height = 4)
+for(year in years){
+  grid.arrange(SC_AA_black_estimate[[as.character(year)]], 
+               SC_AA_black_CoV[[as.character(year)]], ncol = 2)
+}
+dev.off()
 
 ####Part 2D: Black Bachelor's or higher degree attainment
+uni_black_estimate <- list()
+for(year in years){
+  year.idx <- match(year, years)
+  uni_black_estimate[[as.character(year)]] <- raw_inc_df[[year.idx]] %>% 
+    left_join(table_C15002B, by = c("variable" = "name"))%>%
+    filter(college_grad == 1) %>%
+    group_by(GEOID, college_grad) %>% 
+    summarize(
+      estimate = sum(estimate),
+      moe = sum(moe)
+    ) %>%
+    data.table()%>% 
+    mutate(SE = moe/qnorm(.95)) %>% 
+    mutate(CoV = SE/estimate) %>% 
+    st_as_sf() %>%
+    ggplot() +
+    geom_sf(aes(fill = estimate)) +
+    labs(title = "Bachelor's Degree or Higher, Black",
+         subtitle = "Estimate Value") +
+    scale_fill_viridis_c() + 
+    theme_void()
+}
 
-Black_college_grad <- tract_edu_Black_lab %>%
-  filter(college_grad == 1) %>%
-  group_by(GEOID, college_grad) %>% 
-  summarize(
-    estimate = sum(estimate),
-    moe = sum(moe)
-  ) %>%
-  data.table()
+##create Black less than HS educational attainment plot for CoV - NEED TO FIX
+uni_black_CoV <- list()
+for(year in years){
+  year.idx <- match(year, years)
+  uni_black_CoV[[as.character(year)]] <- raw_inc_df[[year.idx]] %>% 
+    left_join(table_C15002B, by = c("variable" = "name"))%>%
+    filter(college_grad == 1) %>%
+    group_by(GEOID, college_grad) %>% 
+    summarize(
+      estimate = sum(estimate),
+      moe = sum(moe))%>%
+    data.table()%>% 
+    mutate(SE = moe/qnorm(.95)) %>% 
+    mutate(CoV = SE/estimate) %>% 
+    st_as_sf() %>%
+    ggplot() +
+    geom_sf(aes(fill = CoV)) +
+    labs(subtitle = "Coefficient of variation",
+         fill = "CoV") +
+    scale_fill_viridis_c() + 
+    theme_void()
+}
 
-## calculate SE and CoV 
-Black_college_grad<- Black_college_grad %>% 
-  mutate(SE = moe/qnorm(.95)) %>% 
-  mutate(CoV = SE/estimate)
+pdf('college_grad_black_over_time.pdf', 
+    width = 8, height = 4)
+for(year in years){
+  grid.arrange(uni_black_estimate[[as.character(year)]], 
+               uni_black_CoV[[as.character(year)]], ncol = 2)
+}
+dev.off()
 
-##create Black college grad plot for estimate only - how do i get 1 to go away?
-Black_college_grad_estimate_plot <- Black_college_grad %>%
-  st_as_sf() %>%
-  ggplot() +
-  geom_sf(aes(fill = estimate)) +
-  labs(title = "Bachelor's Degree or Higher, Black Alone",
-       subtitle = "Using Estimate Value")+
-  facet_wrap(vars(college_grad)) +
-  scale_fill_viridis_c() + 
-  theme_void()
-
-##create Black college grad educational attainment plot for CoV - fix labels
-Black_college_grad_CoV_plot <- Black_college_grad %>% 
-  st_as_sf() %>%
-  ggplot() +
-  geom_sf(aes(fill = CoV)) +
-  labs(title = "Bachelor's Degree or Higher, Black Alone",
-       subtitle = "Coefficient of variation",
-       fill = "Coefficient of variation") +
-  facet_wrap(vars(college_grad)) +
-  scale_fill_viridis_c() + 
-  theme_void()
 
 ####################### PART 3
 ###create data set and plot for American Indian/Alaska Native edu attainment
