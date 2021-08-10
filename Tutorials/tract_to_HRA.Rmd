@@ -262,9 +262,9 @@ text(center.x.pts,
 ```
 
 
-#`sp::over()` 
+# Assign tracts to HRAs: `sp::over()` 
 
-```{r over}
+```{r over, message=FALSE, warning=FALSE}
 vignette("over")
 
 kc_tracts_poly$acs5_2009 <- spTransform(kc_tracts_poly$acs5_2009,
@@ -362,7 +362,7 @@ for(year in years){
 save(tracts_to_hra, file = '../Data/tracts_to_hra.rda')
 ```
 
-## An example: HRA Population
+# An example: HRA Population
 
 ```{r pop}
 ## How to load a .rda
@@ -370,10 +370,17 @@ save(tracts_to_hra, file = '../Data/tracts_to_hra.rda')
 
 pop_by_hra <- list()
 for(year in years){
+  
+  
   pop_by_hra[[paste0("acs5_", year)]] <- 
+    ## take tracts_to_hra file and left_join() 
+    ## my variable from the cnesus
     tracts_to_hra[[paste0("acs5_", year)]] %>%
     left_join(kc_tracts_poly[[paste0("acs5_", year)]]@data %>%
                 dplyr::select(GEOID, estimate, moe)) %>%
+    
+    ## group_by() HRA and get a weighted sum
+    ## of tract contributions to HRA
     group_by(FID_HRA_20) %>%
     summarise(estimate = sum(prop.area*estimate),
               moe = sum(prop.area*moe)) %>%
