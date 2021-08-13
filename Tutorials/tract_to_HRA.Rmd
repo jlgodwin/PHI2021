@@ -387,10 +387,10 @@ for(year in years){
     mutate(SE = moe/qnorm(.95),
            CoV = SE/estimate)
   ## Make sure data frames follow ordering of shapefile
-     reorder.idx <- match(pop_by_hra[[paste0("acs5_", year)]]$FID_HRA_20, 
-                                               hra@data$FID_HRA_20)
-    pop_by_hra[[paste0("acs5_", year)]] <- 
-      pop_by_hra[[paste0("acs5_", year)]][reorder.idx,]
+  reorder.idx <- match(pop_by_hra[[paste0("acs5_", year)]]$FID_HRA_20, 
+                       hra@data$FID_HRA_20)
+  pop_by_hra[[paste0("acs5_", year)]] <- 
+    pop_by_hra[[paste0("acs5_", year)]][reorder.idx,]
   
   kc_tracts_poly[[paste0("acs5_", year)]]@data <-
     kc_tracts_poly[[paste0("acs5_", year)]]@data %>%
@@ -423,13 +423,13 @@ pop.int.tract <- classIntervals(pop.tract.vector$estimate,
                                 n = 9)
 
 pop.int.hra <- classIntervals(pop_by_hra$acs5_2019$estimate,
-                             style = 'fixed',
-                             fixedBreaks = c(0, 10000,
-                                             15000, 20000,
-                                             50000, 75000,
-                                             100000, 15000,
-                                             200000, 250000),
-                             n = 9)
+                              style = 'fixed',
+                              fixedBreaks = c(0, 10000,
+                                              15000, 20000,
+                                              50000, 75000,
+                                              100000, 15000,
+                                              200000, 250000),
+                              n = 9)
 
 ## Get color based on RColorBrwere palette for 
 ## each area
@@ -456,3 +456,214 @@ legend('bottomleft',
        fill = pop.pal,
        legend = names(attr(pop.col.hra, 'table')))
 ```
+
+## Population by age x time
+
+```{r pop_by_age}
+
+var_df <- load_variables(2019, "acs5", cache = TRUE)
+var_df <- var_df[grepl("B01001", var_df$name),]
+lab_splits <- strsplit(var_df$label, "!!")
+age_elems <- unlist(lapply(lab_splits, function(x){
+  if(length(x) == 4){
+    x[4]
+  }else if(length(x) == 3){
+    x[3]
+  }else{
+    x[2]
+  }
+})
+)
+
+var_df$age_short <- gsub(":", "", age_elems)
+table(var_df$age_short)
+
+age_elems <- strsplit(age_elems, " to ")
+var_df$age_upper <- unlist(lapply(age_elems, function(x){
+  if(length(x) == 2){
+    gsub(" years", "", x[2])
+  }else if(x == "Under 5 years"){
+    "4"
+  }else{
+    NA
+  }
+}))
+
+var_df$age_lower <- unlist(lapply(age_elems, function(x){
+  if(length(x) == 2){
+    gsub(" years", "", x[1])
+  }else if(x == "Under 5 years"){
+    "0"
+  }else if(x == "85 years and over"){
+    "85"
+  }else{
+    NA
+  }
+}))
+
+head(var_df)
+age_vars <- var_df %>%
+  filter(concept == "SEX BY AGE") %>%
+  drop_na(age_lower) %>%
+  as.data.frame()
+
+ageslow <- unique(age_vars$age_lower)
+
+
+pop_by_age_tracts <- list()
+pop_by_age_hra <- list()
+for(yr in years){
+  pop_by_age_tracts[[paste0("acs5_",yr)]] <- get_acs("tract",
+                                                     table = "B01001",
+                                                     geometry = FALSE,
+                                                     year = yr,
+                                                     survey = "acs5",
+                                                     state = "WA",
+                                                     county = "King",
+                                                     cache_table = TRUE) %>%
+    left_join(age_vars %>%
+                dplyr::select(name, age_short,
+                              age_upper, age_lower),
+              by = c("variable" = "name")) %>%
+    drop_na(age_short) %>%
+    mutate(SE = moe/qnorm(.95)) %>%
+    
+    ## Sum over sexes
+    group_by(GEOID, age_short) %>%
+    summarise(estimate = sum(estimate),
+              SE = sum(SE),
+              CoV = SE/estimate,
+              age_lower = unique(age_lower))
+  
+  pop_by_age_hra[[paste0("acs5_",yr)]] <- tracts_to_hra[[paste0("acs5_", yr)]] %>%
+    left_join(pop_by_age_tracts[[paste0("acs5_",yr)]]) %>%
+    
+    ## group_by() HRA and get a weighted sum
+    ## of tract contributions to HRA
+    group_by(FID_HRA_20, age_short) %>%
+    summarise(estimate = sum(prop.area*estimate),
+              SE = sum(prop.area*SE)) %>%
+    mutate(CoV = SE/estimate)
+}
+```
+
+### Plots in a loop 
+
+```{r pop_by_age_plot}
+lapply(pop_by_age_tracts, function(x){
+  range(x$estimate)
+  range(x$CoV)
+})
+
+lapply(pop_by_age_hra, function(x){
+  range(x$estimate)
+  range(x$CoV)
+})
+
+## Pick R Color Brewer palette
+pop.pal <- brewer.pal(9, "Blues")
+cov.pal <- brewer.pal(9, "Reds")
+## Get one estimate for each tract (remember this data frame)
+## Is now longer bc it is one row per tract/hra intersection
+
+breaks_by_age <- list()
+cov_by_age <- list()
+for(yr in years){
+  for(agelow in as.numeric(ageslow)){
+    agelabel <- unique(age_vars$age_short[age_vars$age_lower == agelow])
+    pop.tract.vector <- pop_by_age_tracts[[paste0("acs5_", yr)]] %>%
+      filter(age_lower == agelow) %>%
+      mutate(CoV = if_else(is.finite(CoV),
+                           CoV, 100)) %>%
+      as.data.frame()
+    
+    
+    pop.hra.vector <- pop_by_age_hra[[paste0("acs5_", yr)]] %>%
+      filter(age_short == agelabel) %>%
+      as.data.frame() %>% unique()
+    
+    
+    ## assign each population to bin defined in fixed breaks
+    if(match(yr, years) == 1){
+      pop.int.tract <- classIntervals(c(pop.tract.vector$estimate,
+                                        pop.hra.vector$estimate) + 50,
+                                      style = 'jenks', n = 9)
+      cov.int.tract <- classIntervals(pop.tract.vector$CoV,
+                                      style = 'jenks', n = 9)
+      
+      breaks_by_age[[unique(pop.hra.vector$age_short)]] <- c(0, pop.int.tract$brks[-1])
+      cov_by_age[[unique(pop.hra.vector$age_short)]] <- round(c(0, cov.int.tract$brks[-1]), 2)
+    }
+    pop.int.tract <- classIntervals(pop.tract.vector$estimate,
+                                    style = 'fixed',
+                                    fixedBreaks = breaks_by_age[[unique(pop.hra.vector$age_short)]],
+                                    n = 9)
+    cov.int.tract <- classIntervals(pop.tract.vector$CoV,
+                                    style = 'fixed',
+                                    fixedBreaks = cov_by_age[[unique(pop.hra.vector$age_short)]],
+                                    n = 9)
+    pop.int.hra <- classIntervals(pop.hra.vector$estimate,
+                                  style = 'fixed',
+                                  fixedBreaks = breaks_by_age[[unique(pop.hra.vector$age_short)]],
+                                  n = 9)
+    cov.int.hra <- classIntervals(pop.hra.vector$CoV,
+                                  style = 'fixed',
+                                  fixedBreaks = cov_by_age[[unique(pop.hra.vector$age_short)]],
+                                  n = 9)
+    
+    
+    ## Get color based on RColorBrwere palette for 
+    ## each area
+    pop.col.tract <- findColours(pop.int.tract, pop.pal)
+    pop.col.hra <- findColours(pop.int.hra, pop.pal)
+    cov.col.tract <- findColours(cov.int.tract, cov.pal)
+    cov.col.hra <- findColours(cov.int.hra, cov.pal)
+    
+    ## Plot
+    pdf(paste0("../PopPlots/ACS5_",
+               yr, "_age", agelow,
+               ".pdf"),
+        height = 8, width = 8)
+    par(mfrow = c(2,2),
+        mar = c(0,0,2,0) + 0.1,
+        oma = c(0,0,0,0))
+    
+    plot(kc_tracts_poly[[paste0("acs5_",yr)]],
+         col = pop.col.tract,
+         border = 'grey28', lwd = .25,
+         main = "Population")
+    plot(hra,
+         col = pop.col.hra,
+         border = 'grey88', lwd = .25)
+        
+    legend('bottomleft',
+           ncol = 3,
+           bty = 'n',
+           cex = 0.7,
+           border = FALSE,
+           fill = pop.pal,
+           legend = names(attr(pop.col.hra, 'table')))
+    plot(kc_tracts_poly[[paste0("acs5_",yr)]],
+         col = cov.col.tract,
+         main = "Coefficient of Variation",
+         border = 'grey28', lwd = .25)
+    
+    plot(hra,
+         col = cov.col.hra,
+         border = 'grey88', lwd = .25)
+    
+    
+    legend('bottomleft',
+           ncol = 3,
+           bty = 'n',
+           cex = 0.7,
+           border = FALSE,
+           fill = cov.pal,
+           legend = names(attr(cov.col.hra, 'table')))
+    dev.off()
+  }
+}
+
+```
+
+
