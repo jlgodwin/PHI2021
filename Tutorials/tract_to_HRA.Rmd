@@ -496,6 +496,12 @@ var_df$age_lower <- unlist(lapply(age_elems, function(x){
     "0"
   }else if(x == "85 years and over"){
     "85"
+  }else if(x == "18 and 19 years"){
+    "18"
+  }else if(x == "20 years"){
+    "20"
+  }else if(x == "21 years"){
+    "21"
   }else{
     NA
   }
@@ -505,6 +511,23 @@ head(var_df)
 age_vars <- var_df %>%
   filter(concept == "SEX BY AGE") %>%
   drop_na(age_lower) %>%
+  mutate(old.idx = ifelse(age_lower >= 65, 1, 0),
+         child.idx = ifelse(age_lower < 15, 1, 0),
+         teen.idx = ifelse(age_lower >= 15 &
+                             age_lower < 20, 1, 0),
+         twenties.idx = ifelse(age_lower >= 20 &
+                                 age_lower < 30, 1, 0),
+         thirties.idx = ifelse(age_lower >= 30 &
+                                 age_lower < 40, 1, 0),
+         forties.idx = ifelse(age_lower >= 40 &
+                                 age_lower < 50, 1, 0),
+         fifties.idx = ifelse(age_lower >= 50 &
+                                 age_lower < 60, 1, 0),
+         sixties.idx = ifelse(age_lower >= 60 &
+                                 age_lower < 70, 1, 0),
+         seventies.idx = ifelse(age_lower >= 70 &
+                                 age_lower < 80, 1, 0),
+         eightiesup.idx = ifelse(age_lower >= 80, 1, 0)) %>%
   as.data.frame()
 
 ageslow <- unique(age_vars$age_lower)
@@ -630,7 +653,7 @@ for(yr in years){
     
     plot(kc_tracts_poly[[paste0("acs5_",yr)]],
          col = pop.col.tract,
-         border = 'grey28', lwd = .25,
+         border = 'grey48', lwd = .25,
          main = "Population")
     plot(hra,
          col = pop.col.hra,
@@ -646,11 +669,11 @@ for(yr in years){
     plot(kc_tracts_poly[[paste0("acs5_",yr)]],
          col = cov.col.tract,
          main = "Coefficient of Variation",
-         border = 'grey28', lwd = .25)
+         border = 'grey88', lwd = .25)
     
     plot(hra,
          col = cov.col.hra,
-         border = 'grey88', lwd = .25)
+         border = 'grey48', lwd = .25)
     
     
     legend('bottomleft',

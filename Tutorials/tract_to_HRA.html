@@ -926,6 +926,12 @@ var_df$age_lower &lt;- unlist(lapply(age_elems, function(x){
     &quot;0&quot;
   }else if(x == &quot;85 years and over&quot;){
     &quot;85&quot;
+  }else if(x == &quot;18 and 19 years&quot;){
+    &quot;18&quot;
+  }else if(x == &quot;20 years&quot;){
+    &quot;20&quot;
+  }else if(x == &quot;21 years&quot;){
+    &quot;21&quot;
   }else{
     NA
   }
@@ -944,6 +950,23 @@ head(var_df)</code></pre>
 <pre class="r"><code>age_vars &lt;- var_df %&gt;%
   filter(concept == &quot;SEX BY AGE&quot;) %&gt;%
   drop_na(age_lower) %&gt;%
+  mutate(old.idx = ifelse(age_lower &gt;= 65, 1, 0),
+         child.idx = ifelse(age_lower &lt; 15, 1, 0),
+         teen.idx = ifelse(age_lower &gt;= 15 &amp;
+                             age_lower &lt; 20, 1, 0),
+         twenties.idx = ifelse(age_lower &gt;= 20 &amp;
+                                 age_lower &lt; 30, 1, 0),
+         thirties.idx = ifelse(age_lower &gt;= 30 &amp;
+                                 age_lower &lt; 40, 1, 0),
+         forties.idx = ifelse(age_lower &gt;= 40 &amp;
+                                 age_lower &lt; 50, 1, 0),
+         fifties.idx = ifelse(age_lower &gt;= 50 &amp;
+                                 age_lower &lt; 60, 1, 0),
+         sixties.idx = ifelse(age_lower &gt;= 60 &amp;
+                                 age_lower &lt; 70, 1, 0),
+         seventies.idx = ifelse(age_lower &gt;= 70 &amp;
+                                 age_lower &lt; 80, 1, 0),
+         eightiesup.idx = ifelse(age_lower &gt;= 80, 1, 0)) %&gt;%
   as.data.frame()
 
 ageslow &lt;- unique(age_vars$age_lower)
@@ -1018,13 +1041,13 @@ for(yr in years){
   range(x$CoV)
 })</code></pre>
 <pre><code>## $acs5_2019
-## [1] 0.1704341 0.9284575
+## [1] 0.1631001 1.1818949
 ## 
 ## $acs5_2014
-## [1] 0.2047576 0.7333077
+## [1] 0.2047576 1.2071115
 ## 
 ## $acs5_2009
-## [1] 0.1833654 4.9515794</code></pre>
+## [1]  0.1771332 14.8275223</code></pre>
 <pre class="r"><code>## Pick R Color Brewer palette
 pop.pal &lt;- brewer.pal(9, &quot;Blues&quot;)
 cov.pal &lt;- brewer.pal(9, &quot;Reds&quot;)
@@ -1095,7 +1118,7 @@ for(yr in years){
     
     plot(kc_tracts_poly[[paste0(&quot;acs5_&quot;,yr)]],
          col = pop.col.tract,
-         border = &#39;grey28&#39;, lwd = .25,
+         border = &#39;grey48&#39;, lwd = .25,
          main = &quot;Population&quot;)
     plot(hra,
          col = pop.col.hra,
@@ -1111,11 +1134,11 @@ for(yr in years){
     plot(kc_tracts_poly[[paste0(&quot;acs5_&quot;,yr)]],
          col = cov.col.tract,
          main = &quot;Coefficient of Variation&quot;,
-         border = &#39;grey28&#39;, lwd = .25)
+         border = &#39;grey88&#39;, lwd = .25)
     
     plot(hra,
          col = cov.col.hra,
-         border = &#39;grey88&#39;, lwd = .25)
+         border = &#39;grey48&#39;, lwd = .25)
     
     
     legend(&#39;bottomleft&#39;,
@@ -1129,6 +1152,22 @@ for(yr in years){
   }
 }</code></pre>
 <pre><code>## Warning in classIntervals(pop.hra.vector$estimate, style = &quot;fixed&quot;, fixedBreaks
+## = breaks_by_age[[unique(pop.hra.vector$age_short)]], : variable range greater
+## than fixedBreaks
+
+## Warning in classIntervals(pop.hra.vector$estimate, style = &quot;fixed&quot;, fixedBreaks
+## = breaks_by_age[[unique(pop.hra.vector$age_short)]], : variable range greater
+## than fixedBreaks
+
+## Warning in classIntervals(pop.hra.vector$estimate, style = &quot;fixed&quot;, fixedBreaks
+## = breaks_by_age[[unique(pop.hra.vector$age_short)]], : variable range greater
+## than fixedBreaks
+
+## Warning in classIntervals(pop.hra.vector$estimate, style = &quot;fixed&quot;, fixedBreaks
+## = breaks_by_age[[unique(pop.hra.vector$age_short)]], : variable range greater
+## than fixedBreaks
+
+## Warning in classIntervals(pop.hra.vector$estimate, style = &quot;fixed&quot;, fixedBreaks
 ## = breaks_by_age[[unique(pop.hra.vector$age_short)]], : variable range greater
 ## than fixedBreaks
 
