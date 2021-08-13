@@ -1,0 +1,692 @@
+---
+title: "More GIS in R: tracts to HRAs"
+author: "Jessica Godwin"
+output: 
+  html_document:
+    number_sections: true
+    toc: true
+---
+
+# Set `knitr` options
+
+```{r setup, include=TRUE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = '~/Dropbox/PHI2021/Github/PHI-2021/Tutorials/')
+if(FALSE){
+  setwd('~/Dropbox/PHI2021/Github/PHI-2021/Tutorials/')
+}
+rm(list = ls())
+```
+
+
+# Libraries
+
+Load necessary libraries:
+
+* `tidycensus`: access census data
+* `tidyr`, `dplyr`: data manipulation
+* `sp`: interfaces with `Spatial*` and `Spatial*DataFrame` objects (base `R` alternative to `sf` package.)
++ `spplot()`, `spTransform()`, `over()`
++ See the `over()` vignette created by the `sp` package authors by running the following chunk.
+* `rgdal`: loads spatial data files
++ `rgdal()`
+* `scales`: plot translucent colors
++ `alpha()`
+* `rgeos`: lots of good functions for using `Spatial*` objects
++ `gCentroid()`
+* `geosphere`: more good functions for using `Spatial*` objects
++ `dist2Line()`
+
+```{r libs}
+#install.packages('sp', dependencies = TRUE)
+
+library(tidycensus)
+library(sf)
+library(tidyr)
+library(dplyr)
+library(sp)
+library(rgdal)
+library(rgeos)
+library(geosphere)
+library(raster)
+library(RColorBrewer)
+library(classInt)
+library(scales) 
+
+
+
+## tidycensus key ####
+source('tidycensus_APIkey.R')
+census_api_key(myKey) 
+
+## tidycensus shapefile cache ####
+options(tigris_use_cache = TRUE)
+```
+
+
+# Load Data
+
+## Get tract shapefiles
+```{r tractcensus}
+
+years <- seq(2019, 2009, -5)
+
+kc_tracts <- list()
+for(yr in years){
+  kc_tracts[[paste0("acs5_",yr)]] <- get_acs("tract",
+                                             table = "B01001",
+                                             geometry = TRUE,
+                                             year = yr,
+                                             survey = "acs5",
+                                             state = "WA",
+                                             county = "King",
+                                             cache_table = TRUE) %>%
+    filter(variable == "B01001_001")
+}
+
+names(kc_tracts)
+```
+
+### Convert to `sp`
+
+First look at object class and coordinate reference system. We need matching coordinate systems and I only know how to overlay polygons with `sp`.
+```{r tract_sp}
+lapply(kc_tracts, class)
+lapply(kc_tracts, st_crs)
+```
+
+Found some weird thing with empty polygons?? that I had to rectify to convert to `sp`
+
+```{r sf_to_sp, fig.height=2.5, fig.width=7.5}
+which(st_is_empty(kc_tracts$acs5_2019))
+kc_tracts$acs5_2019[st_is_empty(kc_tracts$acs5_2019),]
+
+which(st_is_empty(kc_tracts$acs5_2014))
+kc_tracts$acs5_2014[st_is_empty(kc_tracts$acs5_2014),]
+
+## remove it for now??
+kc_tracts_poly <- list()
+
+for(yr in years){
+  tmp <- kc_tracts[[paste0("acs5_",yr)]]
+  tmp <- tmp[!st_is_empty(tmp), ]
+  
+  kc_tracts_poly[[paste0("acs5_", yr)]] <- 
+    tmp %>% st_geometry() %>%
+    as(., "Spatial", )
+}
+
+
+lapply(kc_tracts_poly, class)
+lapply(kc_tracts_poly, proj4string)
+lapply(kc_tracts_poly, slotNames)
+lapply(kc_tracts_poly, length)
+lapply(kc_tracts_poly, bbox)
+
+## add data frame
+for(yr in years){
+  tmp_df <- kc_tracts[[paste0("acs5_", yr)]] %>%
+    as.data.frame() %>%
+    dplyr::select(-geometry)
+  
+  if(yr != 2009){
+    tmp_df <- tmp_df %>%
+      filter(row_number() != n())
+  }
+  tmp_poly <- kc_tracts_poly[[paste0("acs5_", yr)]]
+  row.names(tmp_df) <- names(tmp_poly)
+  tmp_polydf <- SpatialPolygonsDataFrame(tmp_poly,
+                                         tmp_df)
+  kc_tracts_poly[[paste0("acs5_", yr)]] <- tmp_polydf
+}
+```
+
+### Explore tracts across years
+```{r tract_byyr, eval = TRUE, fig.height=2.5, fig.width=7.5}
+par(mfrow = c(1,3),
+    mar = c(0,0,2,0) + 0.1,
+    oma = c(0,0,0,0))
+
+for(yr in years){
+  map_tmp <- kc_tracts_poly[[paste0("acs5_", yr)]]
+  plot(map_tmp,
+       ylim = bbox(map_tmp)[2,] + .3*c(1,-1),
+       axes = FALSE,
+       main = yr)
+}
+```
+
+```{r tract_diff, fig.height=4, fig.width=8}
+# Appears 50 tracts in 2019 have different IDS
+# than 2009. Same in 2014.
+# 2014 and 2019 have same tract GEOIDs
+# Each line tests whether the GEOIDs in the left shapefile
+# are NOT (using the !) contained in the right shapefile
+# sum counts FALSE as 0 and TRUE as 1, i.e. number
+# not contained in the 2009 for the following 2 lines
+sum(!(kc_tracts_poly$acs5_2019$GEOID %in% kc_tracts_poly$acs5_2009$GEOID))
+sum(!(kc_tracts_poly$acs5_2014$GEOID %in% kc_tracts_poly$acs5_2009$GEOID))
+sum(!(kc_tracts_poly$acs5_2019$GEOID %in% kc_tracts_poly$acs5_2014$GEOID))
+
+# Here we see 25 tracts were ADDED to the 373,
+# Maybe that means with info above
+# 25 were split in two?
+# to make 398 total in 2014
+lapply(kc_tracts_poly, nrow)
+nrow(kc_tracts_poly$acs5_2019) -
+  nrow(kc_tracts_poly$acs5_2009)
+
+kc_tracts_poly$acs5_2009$not_the_same <- 
+  !(kc_tracts_poly$acs5_2009$GEOID %in% kc_tracts_poly$acs5_2019$GEOID)
+kc_tracts_poly$acs5_2019$not_the_same <-
+  !(kc_tracts_poly$acs5_2019$GEOID %in% kc_tracts_poly$acs5_2009$GEOID)
+
+head(kc_tracts_poly$acs5_2019@data)
+
+par(mfrow = c(1,2),
+    mar = c(0,0,2,0) + 0.1,
+    oma = c(0,0,0,0))
+plot(kc_tracts_poly$acs5_2019,
+     border = FALSE,
+     col = 'grey88',
+     xlim = bbox(kc_tracts_poly$acs5_2019)[1,] + c(0, -1))
+plot(kc_tracts_poly$acs5_2009[kc_tracts_poly$acs5_2009@data$not_the_same,],
+     border = 'white',
+     col = 'navy',
+     add = TRUE)
+legend('bottomleft',
+       bty = 'n',
+       border = FALSE,
+       horiz = TRUE,
+       fill = c("navy"),
+       legend = c("2009, not 2019"))
+plot(kc_tracts_poly$acs5_2019,
+     border = FALSE,
+     xlim = bbox(kc_tracts_poly$acs5_2019)[1,] + c(0, -1),
+     col = 'grey88')
+plot(kc_tracts_poly$acs5_2019[kc_tracts_poly$acs5_2019@data$not_the_same,],
+     border = 'white',
+     col = 'firebrick',
+     add = TRUE)
+legend('bottomleft',
+       bty = 'n',
+       border = FALSE,
+       horiz = TRUE,
+       fill = c("firebrick"),
+       legend = c("2019, not 2009"))
+
+```
+
+## Load Health Reporting Area files
+
+```{r hraload, fig.height=4, fig.width=8}
+hra <- readOGR(dsn = "../Data",
+               layer = "HRA_2010Block_Clip")
+
+hra <- spTransform(hra,
+                   kc_tracts_poly$acs5_2019@proj4string)
+
+par(mfrow = c(1,2),
+    mar = c(0,0,2,0) + 0.1,
+    oma = c(0,0,0,0))
+plot(kc_tracts_poly$acs5_2019,
+     border = FALSE,
+     xlim = bbox(kc_tracts_poly$acs5_2019)[1,],
+     col = 'grey88')
+plot(kc_tracts_poly$acs5_2019[kc_tracts_poly$acs5_2019@data$not_the_same,],
+     border = 'white',
+     col = 'firebrick',
+     add = TRUE)
+plot(hra,
+     lwd = 0.7,
+     add = TRUE)
+legend('bottomleft',
+       bty = 'n',
+       border = c('black','white'),
+       horiz = TRUE,
+       fill = c('grey88',"firebrick"),
+       legend = c('HRA', "2019, not 2009"))
+center.x.pts <- unlist(lapply(hra@polygons, function(x){
+  x@labpt[1]
+}))
+
+center.y.pts <- unlist(lapply(hra@polygons, function(x){
+  x@labpt[2]
+}))
+plot(hra,
+     lwd = 0.7)
+text(center.x.pts,
+     center.y.pts,
+     cex = .25,
+     labels = hra@data$HRA2010v2_)
+```
+
+
+# Assign tracts to HRAs: `sp::over()` 
+
+```{r over, message=FALSE, warning=FALSE}
+vignette("over")
+
+kc_tracts_poly$acs5_2009 <- spTransform(kc_tracts_poly$acs5_2009,
+                                        kc_tracts_poly$acs5_2019@proj4string)
+
+
+tracts_to_hra <- list()
+
+for(yr in years){
+  yr.idx <- match(yr, years)
+  
+  tracts_to_hra[[paste0("acs5_", yr)]] <-
+    over(kc_tracts_poly[[paste0("acs5_", yr)]],
+         hra, returnList = TRUE)
+  n.tracts <- length(tracts_to_hra[[yr.idx]])
+  nested.idx <- unlist(lapply(tracts_to_hra[[paste0("acs5_", yr)]],
+                              function(x){
+                                nrow(x) == 1
+                              }))
+  kc_tracts_poly[[paste0("acs5_", yr)]]$nested_in_hra <- 0
+  kc_tracts_poly[[paste0("acs5_", yr)]]$nested_in_hra[nested.idx] <- 1
+  
+  for(tract.idx in 1:n.tracts){
+    tracts_to_hra[[yr.idx]][[tract.idx]]$prop.area <- NA
+    tracts_to_hra[[yr.idx]][[tract.idx]]$total.area <- NA
+    tracts_to_hra[[yr.idx]][[tract.idx]]$total.minus.sum <- NA
+    
+    tracts_to_hra[[yr.idx]][[tract.idx]]$tract.idx <- tract.idx
+    if(nested.idx[tract.idx]){
+      tracts_to_hra[[yr.idx]][[tract.idx]]$prop.area <- 1
+      tracts_to_hra[[paste0("acs5_", yr)]][[tract.idx]]$total.sum <-
+        tracts_to_hra[[paste0("acs5_", yr)]][[tract.idx]]$total.area <-
+        area(kc_tracts_poly[[yr.idx]][tract.idx,])
+      
+      tracts_to_hra[[paste0("acs5_", yr)]][[tract.idx]]$total.minus.sum <-
+        (tracts_to_hra[[paste0("acs5_", yr)]][[tract.idx]]$total.area[1] - 
+           sum(tract.areas))/(sum(tract.areas))
+    }else{
+      hras.for.tract <- tracts_to_hra[[paste0("acs5_", yr)]][[tract.idx]]$FID_HRA_20
+      tract.areas <- rep(NA, length(hras.for.tract))
+      for(hra.no in hras.for.tract){
+        hra.idx <- match(hra.no, hras.for.tract)
+        
+        ## Calculate area of intersections
+        tract.areas[hra.idx] <- area(intersect(kc_tracts_poly[[yr.idx]][tract.idx,],
+                                               hra[hra$FID_HRA_20 == hra.no,]))
+      }
+      tracts_to_hra[[paste0("acs5_", yr)]][[tract.idx]]$prop.area <-
+        tract.areas/sum(tract.areas)
+      tracts_to_hra[[paste0("acs5_", yr)]][[tract.idx]]$total.sum <-
+        tract.areas/sum(tract.areas)
+      tracts_to_hra[[paste0("acs5_", yr)]][[tract.idx]]$total.area <-
+        area(kc_tracts_poly[[yr.idx]][tract.idx,])
+      
+      tracts_to_hra[[paste0("acs5_", yr)]][[tract.idx]]$total.minus.sum <-
+        (tracts_to_hra[[paste0("acs5_", yr)]][[tract.idx]]$total.area[1] - 
+           sum(tract.areas))/(sum(tract.areas))
+    }
+  }
+  
+  transform.df <- do.call(rbind.data.frame,
+                          tracts_to_hra[[yr.idx]])
+  
+  transform.df$GEOID <- kc_tracts_poly[[yr.idx]]$GEOID[transform.df$tract.idx]
+  
+  kc_tracts_poly[[yr.idx]]@data <- kc_tracts_poly[[yr.idx]]@data %>%
+    left_join(transform.df %>%
+                dplyr::select(-COUNTY,
+                              -STATE,
+                              -CNTYN,
+                              -CNTY,
+                              -FIPS)) 
+}
+```
+
+## Save data.frames
+```{r save}
+## Need to dig into the few weirdos
+hist(abs(unlist(lapply(tracts_to_hra$acs5_2019, function(x){
+  x$total.minus.sum
+}))),
+main = "",
+xlab = "")
+
+tracts_to_hra <- lapply(tracts_to_hra,
+                        function(x){
+                          do.call(rbind.data.frame,x)
+                        })
+
+for(year in years){
+  list.name <- paste0("acs5_", year)
+  tracts_to_hra[[list.name]]$GEOID <-
+    kc_tracts_poly[[list.name]]@data$GEOID[tracts_to_hra[[list.name]]$tract.idx]
+}
+save(tracts_to_hra, file = '../Data/tracts_to_hra.rda')
+```
+
+# An example: HRA Population
+
+```{r pop}
+## How to load a .rda
+# load('../Data/tracts_to_hra.rda')
+
+pop_by_hra <- list()
+for(year in years){
+  
+  
+  pop_by_hra[[paste0("acs5_", year)]] <- 
+    ## take tracts_to_hra file and left_join() 
+    ## my variable from the cnesus
+    tracts_to_hra[[paste0("acs5_", year)]] %>%
+    left_join(kc_tracts_poly[[paste0("acs5_", year)]]@data %>%
+                dplyr::select(GEOID, estimate, moe)) %>%
+    
+    ## group_by() HRA and get a weighted sum
+    ## of tract contributions to HRA
+    group_by(FID_HRA_20) %>%
+    summarise(estimate = sum(prop.area*estimate),
+              moe = sum(prop.area*moe)) %>%
+    mutate(SE = moe/qnorm(.95),
+           CoV = SE/estimate)
+  ## Make sure data frames follow ordering of shapefile
+  reorder.idx <- match(pop_by_hra[[paste0("acs5_", year)]]$FID_HRA_20, 
+                       hra@data$FID_HRA_20)
+  pop_by_hra[[paste0("acs5_", year)]] <- 
+    pop_by_hra[[paste0("acs5_", year)]][reorder.idx,]
+  
+  kc_tracts_poly[[paste0("acs5_", year)]]@data <-
+    kc_tracts_poly[[paste0("acs5_", year)]]@data %>%
+    mutate(SE = moe/qnorm(.95),
+           CoV = SE/estimate)
+}
+
+lapply(kc_tracts, function(x){
+  range(x$estimate)
+})
+
+lapply(pop_by_hra, function(x){
+  range(x$estimate)
+})
+
+## Pick R Color Brewer palette
+pop.pal <- brewer.pal(9, "Blues")
+## Get one estimate for each tract (remember this data frame)
+## Is now longer bc it is one row per tract/hra intersection
+pop.tract.vector <- unique(kc_tracts_poly$acs5_2019@data[, c("GEOID", "estimate")])
+
+## assign each population to bin defined in fixed breaks
+pop.int.tract <- classIntervals(pop.tract.vector$estimate,
+                                style = 'fixed',
+                                fixedBreaks = c(0, 10000,
+                                                15000, 20000,
+                                                50000, 75000,
+                                                100000, 15000,
+                                                200000, 250000),
+                                n = 9)
+
+pop.int.hra <- classIntervals(pop_by_hra$acs5_2019$estimate,
+                              style = 'fixed',
+                              fixedBreaks = c(0, 10000,
+                                              15000, 20000,
+                                              50000, 75000,
+                                              100000, 15000,
+                                              200000, 250000),
+                              n = 9)
+
+## Get color based on RColorBrwere palette for 
+## each area
+pop.col.tract <- findColours(pop.int.tract, pop.pal)
+pop.col.hra <- findColours(pop.int.hra, pop.pal)
+
+## Plot
+par(mfrow = c(1,2),
+    mar = c(0,0,2,0) + 0.1,
+    oma = c(0,0,0,0))
+
+plot(kc_tracts_poly$acs5_2019,
+     col = pop.col.tract,
+     border = 'grey28', lwd = .25)
+plot(hra,
+     col = pop.col.hra,
+     border = 'grey88', lwd = .25)
+
+legend('bottomleft',
+       ncol = 3,
+       bty = 'n',
+       cex = 0.7,
+       border = FALSE,
+       fill = pop.pal,
+       legend = names(attr(pop.col.hra, 'table')))
+```
+
+## Population by age x time
+
+```{r pop_by_age}
+
+var_df <- load_variables(2019, "acs5", cache = TRUE)
+var_df <- var_df[grepl("B01001", var_df$name),]
+lab_splits <- strsplit(var_df$label, "!!")
+age_elems <- unlist(lapply(lab_splits, function(x){
+  if(length(x) == 4){
+    x[4]
+  }else if(length(x) == 3){
+    x[3]
+  }else{
+    x[2]
+  }
+})
+)
+
+var_df$age_short <- gsub(":", "", age_elems)
+table(var_df$age_short)
+
+age_elems <- strsplit(age_elems, " to ")
+var_df$age_upper <- unlist(lapply(age_elems, function(x){
+  if(length(x) == 2){
+    gsub(" years", "", x[2])
+  }else if(x == "Under 5 years"){
+    "4"
+  }else{
+    NA
+  }
+}))
+
+var_df$age_lower <- unlist(lapply(age_elems, function(x){
+  if(length(x) == 2){
+    gsub(" years", "", x[1])
+  }else if(x == "Under 5 years"){
+    "0"
+  }else if(x == "85 years and over"){
+    "85"
+  }else if(x == "18 and 19 years"){
+    "18"
+  }else if(x == "20 years"){
+    "20"
+  }else if(x == "21 years"){
+    "21"
+  }else{
+    NA
+  }
+}))
+
+head(var_df)
+age_vars <- var_df %>%
+  filter(concept == "SEX BY AGE") %>%
+  drop_na(age_lower) %>%
+  mutate(old.idx = ifelse(age_lower >= 65, 1, 0),
+         child.idx = ifelse(age_lower < 15, 1, 0),
+         teen.idx = ifelse(age_lower >= 15 &
+                             age_lower < 20, 1, 0),
+         twenties.idx = ifelse(age_lower >= 20 &
+                                 age_lower < 30, 1, 0),
+         thirties.idx = ifelse(age_lower >= 30 &
+                                 age_lower < 40, 1, 0),
+         forties.idx = ifelse(age_lower >= 40 &
+                                 age_lower < 50, 1, 0),
+         fifties.idx = ifelse(age_lower >= 50 &
+                                 age_lower < 60, 1, 0),
+         sixties.idx = ifelse(age_lower >= 60 &
+                                 age_lower < 70, 1, 0),
+         seventies.idx = ifelse(age_lower >= 70 &
+                                 age_lower < 80, 1, 0),
+         eightiesup.idx = ifelse(age_lower >= 80, 1, 0)) %>%
+  as.data.frame()
+
+ageslow <- unique(age_vars$age_lower)
+
+
+pop_by_age_tracts <- list()
+pop_by_age_hra <- list()
+for(yr in years){
+  pop_by_age_tracts[[paste0("acs5_",yr)]] <- get_acs("tract",
+                                                     table = "B01001",
+                                                     geometry = FALSE,
+                                                     year = yr,
+                                                     survey = "acs5",
+                                                     state = "WA",
+                                                     county = "King",
+                                                     cache_table = TRUE) %>%
+    left_join(age_vars %>%
+                dplyr::select(name, age_short,
+                              age_upper, age_lower),
+              by = c("variable" = "name")) %>%
+    drop_na(age_short) %>%
+    mutate(SE = moe/qnorm(.95)) %>%
+    
+    ## Sum over sexes
+    group_by(GEOID, age_short) %>%
+    summarise(estimate = sum(estimate),
+              SE = sum(SE),
+              CoV = SE/estimate,
+              age_lower = unique(age_lower))
+  
+  pop_by_age_hra[[paste0("acs5_",yr)]] <- tracts_to_hra[[paste0("acs5_", yr)]] %>%
+    left_join(pop_by_age_tracts[[paste0("acs5_",yr)]]) %>%
+    
+    ## group_by() HRA and get a weighted sum
+    ## of tract contributions to HRA
+    group_by(FID_HRA_20, age_short) %>%
+    summarise(estimate = sum(prop.area*estimate),
+              SE = sum(prop.area*SE)) %>%
+    mutate(CoV = SE/estimate)
+}
+```
+
+### Plots in a loop 
+
+```{r pop_by_age_plot}
+lapply(pop_by_age_tracts, function(x){
+  range(x$estimate)
+  range(x$CoV)
+})
+
+lapply(pop_by_age_hra, function(x){
+  range(x$estimate)
+  range(x$CoV)
+})
+
+## Pick R Color Brewer palette
+pop.pal <- brewer.pal(9, "Blues")
+cov.pal <- brewer.pal(9, "Reds")
+## Get one estimate for each tract (remember this data frame)
+## Is now longer bc it is one row per tract/hra intersection
+
+breaks_by_age <- list()
+cov_by_age <- list()
+for(yr in years){
+  for(agelow in as.numeric(ageslow)){
+    agelabel <- unique(age_vars$age_short[age_vars$age_lower == agelow])
+    pop.tract.vector <- pop_by_age_tracts[[paste0("acs5_", yr)]] %>%
+      filter(age_lower == agelow) %>%
+      mutate(CoV = if_else(is.finite(CoV),
+                           CoV, 100)) %>%
+      as.data.frame()
+    
+    
+    pop.hra.vector <- pop_by_age_hra[[paste0("acs5_", yr)]] %>%
+      filter(age_short == agelabel) %>%
+      as.data.frame() %>% unique()
+    
+    
+    ## assign each population to bin defined in fixed breaks
+    if(match(yr, years) == 1){
+      pop.int.tract <- classIntervals(c(pop.tract.vector$estimate,
+                                        pop.hra.vector$estimate) + 50,
+                                      style = 'jenks', n = 9)
+      cov.int.tract <- classIntervals(pop.tract.vector$CoV,
+                                      style = 'jenks', n = 9)
+      
+      breaks_by_age[[unique(pop.hra.vector$age_short)]] <- c(0, pop.int.tract$brks[-1])
+      cov_by_age[[unique(pop.hra.vector$age_short)]] <- round(c(0, cov.int.tract$brks[-1]), 2)
+    }
+    pop.int.tract <- classIntervals(pop.tract.vector$estimate,
+                                    style = 'fixed',
+                                    fixedBreaks = breaks_by_age[[unique(pop.hra.vector$age_short)]],
+                                    n = 9)
+    cov.int.tract <- classIntervals(pop.tract.vector$CoV,
+                                    style = 'fixed',
+                                    fixedBreaks = cov_by_age[[unique(pop.hra.vector$age_short)]],
+                                    n = 9)
+    pop.int.hra <- classIntervals(pop.hra.vector$estimate,
+                                  style = 'fixed',
+                                  fixedBreaks = breaks_by_age[[unique(pop.hra.vector$age_short)]],
+                                  n = 9)
+    cov.int.hra <- classIntervals(pop.hra.vector$CoV,
+                                  style = 'fixed',
+                                  fixedBreaks = cov_by_age[[unique(pop.hra.vector$age_short)]],
+                                  n = 9)
+    
+    
+    ## Get color based on RColorBrwere palette for 
+    ## each area
+    pop.col.tract <- findColours(pop.int.tract, pop.pal)
+    pop.col.hra <- findColours(pop.int.hra, pop.pal)
+    cov.col.tract <- findColours(cov.int.tract, cov.pal)
+    cov.col.hra <- findColours(cov.int.hra, cov.pal)
+    
+    ## Plot
+    pdf(paste0("../PopPlots/ACS5_",
+               yr, "_age", agelow,
+               ".pdf"),
+        height = 8, width = 8)
+    par(mfrow = c(2,2),
+        mar = c(0,0,2,0) + 0.1,
+        oma = c(0,0,0,0))
+    
+    plot(kc_tracts_poly[[paste0("acs5_",yr)]],
+         col = pop.col.tract,
+         border = 'grey48', lwd = .25,
+         main = "Population")
+    plot(hra,
+         col = pop.col.hra,
+         border = 'grey88', lwd = .25)
+        
+    legend('bottomleft',
+           ncol = 3,
+           bty = 'n',
+           cex = 0.7,
+           border = FALSE,
+           fill = pop.pal,
+           legend = names(attr(pop.col.hra, 'table')))
+    plot(kc_tracts_poly[[paste0("acs5_",yr)]],
+         col = cov.col.tract,
+         main = "Coefficient of Variation",
+         border = 'grey88', lwd = .25)
+    
+    plot(hra,
+         col = cov.col.hra,
+         border = 'grey48', lwd = .25)
+    
+    
+    legend('bottomleft',
+           ncol = 3,
+           bty = 'n',
+           cex = 0.7,
+           border = FALSE,
+           fill = cov.pal,
+           legend = names(attr(cov.col.hra, 'table')))
+    dev.off()
+  }
+}
+
+```
+
+
