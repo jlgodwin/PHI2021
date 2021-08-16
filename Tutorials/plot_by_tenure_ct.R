@@ -57,9 +57,9 @@ totDF <- avgHHsizeDF %>%
   ) %>%
   mutate(
     type = case_when(
-      variable == "B25003_001" ~ "Total",
-      variable == "B25003_002" ~ "Owner",
-      variable == "B25003_003" ~ "Renter",
+      variable == "B25008_001" ~ "Total",
+      variable == "B25008_002" ~ "Owner",
+      variable == "B25008_003" ~ "Renter"
     )
   ))
 
