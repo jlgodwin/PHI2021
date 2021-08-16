@@ -25,7 +25,7 @@ library(gridExtra)
 # constants
 main_dir <- "/Users/adrienallorant/Documents/UW/PHI2021/"
 data_dir <- paste0(main_dir, "data/")
-out_dir <- paste0(main_dir, "output/")
+out_dir <- paste0(main_dir, "/Code/PHI2021/household_size/")
 
 # set api key to access tidycensusdata
 myKey <- "98068953d7f457e6b1166ff2218f263faefa119e"
@@ -53,7 +53,7 @@ avgHHsizeDF <- bind_rows(lapply(yearsCensus, function(x){
     variables = c("H012001" #hhs
     ),
     state = "WA",
-    tract = "King",
+    county = "King",
     year = x,
     cache_table = TRUE,
     geometry = FALSE) %>%
@@ -68,7 +68,7 @@ avgHHsizeDF <- bind_rows(lapply(yearsCensus, function(x){
         variables = c("H012002" #hhs
         ),
         state = "WA",
-        tract = "King",
+        county = "King",
         year = x,
         cache_table = TRUE,
         geometry = FALSE) %>%
@@ -84,7 +84,7 @@ avgHHsizeDF <- bind_rows(lapply(yearsCensus, function(x){
         variables = c("H012003" #hhs
         ),
         state = "WA",
-        tract = "King",
+        county = "King",
         year = x,
         cache_table = TRUE,
         geometry = FALSE) %>%
@@ -102,7 +102,7 @@ avgHHsizeDF <- bind_rows(lapply(yearsCensus, function(x){
         variables = c("B25010_001" #hhs
         ),
         state = "WA",
-        tract = "King",
+        county = "King",
         survey = "acs5",
         moe_level = 95,
         year = x,
@@ -120,7 +120,7 @@ avgHHsizeDF <- bind_rows(lapply(yearsCensus, function(x){
             variables = c("B25010_002" #hhs
             ),
             state = "WA",
-            tract = "King",
+            county = "King",
             survey = "acs5",
             moe_level = 95,
             year = x,
@@ -138,7 +138,7 @@ avgHHsizeDF <- bind_rows(lapply(yearsCensus, function(x){
             variables = c("B25010_003" #hhs
             ),
             state = "WA",
-            tract = "King",
+            county = "King",
             survey = "acs5",
             moe_level = 95,
             year = x,
@@ -157,17 +157,27 @@ saveRDS(avgHHsizeDF, file = paste0(out_dir, "average_hh_size_by_ownership_ct.RDS
 ## Households by household size ##
 ##################################
 
-hhByhhSizeDF <- bind_rows(lapply(yearsCensus, function(x){
+hhByhhSizeDF <- bind_rows(
+  get_decennial(
+    "tract",
+    table = c("H015"
+    ),
+    state = "WA",
+    county = "King",
+    year = 2000,
+    cache_table = TRUE,
+    geometry = FALSE) %>%
+    mutate(Year = 2000),
   get_decennial(
     "tract",
     table = c("H016"
     ),
     state = "WA",
-    tract = "King",
-    year = x,
+    county = "King",
+    year = 2010,
     cache_table = TRUE,
     geometry = FALSE) %>%
-    mutate(Year = x)})) %>%
+    mutate(Year = 2010)) %>%
   rename(estimate = value) %>%
   mutate(source = "Census",
          moe = NA) %>%
@@ -177,7 +187,7 @@ hhByhhSizeDF <- bind_rows(lapply(yearsCensus, function(x){
         "tract",
         table = c("B25009"),
         state = "WA",
-        tract = "King",
+        county = "King",
         survey = "acs5",
         moe_level = 95,
         year = x,
@@ -185,6 +195,21 @@ hhByhhSizeDF <- bind_rows(lapply(yearsCensus, function(x){
         mutate(Year = x)})) %>%
       mutate(source = "ACS")) %>%
   mutate(hh_size = case_when(
+    variable == "H015001" ~ 0, # total
+    variable == "H015003" ~ 1,
+    variable == "H015004" ~ 2,
+    variable == "H015005" ~ 3,
+    variable == "H015006" ~ 4,
+    variable == "H015007" ~ 5,
+    variable == "H015008" ~ 6,
+    variable == "H015009" ~ 7,
+    variable == "H015011" ~ 1,
+    variable == "H015012" ~ 2,
+    variable == "H015013" ~ 3,
+    variable == "H015014" ~ 4,
+    variable == "H015015" ~ 5,
+    variable == "H015016" ~ 6,
+    variable == "H015017" ~ 7,
     variable == "H016001" ~ 0, # total
     variable == "H016003" ~ 1,
     variable == "H016004" ~ 2,
@@ -220,7 +245,9 @@ hhByhhSizeDF <- bind_rows(lapply(yearsCensus, function(x){
     tenure = ifelse(variable %in% c("B25009_011","B25009_012","B25009_013",
                                     "B25009_014","B25009_015","B25009_016","B25009_017",
                                     "H016011","H016012","H016013","H016014","H016015",
-                                    "H016016","H016017"), "Renter", "Owner")
+                                    "H015016","H015017",
+                                    "H015011","H015012","H015013","H015014","H015015",
+                                    "H015016","H015017"), "Renter", "Owner")
   )
 hhByhhSizeDF$tenure[hhByhhSizeDF$hh_size == 0] <- "Total" 
 
