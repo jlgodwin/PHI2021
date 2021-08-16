@@ -40,12 +40,11 @@ All<-totDF%>%right_join(grid)
 dim(All)
 All$period.id<-as.numeric(as.factor(All$Year))
 
-All$household_population[All$Year %in% 2020:2040] <- All$household_population[All$Year == 2019]
-
 prior.iid <- c(0.5,0.008)
 mod <- inla(hhs ~ Year, #f(period.id, model = "rw1", param = prior.iid), 
             scale = prec,
-            data =All,
+            data =All %>%
+              filter(type == "Total"),
             control.predictor = list(compute = TRUE, link = 1))
 
 summary(mod)
