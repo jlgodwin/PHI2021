@@ -75,7 +75,6 @@ est_hra_avhhsize2 <- totDF %>%
                                moe_sum(moe = housing_units.moe))
   )
 
-# method 2 is off
 
 ############################
 ## Looking at it on a map ##
