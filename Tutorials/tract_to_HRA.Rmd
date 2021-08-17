@@ -853,14 +853,16 @@ for(yr in years){
     
     ## assign each population to bin defined in fixed breaks
     if(match(yr, years) == 1){
-      pop.int.tract <- classIntervals(c(pop.tract.vector$estimate,
-                                        pop.hra.vector$estimate) + 50,
-                                      style = 'jenks', n = 9)
-      cov.int.tract <- classIntervals(pop.tract.vector$CoV,
+      pop.int.tract <- classIntervals(unlist(lapply(c(pop_by_agegroup_tracts,
+                                                      pop_by_agegroup_hra),
+                                                    function(x){
+                                                      x$estimate[x$agegroup == agelabel]
+                                                    })) + 50,
                                       style = 'jenks', n = 9)
       
-      breaks_by_agegroup[[unique(pop.hra.vector$agegroup)]] <- c(0, pop.int.tract$brks[-1])
-      cov_by_agegroup[[unique(pop.hra.vector$agegroup)]] <- round(c(0, cov.int.tract$brks[-1]), 2)
+      
+      breaks_by_agegroup[[unique(pop.hra.vector$agegroup)]] <- round(c(0, pop.int.tract$brks[-1]), 0)
+      cov_by_agegroup[[unique(pop.hra.vector$agegroup)]] <- c(0, 0.4, .5, .6, .8, 1, 100)
     }
     pop.int.tract <- classIntervals(pop.tract.vector$estimate,
                                     style = 'fixed',
@@ -890,11 +892,14 @@ for(yr in years){
     ## Plot
     pdf(paste0("../PopPlots/CreatedAges/ACS5_",
                yr, "_agegroup_", agelabel,
-               "_HRA.pdf"),
+               "_HRA_onepanel.pdf"),
         height = 4, width = 8)
-    par(mfrow = c(1,2),
+    par(mfrow = c(1,1),
         mar = c(0,0,1.5,0)+.1,
         oma = c(0,0,0,0))
+    
+    pop.col.hra[pop.hra.vector$CoV >= 1] <- 'grey33'
+    
     
     # plot(kc_tracts_poly[[paste0("acs5_",yr)]],
     #      col = pop.col.tract,
@@ -904,32 +909,41 @@ for(yr in years){
          col = pop.col.hra,
          main = "Population",
          border = 'grey88', lwd = .25)
+    plot(hra[pop.hra.vector$CoV >= 0.8 &
+               pop.hra.vector$CoV < 1,],
+         border = 'firebrick',
+         add = TRUE)
     
     legend('bottomleft',
            ncol = 3,
            bty = 'n',
            cex = 0.7,
-           border = FALSE,
-           fill = pop.pal,
-           legend = names(attr(pop.col.hra, 'table')))
+           border = c(rep(FALSE, length(pop.pal)+1),
+                      'firebrick'),
+           fill = c(pop.pal,
+                    'grey33',
+                    'white'),
+           legend = c(names(attr(pop.col.hra, 'table')),
+                      "No Information",
+                      "Significance > 20%"))
     # plot(kc_tracts_poly[[paste0("acs5_",yr)]],
     #      col = cov.col.tract,
     #      main = "Coefficient of Variation",
     #      border = 'grey88', lwd = .25)
     
-    plot(hra,
-         col = cov.col.hra,
-         main = "Coefficient of Variation",
-         border = 'grey48', lwd = .25)
-    
-    
-    legend('bottomleft',
-           ncol = 3,
-           bty = 'n',
-           cex = 0.7,
-           border = FALSE,
-           fill = cov.pal,
-           legend = names(attr(cov.col.hra, 'table')))
+    # plot(hra,
+    #      col = cov.col.hra,
+    #      main = "Coefficient of Variation",
+    #      border = 'grey48', lwd = .25)
+    # 
+    # 
+    # legend('bottomleft',
+    #        ncol = 3,
+    #        bty = 'n',
+    #        cex = 0.7,
+    #        border = FALSE,
+    #        fill = cov.pal,
+    #        legend = names(attr(cov.col.hra, 'table')))
     dev.off()
   }
 }
