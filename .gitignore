@@ -1,2 +1,10 @@
 
 Tutorials/tidycensus_APIkey.R
+.DS_Store
+Data/ipums_usa_identified_counties.xlsx
+Data/seattle_typologies.html
+Data/seattle_typologies_geo.gpkg
+Data/tracts_to_hra_2009.rda
+Data/tracts_to_hra_2019.rda
+Data/typologies.html
+.DS_Store
