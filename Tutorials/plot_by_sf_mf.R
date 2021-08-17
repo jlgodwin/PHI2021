@@ -32,8 +32,8 @@ hhByhhTypeDF <- readRDS(file = paste0(out_dir, "hh_by_hh_size_and_type_kc.RDS"))
 #################################
 
 plotDF <- hhByhhTypeDF %>%
-  mutate(hi = hh_size + moe,
-         lo = hh_size - moe) %>%
+  mutate(hi = estimate + moe,
+         lo = estimate - moe) %>%
   filter(
     tenure != "Total" & !is.na(hh_size)
   ) %>%
