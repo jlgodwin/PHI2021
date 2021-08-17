@@ -367,6 +367,7 @@ save(tracts_to_hra, file = '../Data/tracts_to_hra.rda')
 ```{r pop}
 ## How to load a .rda
 # load('../Data/tracts_to_hra.rda')
+# years <- seq(2019, 2009, -5)
 
 pop_by_hra <- list()
 for(year in years){
@@ -459,11 +460,21 @@ legend('bottomleft',
 
 ## Population by age x time
 
+First, load the variable labels and fix up/transform the `label` column into more usable variables for me `age_short`, `age_lower`, `age_upper`.
 ```{r pop_by_age}
 
 var_df <- load_variables(2019, "acs5", cache = TRUE)
 var_df <- var_df[grepl("B01001", var_df$name),]
+
+
+## Split the var_df$label column everywhere there is a "!!"
 lab_splits <- strsplit(var_df$label, "!!")
+head(lab_splits)
+
+## Based on the length of each element of lab_splits,
+## e.g. look at lab_splits[[1]] lab_splits[[10]]
+## take the vector element I want (age group!)
+
 age_elems <- unlist(lapply(lab_splits, function(x){
   if(length(x) == 4){
     x[4]
@@ -474,24 +485,38 @@ age_elems <- unlist(lapply(lab_splits, function(x){
   }
 })
 )
+head(age_elems)
 
+## Replace all colons in age_elems
 var_df$age_short <- gsub(":", "", age_elems)
+
+## How many observations by each age?
+## What do the age group strings look like?
 table(var_df$age_short)
 
+## Split the strings on " to " as it's the most
+## common age group definition time "XX to XX years"
 age_elems <- strsplit(age_elems, " to ")
+
 var_df$age_upper <- unlist(lapply(age_elems, function(x){
   if(length(x) == 2){
+    ## All "XX to XX years" fit this logical test
     gsub(" years", "", x[2])
   }else if(x == "Under 5 years"){
     "4"
   }else{
+    ## Should add more cases but decide to 
+    ## use age_lower as my lookup variable
     NA
   }
 }))
 
 var_df$age_lower <- unlist(lapply(age_elems, function(x){
   if(length(x) == 2){
+    ## All "XX to XX years" fit this logical test
     gsub(" years", "", x[1])
+    
+    ## Begin special cases
   }else if(x == "Under 5 years"){
     "0"
   }else if(x == "85 years and over"){
@@ -508,11 +533,18 @@ var_df$age_lower <- unlist(lapply(age_elems, function(x){
 }))
 
 head(var_df)
+```
+
+Now that the labels are all cleaned up and I understand how ages are binned, I want to make my own columns which are indicators combining the census age groups into meaningful age groups.
+
+```{r age_decades}
 age_vars <- var_df %>%
   filter(concept == "SEX BY AGE") %>%
   drop_na(age_lower) %>%
+  mutate(age_lower = as.numeric(age_lower)) %>%
   mutate(old.idx = ifelse(age_lower >= 65, 1, 0),
-         child.idx = ifelse(age_lower < 15, 1, 0),
+         child.idx = ifelse(age_lower >= 0 &
+                              age_lower < 15, 1, 0),
          teen.idx = ifelse(age_lower >= 15 &
                              age_lower < 20, 1, 0),
          twenties.idx = ifelse(age_lower >= 20 &
@@ -520,22 +552,40 @@ age_vars <- var_df %>%
          thirties.idx = ifelse(age_lower >= 30 &
                                  age_lower < 40, 1, 0),
          forties.idx = ifelse(age_lower >= 40 &
-                                 age_lower < 50, 1, 0),
+                                age_lower < 50, 1, 0),
          fifties.idx = ifelse(age_lower >= 50 &
-                                 age_lower < 60, 1, 0),
+                                age_lower < 60, 1, 0),
          sixties.idx = ifelse(age_lower >= 60 &
-                                 age_lower < 70, 1, 0),
+                                age_lower < 70, 1, 0),
          seventies.idx = ifelse(age_lower >= 70 &
-                                 age_lower < 80, 1, 0),
+                                  age_lower < 80, 1, 0),
          eightiesup.idx = ifelse(age_lower >= 80, 1, 0)) %>%
   as.data.frame()
 
+
+## Make sure the ages_var table age_lower column
+## looks like what I expect and want
 ageslow <- unique(age_vars$age_lower)
+ageslow
 
+```
 
-pop_by_age_tracts <- list()
-pop_by_age_hra <- list()
+Now, following the example above, I'll convert the tract data to health reporting areas.
+
+```{r tract_to_hra_pop_by_age}
+pop_by_age_tracts <- 
+  pop_by_agegroup_tracts <- list()
+pop_by_age_hra <- 
+  pop_by_agegroup_hra <- list()
+
 for(yr in years){
+  
+  ## Pull data from ACS
+  ## NOTE: geometry = FALSE, because
+  ## I will use the geometries loaded previously
+  ## This saves memory and computation time!
+  ## But if you want to work in ggplot(), sf() framework
+  ## Loading them all as geometries makes sense
   pop_by_age_tracts[[paste0("acs5_",yr)]] <- get_acs("tract",
                                                      table = "B01001",
                                                      geometry = FALSE,
@@ -544,43 +594,137 @@ for(yr in years){
                                                      state = "WA",
                                                      county = "King",
                                                      cache_table = TRUE) %>%
-    left_join(age_vars %>%
-                dplyr::select(name, age_short,
-                              age_upper, age_lower),
+    
+    ## Merge the age_vars table
+    ## to use my fancy new labels
+    left_join(age_vars,
               by = c("variable" = "name")) %>%
+    
+    ## Drop "Total", "Male", "Female"
     drop_na(age_short) %>%
+    ## Calculate SE from moe
     mutate(SE = moe/qnorm(.95)) %>%
     
-    ## Sum over sexes
+    ## Sum over sexes,
+    ## calculate CoV
     group_by(GEOID, age_short) %>%
     summarise(estimate = sum(estimate),
               SE = sum(SE),
               CoV = SE/estimate,
               age_lower = unique(age_lower))
   
-  pop_by_age_hra[[paste0("acs5_",yr)]] <- tracts_to_hra[[paste0("acs5_", yr)]] %>%
+  
+  ## Do it again for my custom age groups
+  ## Would maybe be best to fold this into code above, BUT
+  
+  pop_by_agegroup_tracts[[paste0("acs5_",yr)]] <- get_acs("tract",
+                                                          table = "B01001",
+                                                          geometry = FALSE,
+                                                          year = yr,
+                                                          survey = "acs5",
+                                                          state = "WA",
+                                                          county = "King",
+                                                          cache_table = TRUE) %>%
+    
+    ## Merge the age_vars table
+    ## to use my fancy new labels
+    left_join(age_vars,
+              by = c("variable" = "name")) %>%
+    
+    ## Drop "Total", "Male", "Female"
+    drop_na(age_short) %>%
+    ## Calculate SE from moe
+    mutate(SE = moe/qnorm(.95)) 
+  
+  ## Do special groups in a loop
+  tmp.names.idx <- names(pop_by_agegroup_tracts[[paste0("acs5_",yr)]])[
+    grep("idx", names(pop_by_agegroup_tracts[[paste0("acs5_", yr)]]))]
+  
+  for(group in tmp.names.idx){
+    tmp.colname <- gsub("\\.idx", "", group)
+    ## Do estimate for special group
+    pop_by_agegroup_tracts[[paste0("acs5_",yr)]][ , paste0(tmp.colname,
+                                                           "_estimate")] <-
+      pop_by_agegroup_tracts[[paste0("acs5_",yr)]]$estimate*
+      pop_by_agegroup_tracts[[paste0("acs5_",yr)]][ , group]
+    ## Do MOE for special group
+    pop_by_agegroup_tracts[[paste0("acs5_",yr)]][ , paste0(tmp.colname,
+                                                           "_SE")] <-
+      pop_by_agegroup_tracts[[paste0("acs5_",yr)]]$SE*
+      pop_by_agegroup_tracts[[paste0("acs5_",yr)]][ , group]
+  }
+  
+  
+  pop_by_agegroup_tracts[[paste0("acs5_",yr)]] <-
+    pop_by_agegroup_tracts[[paste0("acs5_",yr)]] %>%
+    
+    pivot_longer(cols = ends_with(c("_estimate", "_SE")),
+                 names_to = c("agegroup", "metric"),
+                 names_sep = "_",
+                 values_to = "metric_val",
+                 values_drop_na = FALSE) %>%
+    pivot_longer(cols = ends_with("idx"),
+                 names_to = c("idxagegroup", "idx"),
+                 names_sep = "\\.",
+                 values_to = "idx_val",
+                 values_drop_na = FALSE) %>%
+    filter(idx_val == 1) %>%
+    filter(agegroup == idxagegroup) %>%
+    dplyr::select(-estimate, -moe) %>%
+    ## Sum over sexes,
+    group_by(GEOID, agegroup,
+             metric) %>%
+    summarise(metric_val = sum(metric_val),
+              age_lower = min(age_lower)) %>%
+    pivot_wider(names_from ="metric",
+                values_from = "metric_val") %>%
+    arrange(age_lower)
+  
+  ## Use tracts_to_hra data.frames and the 
+  ## tracts_to_hra$acs5_YYYY$prop.area
+  ## column to aggregate up to HRAs
+  pop_by_age_hra[[paste0("acs5_",yr)]] <- 
+    tracts_to_hra[[paste0("acs5_", yr)]] %>%
     left_join(pop_by_age_tracts[[paste0("acs5_",yr)]]) %>%
     
-    ## group_by() HRA and get a weighted sum
+    ## group_by() HRA and AGE (not used in previous example)
+    ## to get a weighted sum
     ## of tract contributions to HRA
     group_by(FID_HRA_20, age_short) %>%
+    summarise(estimate = sum(prop.area*estimate),
+              SE = sum(prop.area*SE),
+              age_lower = unique(age_lower)) %>%
+    mutate(CoV = SE/estimate)
+  
+  pop_by_agegroup_hra[[paste0("acs5_",yr)]] <- 
+    tracts_to_hra[[paste0("acs5_", yr)]] %>%
+    left_join(pop_by_agegroup_tracts[[paste0("acs5_",yr)]]) %>%
+    ## group_by() HRA and AGE (not used in previous example)
+    ## to get a weighted sum
+    ## of tract contributions to HRA
+    group_by(FID_HRA_20, HRA2010v2_,
+             agegroup, age_lower) %>%
     summarise(estimate = sum(prop.area*estimate),
               SE = sum(prop.area*SE)) %>%
     mutate(CoV = SE/estimate)
 }
 ```
 
-### Plots in a loop 
+### Plots in a loop
+#### Census age groups
 
 ```{r pop_by_age_plot}
+
+## Check output to see ranges for custom label ranges
+## and to make sure there's no funny business
 lapply(pop_by_age_tracts, function(x){
-  range(x$estimate)
-  range(x$CoV)
+  print(range(x$estimate))
+  print(range(x$CoV))
 })
 
 lapply(pop_by_age_hra, function(x){
-  range(x$estimate)
-  range(x$CoV)
+  print(range(x$estimate))
+  print(range(x$CoV))
 })
 
 ## Pick R Color Brewer palette
@@ -597,7 +741,7 @@ for(yr in years){
     pop.tract.vector <- pop_by_age_tracts[[paste0("acs5_", yr)]] %>%
       filter(age_lower == agelow) %>%
       mutate(CoV = if_else(is.finite(CoV),
-                           CoV, 100)) %>%
+                     uni      CoV, 100)) %>%
       as.data.frame()
     
     
@@ -643,7 +787,7 @@ for(yr in years){
     cov.col.hra <- findColours(cov.int.hra, cov.pal)
     
     ## Plot
-    pdf(paste0("../PopPlots/ACS5_",
+    pdf(paste0("../PopPlots/CensusAges/ACS5_",
                yr, "_age", agelow,
                ".pdf"),
         height = 8, width = 8)
@@ -658,7 +802,108 @@ for(yr in years){
     plot(hra,
          col = pop.col.hra,
          border = 'grey88', lwd = .25)
-        
+    
+    legend('bottomleft',
+           ncol = 3,
+           bty = 'n',
+           cex = 0.7,
+           border = FALSE,
+           fill = pop.pal,
+           legend = names(attr(pop.col.hra, 'table')))
+    plot(kc_tracts_poly[[paste0("acs5_",yr)]],
+         col = cov.col.tract,
+         main = "Coefficient of Variation",
+         border = 'grey88', lwd = .25)
+    
+    plot(hra,
+         col = cov.col.hra,
+         border = 'grey48', lwd = .25)
+    
+    
+    legend('bottomleft',
+           ncol = 3,
+           bty = 'n',
+           cex = 0.7,
+           border = FALSE,
+           fill = cov.pal,
+           legend = names(attr(cov.col.hra, 'table')))
+    dev.off()
+  }
+}
+
+
+
+breaks_by_agegroup <- list()
+cov_by_agegroup <- list()
+for(yr in years){
+  for(agelabel in unique(pop_by_agegroup_hra$acs5_2019$agegroup)){
+    agelow <- unique(pop_by_agegroup_hra$acs5_2019$age_lower[
+      pop_by_agegroup_hra$acs5_2019$agegroup == agelabel])
+    pop.tract.vector <- pop_by_agegroup_tracts[[paste0("acs5_", yr)]] %>%
+      filter(age_lower == agelow) %>%
+      mutate(CoV = if_else(estimate > 0,
+                           SE/estimate, 100)) %>%
+      as.data.frame()
+    
+    
+    pop.hra.vector <- pop_by_agegroup_hra[[paste0("acs5_", yr)]] %>%
+      filter(agegroup == agelabel) %>%
+      as.data.frame() %>% unique()
+    
+    
+    ## assign each population to bin defined in fixed breaks
+    if(match(yr, years) == 1){
+      pop.int.tract <- classIntervals(c(pop.tract.vector$estimate,
+                                        pop.hra.vector$estimate) + 50,
+                                      style = 'jenks', n = 9)
+      cov.int.tract <- classIntervals(pop.tract.vector$CoV,
+                                      style = 'jenks', n = 9)
+      
+      breaks_by_agegroup[[unique(pop.hra.vector$agegroup)]] <- c(0, pop.int.tract$brks[-1])
+      cov_by_agegroup[[unique(pop.hra.vector$agegroup)]] <- round(c(0, cov.int.tract$brks[-1]), 2)
+    }
+    pop.int.tract <- classIntervals(pop.tract.vector$estimate,
+                                    style = 'fixed',
+                                    fixedBreaks = breaks_by_agegroup[[unique(pop.hra.vector$agegroup)]],
+                                    n = 9)
+    cov.int.tract <- classIntervals(pop.tract.vector$CoV,
+                                    style = 'fixed',
+                                    fixedBreaks = cov_by_agegroup[[unique(pop.hra.vector$agegroup)]],
+                                    n = 9)
+    pop.int.hra <- classIntervals(pop.hra.vector$estimate,
+                                  style = 'fixed',
+                                  fixedBreaks = breaks_by_agegroup[[unique(pop.hra.vector$agegroup)]],
+                                  n = 9)
+    cov.int.hra <- classIntervals(pop.hra.vector$CoV,
+                                  style = 'fixed',
+                                  fixedBreaks = cov_by_agegroup[[unique(pop.hra.vector$agegroup)]],
+                                  n = 9)
+    
+    
+    ## Get color based on RColorBrwere palette for 
+    ## each area
+    pop.col.tract <- findColours(pop.int.tract, pop.pal)
+    pop.col.hra <- findColours(pop.int.hra, pop.pal)
+    cov.col.tract <- findColours(cov.int.tract, cov.pal)
+    cov.col.hra <- findColours(cov.int.hra, cov.pal)
+    
+    ## Plot
+    pdf(paste0("../PopPlots/CreatedAges/ACS5_",
+               yr, "_agegroup_", agelabel,
+               ".pdf"),
+        height = 8, width = 8)
+    par(mfrow = c(2,2),
+        mar = c(0,0,2,0) + 0.1,
+        oma = c(0,0,0,0))
+    
+    plot(kc_tracts_poly[[paste0("acs5_",yr)]],
+         col = pop.col.tract,
+         border = 'grey48', lwd = .25,
+         main = "Population")
+    plot(hra,
+         col = pop.col.hra,
+         border = 'grey88', lwd = .25)
+    
     legend('bottomleft',
            ncol = 3,
            bty = 'n',
