@@ -741,7 +741,7 @@ for(yr in years){
     pop.tract.vector <- pop_by_age_tracts[[paste0("acs5_", yr)]] %>%
       filter(age_lower == agelow) %>%
       mutate(CoV = if_else(is.finite(CoV),
-                     uni      CoV, 100)) %>%
+                     CoV, 100)) %>%
       as.data.frame()
     
     
@@ -890,18 +890,19 @@ for(yr in years){
     ## Plot
     pdf(paste0("../PopPlots/CreatedAges/ACS5_",
                yr, "_agegroup_", agelabel,
-               ".pdf"),
-        height = 8, width = 8)
-    par(mfrow = c(2,2),
-        mar = c(0,0,2,0) + 0.1,
+               "_HRA.pdf"),
+        height = 4, width = 8)
+    par(mfrow = c(1,2),
+        mar = c(0,0,1.5,0)+.1,
         oma = c(0,0,0,0))
     
-    plot(kc_tracts_poly[[paste0("acs5_",yr)]],
-         col = pop.col.tract,
-         border = 'grey48', lwd = .25,
-         main = "Population")
+    # plot(kc_tracts_poly[[paste0("acs5_",yr)]],
+    #      col = pop.col.tract,
+    #      border = 'grey48', lwd = .25,
+    #      main = "Population")
     plot(hra,
          col = pop.col.hra,
+         main = "Population",
          border = 'grey88', lwd = .25)
     
     legend('bottomleft',
@@ -911,13 +912,14 @@ for(yr in years){
            border = FALSE,
            fill = pop.pal,
            legend = names(attr(pop.col.hra, 'table')))
-    plot(kc_tracts_poly[[paste0("acs5_",yr)]],
-         col = cov.col.tract,
-         main = "Coefficient of Variation",
-         border = 'grey88', lwd = .25)
+    # plot(kc_tracts_poly[[paste0("acs5_",yr)]],
+    #      col = cov.col.tract,
+    #      main = "Coefficient of Variation",
+    #      border = 'grey88', lwd = .25)
     
     plot(hra,
          col = cov.col.hra,
+         main = "Coefficient of Variation",
          border = 'grey48', lwd = .25)
     
     
