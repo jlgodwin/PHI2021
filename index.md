@@ -54,7 +54,7 @@ layout: default
 # Housing and households
 
 **Household formation and size**
-  * [Joint and stem families](https://jlgodwin.github.io/PHI2021/Readings/Ruggles2010.pdf) | [Intergenerational Ties](https://jlgodwin.github.io/PHI2021/Readings/IntergenerationalTies_2020.pdf) | [Proximity to kin and mobility](https://jlgodwin.github.io/PHI2021/Readings/Downey_Family_Mobility_EnvironmentalInequality_2017.pdf) | [Grandfamilies and the Opioid crisis](https://jlgodwin.github.io/PHI2021/Readings/Grandfamilies_opioid_2021.pdf)
+  * [Joint and stem families](https://jlgodwin.github.io/PHI2021/Readings/Ruggles2010.pdf) | [Intergenerational Ties](https://jlgodwin.github.io/PHI2021/Readings/IntergenerationalTies_2020.pdf) | [Proximity to kin and mobility](https://jlgodwin.github.io/PHI2021/Readings/Spring_Kin_Mobility_2017.pdf) | [Grandfamilies and the Opioid crisis](https://jlgodwin.github.io/PHI2021/Readings/Grandfamilies_opioid_2021.pdf)
   * [Global fertility preferences](https://jlgodwin.github.io/PHI2021/Readings/BongaartsCasterline2018.pdf) | [US and divorce](https://jlgodwin.github.io/PHI2021/Readings/Ruggles2014.pdf) | [Demographic perspectives on familiy change](https://jlgodwin.github.io/PHI2021/Readings/Bianchi2014.pdf)
 
 **Evictions**
