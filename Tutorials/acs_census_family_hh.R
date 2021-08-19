@@ -40,6 +40,7 @@ yearsCensus <- c(2000,2010)
 yearsACS <- c(2005:2019)
 var2000<-load_variables(2000,"sf1")
 var2010<-load_variables(2010,"sf1")
+var2005 <- load_variables(2005, "acs1")
 ##################################
 ## Households by household size ##
 ##################################
@@ -72,7 +73,7 @@ hhByhhTypeDF <- bind_rows(
     bind_rows(lapply(yearsACS, function(x){
       get_acs(
         "county",
-        table = c("B25009"),
+        table = c("B11016"),
         state = "WA",
         county = "King",
         survey = "acs1",
@@ -110,31 +111,30 @@ hhByhhTypeDF <- bind_rows(
     variable == "P028014" ~ 5,
     variable == "P028015" ~ 6,
     variable == "P028016" ~ 7,
-    variable == "B25009_001" ~ 0, # total
-    variable == "B25009_003" ~ 1,
-    variable == "B25009_004" ~ 2,
-    variable == "B25009_005" ~ 3,
-    variable == "B25009_006" ~ 4,
-    variable == "B25009_007" ~ 5,
-    variable == "B25009_008" ~ 6,
-    variable == "B25009_009" ~ 7,
-    variable == "B25009_011" ~ 1,
-    variable == "B25009_012" ~ 2,
-    variable == "B25009_013" ~ 3,
-    variable == "B25009_014" ~ 4,
-    variable == "B25009_015" ~ 5,
-    variable == "B25009_016" ~ 6,
-    variable == "B25009_017" ~ 7
+    variable == "B11016_001" ~ 0, # total
+    variable == "B11016_003" ~ 2,
+    variable == "B11016_004" ~ 3,
+    variable == "B11016_005" ~ 4,
+    variable == "B11016_006" ~ 5,
+    variable == "B11016_007" ~ 6,
+    variable == "B11016_008" ~ 7,
+    variable == "B11016_010" ~ 1,
+    variable == "B11016_011" ~ 2,
+    variable == "B11016_012" ~ 3,
+    variable == "B11016_013" ~ 4,
+    variable == "B11016_014" ~ 5,
+    variable == "B11016_015" ~ 6,
+    variable == "B11016_016" ~ 7
   )) %>%
   mutate(
-    tenure = ifelse(variable %in% c("B25009_011","B25009_012","B25009_013",
-                                    "B25009_014","B25009_015","B25009_016","B25009_017",
+    type = ifelse(variable %in% c("B11016_010","B11016_011","B11016_012","B11016_013",
+                                    "B11016_014","B11016_015","B11016_016",
                                     "P028010","P028011","P028012","P028013","P028014","P028015",
                                     "P028016","P028017",
                                     "P026010","P026011","P026012","P026013","P026014","P026015",
                                     "P026016","P026017"), "Non-family", "Family")
   ) %>%
   filter(!is.na(hh_size))
-hhByhhTypeDF$tenure[hhByhhTypeDF$hh_size == 0] <- "Total" 
+hhByhhTypeDF$type[hhByhhTypeDF$hh_size == 0] <- "Total" 
 
 saveRDS(hhByhhTypeDF, file = paste0(out_dir, "hh_by_hh_size_and_type_kc.RDS"))

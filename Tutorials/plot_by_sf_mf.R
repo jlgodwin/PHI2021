@@ -35,7 +35,7 @@ plotDF <- hhByhhTypeDF %>%
   mutate(hi = estimate + moe,
          lo = estimate - moe) %>%
   filter(
-    tenure != "Total" & !is.na(hh_size)
+    type != "Total" & !is.na(hh_size)
   ) %>%
   mutate(hh_size = factor(hh_size))
 
@@ -47,7 +47,7 @@ p2 <- plotDF %>%
   geom_ribbon(aes(fill = hh_size), alpha = .4) +
   theme_classic() +
   scale_x_continuous(breaks = c(2000,2005,2010,2015,2020)) +
-  facet_wrap(~tenure) +
+  facet_wrap(~type) +
   labs(y="", color = "Household by household size in King County",
        title = "Household by household size and type") +
   guides(fill=FALSE)
@@ -56,7 +56,7 @@ ggsave(p2, filename =  paste0(out_dir, "hh_by_hh_size_and_type_kc.png"),
        width = 9, height = 6)
 
 plotDF <- hhByhhTypeDF %>%
-  filter(tenure == "Total") %>%
+  filter(type == "Total") %>%
   dplyr::select(Year, source, estimate,moe) %>%
   rename(total = estimate,
          total.moe = moe) %>%
@@ -66,7 +66,7 @@ plotDF <- hhByhhTypeDF %>%
            estimate, total,
            moe, total.moe
          )) %>%
-  filter(tenure != "Total" & !is.na(hh_size)) %>%
+  filter(type != "Total" & !is.na(hh_size)) %>%
   mutate(hi = prop + prop.moe,
          lo = prop - prop.moe,
          hh_size = factor(hh_size))
@@ -79,7 +79,7 @@ p3 <- plotDF %>%
   geom_ribbon(aes(fill = hh_size), alpha = .4) +
   theme_classic() +
   scale_x_continuous(breaks = c(2000,2005,2010,2015,2020)) +
-  facet_wrap(~tenure) +
+  facet_wrap(~type) +
   labs(y="", color = "Household by household size in King County",
        title = "Household by household size and type") +
   guides(fill=FALSE)
