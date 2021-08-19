@@ -54,11 +54,14 @@ layout: default
 # Housing and households
 
 **Household formation and size**
-  * [Joint and stem families](https://jlgodwin.github.io/PHI2021/Readings/Ruggles2010.pdf) | [Intergenerational Ties](https://jlgodwin.github.io/PHI2021/Readings/IntergenerationalTies_2020.pdf) | [Grandfamilies and the Opioid crisis](https://jlgodwin.github.io/PHI2021/Readings/Grandfamilies_opioid_2021.pdf)
+  * [Joint and stem families](https://jlgodwin.github.io/PHI2021/Readings/Ruggles2010.pdf) | [Intergenerational Ties](https://jlgodwin.github.io/PHI2021/Readings/IntergenerationalTies_2020.pdf) | [Proximity to kin and mobility](https://jlgodwin.github.io/PHI2021/Readings/Downey_Family_Mobility_EnvironmentalInequality_2017.pdf) | [Grandfamilies and the Opioid crisis](https://jlgodwin.github.io/PHI2021/Readings/Grandfamilies_opioid_2021.pdf)
   * [Global fertility preferences](https://jlgodwin.github.io/PHI2021/Readings/BongaartsCasterline2018.pdf) | [US and divorce](https://jlgodwin.github.io/PHI2021/Readings/Ruggles2014.pdf) | [Demographic perspectives on familiy change](https://jlgodwin.github.io/PHI2021/Readings/Bianchi2014.pdf)
 
 **Evictions**
   * [Looming Eviction Cliff](https://jlgodwin.github.io/PHI2021/Readings/TheLoomingEvictionCliff.pdf) | [US 2020 Eviction Trends](https://jlgodwin.github.io/PHI2021/Readings/USEvictionFilingPatternsin2020.pdf) | [Right to Counsel-NYC](https://jlgodwin.github.io/PHI2021/Readings/PreliminaryEffectsofRighttoCounselonEvictions.pdf) | [Predictors of Eviction](https://jlgodwin.github.io/PHI2021/Readings/PredictorsofEviction.pdf)
+
+**Race and housing burden**
+  * [Foreclosure migration and segregation](https://jlgodwin.github.io/PHI2021/Readings/Hall_Foreclosures_Race_2018.pdf) | [Race and Housing Costs](https://jlgodwin.github.io/PHI2021/Readings/Hess_Race_HousingBurden_2021.pdf)
 
 **R**
   * [Household size by Adrien Allorant](https://jlgodwin.github.io/PHI2021/Tutorials/0_ACS_data_inspection.R)
@@ -66,6 +69,7 @@ layout: default
 # Disaster and Resiliency
 
 * [Making Healthy Places-Resiliency to Disaster](https://jlgodwin.github.io/PHI2021/Readings/MakingHealthyPlaces_ResiliencytoDisaster_Beatley2011.pdf) | [Resilience and disaster risk reduction](https://jlgodwin.github.io/PHI2021/Readings/ResilienceandDisaster_Alexander_2013.pdf) | [Disaster Resiliency-Concepts, Measures, and Critques](https://jlgodwin.github.io/PHI2021/Readings/Ch7_DisasterResilience_Tierney_2019.pdf) 
+* [Neigborhoods, Race, Environmental Hazards, Inequality](https://jlgodwin.github.io/PHI2021/Readings/Crowder_MigrationRaceEnvironmentalHazards_2010.pdf) | [Family, Mobility, Environmental Inequality](https://jlgodwin.github.io/PHI2021/Readings/Downey_Family_Mobility_EnvironmentalInequality_2017.pdf) 
 * [Global warming and population growth](https://jlgodwin.github.io/PHI2021/Readings/BongaartsONeill2018.pdf) | [Population and climate change](https://jlgodwin.github.io/PHI2021/https://github.com/jlgodwin/PHI2021/Readings/vanDalen2021.pdf) 
 
 # COVID-19
