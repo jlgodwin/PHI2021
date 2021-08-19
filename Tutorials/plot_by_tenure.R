@@ -55,8 +55,8 @@ ggsave(p1, filename =  paste0(out_dir, "average_hh_size_by_tenure_kc.png"),
 #################################
 
 plotDF <- hhByhhSizeDF %>%
-  mutate(hi = hh_size + moe,
-         lo = hh_size - moe) %>%
+  mutate(hi = estimate + moe,
+         lo = estimate - moe) %>%
   filter(
     tenure != "Total" & !is.na(hh_size)
   ) %>%
