@@ -46,6 +46,9 @@ layout: default
 **Intro to Survey Statistics**
   * [Slides](https://jlgodwin.github.io/PHI2021/Lectures/SurveyStatistics_20210707.pdf) | [Recording I: up to design-based (long)](https://washington.zoom.us/rec/play/mMe0TIT2WGp-uJ5tO0QkfnZ02DdHavr7KAA_EHHCmgiSNtY48sUnvgQxmxSHXEPNBRf0wwPMtyzR12QO.-5sGPdjCRj7tpff2) [Recording II: design-based and model-based (short)](https://washington.zoom.us/rec/play/X6bKP7a24MO2oQ9EeMhWpO6mcqbQTQNkJScZyEObyhko23pnP9gu0ccV9cpuYzUmnBLlGvo3XenyIVRf.BW-WU4q44gs1yUtG) | [Annotated Slides](https://jlgodwin.github.io/PHI2021/Lectures/SurveyStatistics_20210707_Annotated.pdf)
 
+**Small Area Estimation**
+  * [Forecasting and SAE](https://jlgodwin.github.io/PHI2021/Readings/Wilson2021_Article_MethodsForSmallAreaPopulationF.pdf)
+
 **Replicate weights**
  
 # Housing and households
@@ -66,4 +69,6 @@ layout: default
 * [Global warming and population growth](https://jlgodwin.github.io/PHI2021/Readings/BongaartsONeill2018.pdf) | [Population and climate change](https://jlgodwin.github.io/PHI2021/https://github.com/jlgodwin/PHI2021/Readings/vanDalen2021.pdf) 
 
 # COVID-19
-* [COVID19 and the built environment](https://jlgodwin.github.io/PHI2021/Readings/Frumkin_2021_COVID_BuiltEnvironment.pdf) | [Eviction Moratoria and COVID Mortality](https://jlgodwin.github.io/PHI2021/Readings/EvictionMoratoriumMortality_2021.pdf) | [Global COVID orphanhood](https://jlgodwin.github.io/PHI2021/Readings/COVID_orphanhood_global_2021.pdf) | [Supporting orphaned youth](https://jlgodwin.github.io/PHI2021/Readings/OrphanedYouthCOVID_Lancet_2021.pdf)
+* [COVID19 and the built environment](https://jlgodwin.github.io/PHI2021/Readings/Frumkin_2021_COVID_BuiltEnvironment.pdf) | [COVID19 and the built environment: King County case study](https://jlgodwin.github.io/PHI2021/Readings/Liu_KC_Covid_BuiltEnvironment.pdf)
+* [Eviction Moratoria and COVID Mortality](https://jlgodwin.github.io/PHI2021/Readings/EvictionMoratoriumMortality_2021.pdf)
+*  [Global COVID orphanhood](https://jlgodwin.github.io/PHI2021/Readings/COVID_orphanhood_global_2021.pdf) | [Supporting orphaned youth](https://jlgodwin.github.io/PHI2021/Readings/OrphanedYouthCOVID_Lancet_2021.pdf)
