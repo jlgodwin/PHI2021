@@ -438,6 +438,7 @@ pop.col.tract <- findColours(pop.int.tract, pop.pal)
 pop.col.hra <- findColours(pop.int.hra, pop.pal)
 
 ## Plot
+
 par(mfrow = c(1,2),
     mar = c(0,0,2,0) + 0.1,
     oma = c(0,0,0,0))
@@ -456,6 +457,110 @@ legend('bottomleft',
        border = FALSE,
        fill = pop.pal,
        legend = names(attr(pop.col.hra, 'table')))
+
+pdf("../PopPlots/TotalPop_2019_HRA.pdf",
+    height = 4,width = 4)
+
+par(mfrow = c(1,1),
+    mar = c(0,0,0,0),
+    oma = c(0,0,0,0))
+plot(hra,
+     col = pop.col.hra,
+     border = 'grey88', lwd = .25)
+
+legend('bottomleft',
+       ncol = 3,
+       bty = 'n',
+       cex = 0.7,
+       border = FALSE,
+       fill = pop.pal,
+       legend = names(attr(pop.col.hra, 'table')))
+
+dev.off()
+
+
+pdf("../PopPlots/TotalPop_Carnation_2019_HRA.pdf",
+    height = 4,width = 4)
+
+par(mfrow = c(1,1),
+    mar = c(0,0,0,0),
+    oma = c(0,0,0,0))
+plot(hra,
+     col = pop.col.hra,
+     border = 'grey88', lwd = .25)
+plot(hra[5,],
+     add = TRUE,
+     border = 'firebrick')
+
+legend('bottomleft',
+       ncol = 3,
+       bty = 'n',
+       cex = 0.7,
+       border = FALSE,
+       fill = pop.pal,
+       legend = names(attr(pop.col.hra, 'table')))
+
+dev.off()
+
+
+
+pdf("../PopPlots/TotalPop_Snoqualmie_2019_HRA.pdf",
+    height = 4,width = 4)
+
+par(mfrow = c(1,1),
+    mar = c(0,0,0,0),
+    oma = c(0,0,0,0))
+plot(hra,
+     col = pop.col.hra,
+     border = 'grey88', lwd = .25)
+plot(hra[46,],
+     add = TRUE,
+     border = 'firebrick')
+
+legend('bottomleft',
+       ncol = 3,
+       bty = 'n',
+       cex = 0.7,
+       border = FALSE,
+       fill = pop.pal,
+       legend = names(attr(pop.col.hra, 'table')))
+
+dev.off()
+
+
+pop.int.hra <- classIntervals(pop_by_hra$acs5_2009$estimate,
+                              style = 'fixed',
+                              fixedBreaks = c(0, 10000,
+                                              15000, 20000,
+                                              50000, 75000,
+                                              100000, 15000,
+                                              200000, 250000),
+                              n = 9)
+
+## Get color based on RColorBrwere palette for 
+## each area
+
+pop.col.hra <- findColours(pop.int.hra, pop.pal)
+
+pdf("../PopPlots/TotalPop_2009_HRA.pdf",
+    height = 4,width = 4)
+
+par(mfrow = c(1,1),
+    mar = c(0,0,0,0),
+    oma = c(0,0,0,0))
+plot(hra,
+     col = pop.col.hra,
+     border = 'grey88', lwd = .25)
+
+legend('bottomleft',
+       ncol = 3,
+       bty = 'n',
+       cex = 0.7,
+       border = FALSE,
+       fill = pop.pal,
+       legend = names(attr(pop.col.hra, 'table')))
+
+dev.off()
 ```
 
 ## Population by age x time
@@ -741,7 +846,7 @@ for(yr in years){
     pop.tract.vector <- pop_by_age_tracts[[paste0("acs5_", yr)]] %>%
       filter(age_lower == agelow) %>%
       mutate(CoV = if_else(is.finite(CoV),
-                     CoV, 100)) %>%
+                           CoV, 100)) %>%
       as.data.frame()
     
     
@@ -862,7 +967,8 @@ for(yr in years){
       
       
       breaks_by_agegroup[[unique(pop.hra.vector$agegroup)]] <- round(c(0, pop.int.tract$brks[-1]), 0)
-      cov_by_agegroup[[unique(pop.hra.vector$agegroup)]] <- c(0, 0.4, .5, .6, .8, 1, 100)
+      cov_by_agegroup[[unique(pop.hra.vector$agegroup)]] <-
+        c(0, 0.4, .5, .6, .8, 1, 100)
     }
     pop.int.tract <- classIntervals(pop.tract.vector$estimate,
                                     style = 'fixed',
@@ -893,57 +999,267 @@ for(yr in years){
     pdf(paste0("../PopPlots/CreatedAges/ACS5_",
                yr, "_agegroup_", agelabel,
                "_HRA_onepanel.pdf"),
-        height = 4, width = 8)
-    par(mfrow = c(1,1),
-        mar = c(0,0,1.5,0)+.1,
-        oma = c(0,0,0,0))
+        height = 4, width = 4)
+    {
+      par(mfrow = c(1,1),
+          mar = c(0,0,1.5,0)+.1,
+          oma = c(0,0,0,0))
+      
+      pop.col.hra[pop.hra.vector$CoV >= 1] <- 'grey33'
+      
+      
+      # plot(kc_tracts_poly[[paste0("acs5_",yr)]],
+      #      col = pop.col.tract,
+      #      border = 'grey48', lwd = .25,
+      #      main = "Population")
+      plot(hra,
+           col = pop.col.hra,
+           main = "Population",
+           border = 'grey88', lwd = .25)
+      plot(hra[pop.hra.vector$CoV >= 0.8 &
+                 pop.hra.vector$CoV < 1,],
+           border = 'firebrick',
+           add = TRUE)
+      
+      legend('bottomleft',
+             ncol = 3,
+             bty = 'n',
+             cex = 0.55,
+             border = c(pop.pal, 'grey33',
+                        'firebrick'),
+             fill = c(pop.pal,
+                      'grey33',
+                      'white'),
+             legend = c(names(attr(pop.col.hra, 'table')),
+                        "No Information",
+                        "Significance > 20%"))
+      # plot(kc_tracts_poly[[paste0("acs5_",yr)]],
+      #      col = cov.col.tract,
+      #      main = "Coefficient of Variation",
+      #      border = 'grey88', lwd = .25)
+      
+      # plot(hra,
+      #      col = cov.col.hra,
+      #      main = "Coefficient of Variation",
+      #      border = 'grey48', lwd = .25)
+      # 
+      # 
+      # legend('bottomleft',
+      #        ncol = 3,
+      #        bty = 'n',
+      #        cex = 0.7,
+      #        border = FALSE,
+      #        fill = cov.pal,
+      #        legend = names(attr(cov.col.hra, 'table')))
+    }
+    dev.off()
     
-    pop.col.hra[pop.hra.vector$CoV >= 1] <- 'grey33'
+    if(agelabel %in% c("old", "seventies", "eightiesup")){
+      
+      pdf(paste0("../PopPlots/CreatedAges/ACS5_",
+                 yr, 
+                 "_HRA_floods_onepanel.pdf"),
+          height = 4, width = 4)
+      {
+        par(mfrow = c(1,1),
+            mar = c(0,0,1.5,0)+.1,
+            oma = c(0,0,0,0))
+        
+        pop.col.hra[pop.hra.vector$CoV >= 1] <- 'grey33'
+        
+        
+        # plot(kc_tracts_poly[[paste0("acs5_",yr)]],
+        #      col = pop.col.tract,
+        #      border = 'grey48', lwd = .25,
+        #      main = "Population")
+        plot(hra[c(5,46),],
+             col = pop.col.hra[c(5,46)],
+             border = 'grey88', lwd = .25)
+        legend('bottomleft',
+               ncol = 3,
+               bty = 'n',
+               cex = 0.55,
+               border = c(pop.pal, 'grey33',
+                          'firebrick'),
+               fill = c(pop.pal,
+                        'grey33',
+                        'white'),
+               legend = c(names(attr(pop.col.hra, 'table')),
+                          "No Information",
+                          "Significance > 20%"))
+      }
+      dev.off()
+      
+      pdf(paste0("../PopPlots/CreatedAges/ACS5_",
+                 yr, "_agegroup_", agelabel,
+                 "_HRA_floods_onepanel.pdf"),
+          height = 4, width = 4)
+      {
+        par(mfrow = c(1,1),
+            mar = c(0,0,1.5,0)+.1,
+            oma = c(0,0,0,0))
+        
+        pop.col.hra[pop.hra.vector$CoV >= 1] <- 'grey33'
+        
+        
+        # plot(kc_tracts_poly[[paste0("acs5_",yr)]],
+        #      col = pop.col.tract,
+        #      border = 'grey48', lwd = .25,
+        #      main = "Population")
+        plot(hra[c(5,46),],
+             col = pop.col.hra[c(5,46)],
+             border = 'grey88', lwd = .25)
+        legend('bottomleft',
+               ncol = 3,
+               bty = 'n',
+               cex = 0.55,
+               border = c(pop.pal, 'grey33',
+                          'firebrick'),
+               fill = c(pop.pal,
+                        'grey33',
+                        'white'),
+               legend = c(names(attr(pop.col.hra, 'table')),
+                          "No Information",
+                          "Significance > 20%"))
+      }
+      dev.off()
+      
+    }
     
+    prop.int.hra <- classIntervals(pop.hra.vector$estimate/pop_by_hra[[paste0('acs5_',yr)]]$estimate,
+                                   n = 9,
+                                   style = 'fixed',
+                                   fixedBreaks = c(0, 0.025,
+                                                   0.05, 0.075,
+                                                   0.1, 0.15,
+                                                   0.2, 0.3,
+                                                   0.4, 0.5))
+    prop.col.hra <- findColours(prop.int.hra, pop.pal)
     
-    # plot(kc_tracts_poly[[paste0("acs5_",yr)]],
-    #      col = pop.col.tract,
-    #      border = 'grey48', lwd = .25,
-    #      main = "Population")
-    plot(hra,
-         col = pop.col.hra,
-         main = "Population",
-         border = 'grey88', lwd = .25)
-    plot(hra[pop.hra.vector$CoV >= 0.8 &
-               pop.hra.vector$CoV < 1,],
-         border = 'firebrick',
-         add = TRUE)
+    pdf(paste0("../PopPlots/CreatedAges/ACS5_",
+               yr, "_agegroupProp_", agelabel,
+               "_HRA_onepanel.pdf"),
+        height = 4, width = 4)
+    {
+      par(mfrow = c(1,1),
+          mar = c(0,0,1.5,0)+.1,
+          oma = c(0,0,0,0))
+      
+      prop.col.hra[pop.hra.vector$CoV >= 1] <- 'grey33'
+      
+      
+      # plot(kc_tracts_poly[[paste0("acs5_",yr)]],
+      #      col = pop.col.tract,
+      #      border = 'grey48', lwd = .25,
+      #      main = "Population")
+      plot(hra,
+           col = prop.col.hra,
+           main = "Proportion",
+           border = 'grey88', lwd = .25)
+      plot(hra[pop.hra.vector$CoV >= 0.8 &
+                 pop.hra.vector$CoV < 1,],
+           border = 'firebrick',
+           add = TRUE)
+      
+      legend('bottomleft',
+             ncol = 3,
+             bty = 'n',
+             cex = 0.55,
+             border = c(pop.pal, 'grey33',
+                        'firebrick'),
+             fill = c(pop.pal,
+                      'grey33',
+                      'white'),
+             legend = c(names(attr(prop.col.hra, 'table')),
+                        "No Information",
+                        "Significance > 20%"))
+      # plot(kc_tracts_poly[[paste0("acs5_",yr)]],
+      #      col = cov.col.tract,
+      #      main = "Coefficient of Variation",
+      #      border = 'grey88', lwd = .25)
+      
+      # plot(hra,
+      #      col = cov.col.hra,
+      #      main = "Coefficient of Variation",
+      #      border = 'grey48', lwd = .25)
+      # 
+      # 
+      # legend('bottomleft',
+      #        ncol = 3,
+      #        bty = 'n',
+      #        cex = 0.7,
+      #        border = FALSE,
+      #        fill = cov.pal,
+      #        legend = names(attr(cov.col.hra, 'table')))
+    }
+    dev.off()
     
-    legend('bottomleft',
-           ncol = 3,
-           bty = 'n',
-           cex = 0.7,
-           border = c(rep(FALSE, length(pop.pal)+1),
-                      'firebrick'),
-           fill = c(pop.pal,
-                    'grey33',
-                    'white'),
-           legend = c(names(attr(pop.col.hra, 'table')),
-                      "No Information",
-                      "Significance > 20%"))
-    # plot(kc_tracts_poly[[paste0("acs5_",yr)]],
-    #      col = cov.col.tract,
-    #      main = "Coefficient of Variation",
-    #      border = 'grey88', lwd = .25)
+    prop.int.hra <- classIntervals(pop.hra.vector$estimate/sum(pop.hra.vector$estimate),
+                                   n = 9,
+                                   style = 'fixed',
+                                   fixedBreaks = c(0, 0.01,
+                                                   0.02, 0.03,
+                                                   0.04, 0.05,
+                                                   0.10, 0.15,
+                                                   0.20, 0.25))
+    prop.col.hra <- findColours(prop.int.hra, pop.pal)
     
-    # plot(hra,
-    #      col = cov.col.hra,
-    #      main = "Coefficient of Variation",
-    #      border = 'grey48', lwd = .25)
-    # 
-    # 
-    # legend('bottomleft',
-    #        ncol = 3,
-    #        bty = 'n',
-    #        cex = 0.7,
-    #        border = FALSE,
-    #        fill = cov.pal,
-    #        legend = names(attr(cov.col.hra, 'table')))
+    pdf(paste0("../PopPlots/CreatedAges/ACS5_",
+               yr, "_agegroupPropbyAge_", agelabel,
+               "_HRA_onepanel.pdf"),
+        height = 4, width = 4)
+    {
+      par(mfrow = c(1,1),
+          mar = c(0,0,1.5,0)+.1,
+          oma = c(0,0,0,0))
+      
+      prop.col.hra[pop.hra.vector$CoV >= 1] <- 'grey33'
+      
+      
+      # plot(kc_tracts_poly[[paste0("acs5_",yr)]],
+      #      col = pop.col.tract,
+      #      border = 'grey48', lwd = .25,
+      #      main = "Population")
+      plot(hra,
+           col = prop.col.hra,
+           main = "Proportion",
+           border = 'grey88', lwd = .25)
+      plot(hra[pop.hra.vector$CoV >= 0.8 &
+                 pop.hra.vector$CoV < 1,],
+           border = 'firebrick',
+           add = TRUE)
+      
+      legend('bottomleft',
+             ncol = 3,
+             bty = 'n',
+             cex = 0.55,
+             border = c(pop.pal, 'grey33',
+                        'firebrick'),
+             fill = c(pop.pal,
+                      'grey33',
+                      'white'),
+             legend = c(names(attr(prop.col.hra, 'table')),
+                        "No Information",
+                        "Significance > 20%"))
+      # plot(kc_tracts_poly[[paste0("acs5_",yr)]],
+      #      col = cov.col.tract,
+      #      main = "Coefficient of Variation",
+      #      border = 'grey88', lwd = .25)
+      
+      # plot(hra,
+      #      col = cov.col.hra,
+      #      main = "Coefficient of Variation",
+      #      border = 'grey48', lwd = .25)
+      # 
+      # 
+      # legend('bottomleft',
+      #        ncol = 3,
+      #        bty = 'n',
+      #        cex = 0.7,
+      #        border = FALSE,
+      #        fill = cov.pal,
+      #        legend = names(attr(cov.col.hra, 'table')))
+    }
     dev.off()
   }
 }
@@ -951,3 +1267,51 @@ for(yr in years){
 ```
 
 
+```{r floodplain, echo = FALSE, eval = FALSE}
+
+flood_firm <- readOGR(dsn = "../Data/FEMA_floodplain/",
+                      layer = "S_FIRM_PAN" )
+flood_AR <- readOGR(dsn = "../Data/FEMA_floodplain/",
+                    layer = "S_FLD_HAZ_AR" )
+flood_LN <- readOGR(dsn = "../Data/FEMA_floodplain/",
+                    layer = "S_FLD_HAZ_LN" )
+
+carnation.idx <- 5
+snoqualmie.idx <- 46
+
+
+```
+
+```{r covid}
+covid_WA <- readxl::read_xlsx('../Data/WA_COVID19_Cases_Hospitalizations_Deaths.xlsx',
+                              sheet = "Deaths")
+
+cases_WA <- readxl::read_xlsx('../Data/WA_COVID19_Cases_Hospitalizations_Deaths.xlsx',
+                              sheet = "Cases")
+covid_WA <- covid_WA %>%
+  filter(County == "King County") %>%
+  group_by(County) %>%
+  dplyr::select(-WeekStartDate) %>%
+  summarise(across(where(is.numeric), ~sum(.x))) %>%
+  pivot_longer(cols = where(is.numeric),
+               names_to = "metric",
+               values_to = "metric_val")
+
+cases_WA <- cases_WA %>%
+  filter(County == "King County") %>%
+  group_by(County) %>%
+  dplyr::select(-WeekStartDate) %>%
+  summarise(across(where(is.numeric), ~sum(.x))) %>%
+  pivot_longer(cols = where(is.numeric),
+               names_to = "metric",
+               values_to = "metric_val") %>%
+  filter()
+
+# devtools::install_github("nmmarquez/smoothHP",
+#                           build_vignettes = F, force = T)
+
+library(smoothHP)
+
+
+
+```
