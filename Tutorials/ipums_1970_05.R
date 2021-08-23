@@ -1,6 +1,6 @@
 ########################################################
 ###
-### Analyzing individual-level data from ACS 5-year IPUMS data
+### Analyzing individual-level data from ACS 1-year IPUMS data
 ### Updated August 18, 2021
 
 rm(list=ls())
@@ -24,7 +24,7 @@ code_dir <- paste0(main_dir, "PHI2021/household_size/")
 source(paste0(code_dir,"../Tutorials/ipums_acs_recode.R"))
 source(paste0(code_dir,"../Tutorials/compute_survey_proportions.R"))
 # loading data
-ipums <- readRDS(file = paste0(code_dir, "kc_ACS5_IPUMS.RDS"))
+ipums <- readRDS(file = paste0(code_dir, "1970_05_IPUMS.RDS"))
 
 # recoding data
 hhDF <- ipums_recode_acs5(ipums) %>%
@@ -58,7 +58,7 @@ hh_type_merge<-data.frame(hh_type=unique(hhDF$hh_type),
 
 hh_tenure_merge<-data.frame(hh_type="ALL",
                             tenure=unique(hhDF$tenure))#,
-                            # hh_size="ALL")
+# hh_size="ALL")
 # hh_size_merge<-data.frame(hh_type="ALL",
 #                             hh_tenure="ALL",
 #                             hh_size=unique(hhDF$hh_size))
@@ -71,40 +71,43 @@ hh_tenure_merge<-data.frame(hh_type="ALL",
 ##########################################
 
 my.svydesign <- svydesign(id= ~CLUSTER,
-                              strata=~STRATA,
-                              weights= ~HHWT, data=hhDF %>%
-                            filter(YEAR == 2009))
+                          strata=~STRATA,
+                          weights= ~HHWT, data=hhDF %>%
+                            filter(YEAR == 1980))
 
 ###############################################################
 ## Compute population proportions for vars  ###################
 ###############################################################
 
+final_1980 <- compute_survey_proportions(hhDF %>%
+                                           filter(YEAR == 1980))
 
-final_2009 <- compute_survey_proportions(hhDF %>%
-                                           filter(YEAR == 2009))
+# my.svydesign <- svydesign(id= ~CLUSTER,
+#                           strata=~STRATA,
+#                           weights= ~HHWT, data=hhDF %>%
+#                             filter(YEAR == 1990))
+# 
+# final_1990 <- compute_survey_proportions(hhDF %>%
+#                                            filter(YEAR == 1990))
+
 my.svydesign <- svydesign(id= ~CLUSTER,
                           strata=~STRATA,
                           weights= ~HHWT, data=hhDF %>%
-                            filter(YEAR == 2014))
-final_2014 <- compute_survey_proportions(hhDF %>%
-                                           filter(YEAR == 2014))
-my.svydesign <- svydesign(id= ~CLUSTER,
-                          strata=~STRATA,
-                          weights= ~HHWT, data=hhDF %>%
-                            filter(YEAR == 2019))
-final_2019 <- compute_survey_proportions(hhDF %>%
-                                           filter(YEAR == 2019))
-final_2009$year<-2009
-final_2014$year<-2014
-final_2019$year<-2019
+                            filter(YEAR == 2005))
+
+final_2005 <- compute_survey_proportions(hhDF %>%
+                                           filter(YEAR == 2005))
+final_1980$year<-1980
+# final_1990$year<-1990
+final_2005$year<-2005
 
 final <- rbind(
-  final_2009,
-  final_2014,
-  final_2019
+  final_1980,
+  # final_1990,
+  final_2005
 )
 
-final$survey <- "acs5"
+final$survey <- "ipums_1980"
 
 write_csv(as.data.frame(final),
-          paste0(out_dir,"Processed_ACS_5_IPUMS.csv"))
+          paste0(out_dir,"Processed_1980_2005_IPUMS.csv"))

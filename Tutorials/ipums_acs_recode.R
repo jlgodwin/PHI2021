@@ -1,7 +1,7 @@
 ipums_recode_acs5 <- function(dataframe){
   dataframe <- dataframe %>%
     mutate(
-    hh_id = paste0(SAMPLE, SERIAL),
+    # hh_id = paste0(SAMPLE, SERIAL),
     hh_type = case_when(
       HHTYPE == 1 ~ "family",
       HHTYPE %in% 2:8 ~ "non-family"
