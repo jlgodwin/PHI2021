@@ -31,7 +31,6 @@ resis <- read.csv('../../../../EXTR_ResBldg.csv')
 parcels <- read.csv('../../../../EXTR_Parcel.csv')
 envir <- read.csv("../../../../EXTR_EnvironmentalRestriction_V.csv")
 homeimp <- read.csv("../../../../EXTR_HomeImpApp.csv")
-units <- read.csv('../../../../EXTR_UnitBreakdown.csv')
 
 ## Exploratory ####
 names(lookup)
@@ -41,7 +40,6 @@ names(resis)
 names(parcels)
 names(envir)
 names(homeimp)
-names(units)
 
 head(apts)
 head(condos)
@@ -82,22 +80,9 @@ table(envir$Source)
 table(envir$PcntAffected)
 table(envir$UpdatedBy)
 
+# Households ####
 
-# Home Improvement ####
-## Juliette--may be something
-## for us to look into for case studies?
-table(homeimp$MaintOrReplace)
-table(homeimp$MultipleDwellings)
-table(homeimp$PersonalProperty)
-summary(homeimp$EstCost)
-
-
-# Unit breakdown ####
-table(units$UnitTypeItemId)
-
-
-# Households by type ####
-
+## by_zipcode ####
 
 ### Apartments ####
 
@@ -110,19 +95,25 @@ apts$ConstrClass <- factor(apts$ConstrClass,
                                       "Wood frame",
                                       "Prefab steel"))
 
-#### Join with parcels + other datasets ####
+by_zipcode <- list()
+by_zipcode[["apts"]] <- apts %>%
+  select(Major, Minor,
+         ComplexDescr,
+         ConstrClass,
+         NbrBldgs,
+         NbrUnits,
+         AvgUnitSize,
+         Address) %>%
+  left_join()
+
+#### Join with parcels and envir ####
 
 apts_in_parcels <- apts %>% 
   group_by(Major, Minor) %>% 
   left_join(parcels %>%
               group_by(Major, Minor) %>%
-              ## Select parcel vars of interest
-              dplyr::select(DistrictName,
-                            PropType,
-                            LevyCode,
-                            CurrentUseDesignation)) %>%
-  left_join(envir) %>%
-  left_join(homeimp)
+              select(DistrictName)) %>%
+  left_join(envir)
 
 apts_in_parcels %>% 
   as.data.frame() %>% 
@@ -137,43 +128,48 @@ table(apts_in_parcels$DistrictName, useNA = 'ifany')
 table(apts_in_parcels$Type,
       apts_in_parcels$DistrictName, useNA = 'ifany')
 
-## tidyverse/piping alternative to above
-apts_in_parcels %>%
-  group_by(DistrictName, Type) %>%
-  summarise(N = n())
+#### Make ZipCode ####
 
-## OR group by hazard Type first
-
-apts_in_parcels %>%
-  group_by(Type, DistrictName) %>%
-  summarise(N = n()) 
-
-
-## Select a specific hazard to look at?
-
-###### Seismic ####
-apts_in_parcels %>%
-  group_by(Type, DistrictName) %>%
-  summarise(N = n())  %>%
-  filter(Type == "SeismicHazard")
-
-###### Hundred Year Flood Plain ####
-apts_in_parcels %>%
-  group_by(Type, DistrictName) %>%
-  summarise(N = n())  %>%
-  filter(Type == "HundredYrFloodPlain")
+## Grab the zipcode testing
+if(FALSE){
+  nchar(apts$Address[1])
+  substr(apts$Address[1],
+         start = nchar(apts$Address[1]) - 5 + 1,
+         stop = nchar(apts$Address[1]))
+}
+by_zipcode$apts$ZipCode <- substr(by_zipcode$apts$Address,
+                                  start = nchar(by_zipcode$apts$Address) - 5 + 1,
+                                  stop = nchar(by_zipcode$apts$Address))
+by_zipcode$apts$ZipCodeQual <- ifelse(substr(by_zipcode$apts$ZipCode, 1, 1) == 9 &
+                                        nchar(by_zipcode$apts$ZipCode) == 5,
+                                      1, 0)
+table(by_zipcode$apts$ZipCode)
+table(by_zipcode$apts$ZipCodeQual)
 
 ### Condos ####
 table(condos$ConstrClass)
 condos$ConstrClass <- factor(condos$ConstrClass,
-                             levels = 0:5,
-                             labels = c("Unknown", "Strutural steel",
-                                        "Reinforced concrete",
-                                        "Masonry",
-                                        "Wood frame",
-                                        "Prefab steel"))
+                           levels = 0:5,
+                           labels = c("Unknown", "Strutural steel",
+                                      "Reinforced concrete",
+                                      "Masonry",
+                                      "Wood frame",
+                                      "Prefab steel"))
 table(condos$ConstrClass)
 
+by_zipcode[["condos"]] <- condos %>%
+  select(Major, ComplexType,
+         ComplexDescr, NbrBldgs,
+         NbrUnits,
+         AvgUnitSize,
+         ZipCode) 
+
+
+table(by_zipcode$condos$ZipCode)
+by_zipcode$condos$ZipCodeQual <- ifelse(substr(by_zipcode$condos$ZipCode, 1, 1) == 9 &
+                                          nchar(by_zipcode$condos$ZipCode) == 5,
+                                        1, 0)
+table(by_zipcode$condos$ZipCodeQual)
 
 #### Join with parcels and envir ####
 
@@ -182,8 +178,7 @@ condos_in_parcels <- condos %>%
   left_join(parcels %>%
               group_by(Major, Minor) %>%
               select(DistrictName)) %>%
-  left_join(envir) %>%
-  left_join(homeimp)
+  left_join(envir)
 
 condos_in_parcels %>% 
   as.data.frame() %>% 
@@ -197,17 +192,6 @@ table(condos_in_parcels$DistrictName, useNA = 'ifany')
 table(condos_in_parcels$Type,
       condos_in_parcels$DistrictName, useNA = 'ifany')
 
-###### Seismic ####
-condos_in_parcels %>%
-  group_by(Type, DistrictName) %>%
-  summarise(N = n())  %>%
-  filter(Type == "SeismicHazard")
-
-###### Hundred Year Flood Plain ####
-condos_in_parcels %>%
-  group_by(Type, DistrictName) %>%
-  summarise(N = n())  %>%
-  filter(Type == "HundredYrFloodPlain")
 
 
 ### Residential Buildings ####
@@ -219,7 +203,7 @@ resis$HeatSource <- factor(resis$HeatSource,
                            levels = 0:7,
                            labels = c( "Unknown",
                                        "Oil",
-                                       "Gas",
+                                      "Gas",
                                        "Electricity",
                                        "Oil/Solar",
                                        "Gas/Solar",
@@ -244,8 +228,7 @@ resis_in_parcels <- resis %>%
   left_join(parcels %>%
               group_by(Major, Minor) %>%
               select(DistrictName)) %>%
-  left_join(envir) %>%
-  left_join(homeimp)
+  left_join(envir)
 
 resis_in_parcels %>% 
   as.data.frame() %>% 
@@ -261,88 +244,41 @@ table(resis_in_parcels$Type,
       resis_in_parcels$DistrictName, useNA = 'ifany')
 
 
-###### Seismic ####
-resis_in_parcels %>%
-  group_by(Type, DistrictName) %>%
-  summarise(N = n())  %>%
-  filter(Type == "SeismicHazard")
 
-###### Hundred Year Flood Plain ####
-resis_in_parcels %>%
-  group_by(Type, DistrictName) %>%
-  summarise(N = n())  %>%
-  filter(Type == "HundredYrFloodPlain")
+by_zipcode[["resis"]] <- resis %>%
+  select(Major, Minor,
+         BldgNbr,
+         NbrLivingUnits,
+         BuildingNumber,
+         Bedrooms,
+         SqFtTotLiving,
+         BathFullCount,
+         ZipCode) %>%
+  rename(NbrUnits = NbrLivingUnits)
 
+table(by_zipcode$resis$ZipCode)
+by_zipcode$resis$ZipCodeQual <- ifelse(substr(by_zipcode$resis$ZipCode, 1, 1) == 9 &
+                                          nchar(by_zipcode$resis$ZipCode) == 5,
+                                        1, 0)
+table(by_zipcode$resis$ZipCodeQual)
 
-# Apts/Condos + Resi? ####
+### Aggregate to clean ZipCodes ####
+hh.idx <- 0
 
-## Since Apts and Condos
-## Don't have heating systems etc
-## are they in the residential building file?
-## let's see what happens?
+for(hh.type in names(by_zipcode)){
+  hh.idx <- hh.idx + 1
+  
+  by_zipcode[[hh.idx]] <-
+    by_zipcode[[hh.idx]] %>%
+    mutate(HouseholdType = hh.type) %>%
+    filter(ZipCodeQual == 1) %>%
+    group_by(ZipCode, HouseholdType) %>%
+    summarise(NbrUnits = sum(NbrUnits))
+}
+#### save() ####
 
-resis_in_parcels %>%
-  left_join(apts_in_parcels) %>%
-  nrow()
-
-sum(apts_in_parcels$Major %in% resis_in_parcels$Major)
-
-## okay this is weird?
-## error about building number
-## can we merge without BuildingNumber
-resis_in_parcels %>%
-  left_join(condos_in_parcels) %>%
-  nrow()
-
-resis_in_parcels %>%
-  left_join(condos_in_parcels %>%
-            dplyr::select(-BuildingNumber)) %>%
-  nrow()
-
-## Aha! resis include Apts and Condos 
-## Can we left join the other way?
-apts_in_parcels %>%
-  left_join(resis_in_parcels) %>%
-  group_by(HeatSystem) %>%
-  summarise(N = n())
-
-all_households <- resis_in_parcels %>%
-  left_join(apts_in_parcels) %>%
-  left_join(condos_in_parcels %>%
-              dplyr::select(-BuildingNumber))
-
-nrow(all_households)
-
-table(all_households$DistrictName)
-
-## HeatSystem and HeatSource ####
-## WOW no info for Apts! great to find out
-all_households %>%
-  group_by(HeatSystem,
-           AptIndicator) %>%
-  summarise(N = n())
-
-
-heat_systems <- all_households %>%
-  group_by(DistrictName,
-           HeatSystem,
-           HeatSource) %>%
-  summarise(N = n())
-
-
-## pick a district
-heat_systems %>%
-  filter(DistrictName == "SEATTLE")
-
-## get rid of heat source
-heat_systems %>%
-  ungroup() %>%
-  group_by(HeatSystem) %>%
-  summarise(N = sum(N))
-
-all_households %>%
-  group_by(DistrictName,
-           HeatSystem) %>%
-  summarise(N = n()) %>%
-  filter(DistrictName == "KENT")
-
+households <- do.call(rbind.data.frame, by_zipcode)
+save(households,
+     file = paste0('households_zip_',
+                   todays.date,
+                   '.rda'))
