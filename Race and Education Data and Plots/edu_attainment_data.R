@@ -500,9 +500,11 @@ C15002I <- C15002I %>%
 ### combine all races data into one data set to create a CSV of it
 edu_attainment_data <- bind_rows(C15002A, C15002B, C15002C, C15002D, C15002E,
                                  C15002F, C15002G, C15002H, C15002I)
-edu_attainment_data <- edu_attainment_data %>% 
+edu_attainment_data <- edu_attainment_data %>%
   filter(short_label != "Total:") %>% 
   filter(short_label != "Male:") %>% 
   filter(short_label != "Female:")
+ 
+edu_attainment_data <- subset(edu_attainment_data, select = -geometry)
 
 write_csv(edu_attainment_data, "edu_attainment_data.csv")
