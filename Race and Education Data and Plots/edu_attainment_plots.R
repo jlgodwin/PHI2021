@@ -55,35 +55,34 @@ get_geometry <-
           moe = 90,
           cache_table = TRUE) 
 
-edu_data_test <- get_geometry %>% 
-  select(geometry) 
-## can i join this data set to the edu_data? i tried to but since they are diff
-## vector lengths it doesn't work for me?
+edu_geo <- get_geometry %>% 
+  select(GEOID, geometry) %>% 
+  mutate(GEOID = as.numeric(GEOID))
 
+
+edu_data <- edu_data %>% 
+  filter(less_than_hs == 1) %>%
+  group_by(GEOID, less_than_hs) %>% 
+  summarize(
+    estimate = sum(estimate),
+    moe = sum(moe)
+  ) %>%
+  data.table()%>% 
+  mutate(SE = moe/qnorm(.95)) %>% 
+  mutate(CoV = SE/estimate)
+
+edu_data <- edu_geo %>% 
+  left_join(edu_data, by = "GEOID")
 
 years <- c(2009, 2014, 2019)
 less_than_hs_white_estimate <- list()
 for(year in years){
   year.idx <- match(year, years)
   less_than_hs_white_estimate[[as.character(year)]] <- edu_data %>% 
-    filter(less_than_hs == 1) %>%
-    group_by(GEOID, less_than_hs) %>% 
-    summarize(
-      estimate = sum(estimate),
-      moe = sum(moe)
-    ) %>%
-    data.table()%>% 
-    mutate(SE = moe/qnorm(.95)) %>% 
-    mutate(CoV = SE/estimate) %>% 
-    #st_as_sf() %>%
-    
-  ## trying to get this plot to work
-    test <- ggplot() +
-    geom_sf(edu_data, mapping = aes(fill = estimate), 
-            data = st_as_sf(edu_data_test$geometry),
-            stat = "sf", position = "identity") +
+    ggplot() +
+    geom_sf(mapping = aes(fill = estimate)) +
     labs(title = "Less than High School",
          subtitle = paste0("Estimate, White alone, ", year)) +
-    scale_fill_viridis_c() + 
+    scale_fill_fermenter() + 
     theme_void()
 }
