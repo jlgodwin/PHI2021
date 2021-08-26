@@ -29,19 +29,35 @@ for(feature.id in 1:length(horrid$features)){
   tmp_geometry <- horrid$features[[feature.id]]$geometry
   tmp_coords <- tmp_geometry$coordinates
   feature_test[[feature.id]] <- lapply(unlist(tmp_coords),
-              function(coords_elem){ coords_elem[[1]]
-               
-              } )
+                                       function(coords_elem){ coords_elem[[1]]
+                                         
+                                       } )
   
-featuredf_test[[feature.id]] <- 
-  data.frame(long = unlist(feature_test[[feature.id]][seq(1,
-                                                          length(feature_test[[feature.id]]),2)]),
-             lat = unlist(feature_test[[feature.id]][seq(2,
-                                                         length(feature_test[[feature.id]]),2)]))  
-feature_geo_test[[feature.id]] <- df_geojson(featuredf_test[[feature.id]], 
-                                             lon = "long", lat = "lat") %>% 
-  geojson_sf()
+  featuredf_test[[feature.id]] <- 
+    data.frame(long = unlist(feature_test[[feature.id]][seq(1,
+                                                            length(feature_test[[feature.id]]),2)]),
+               lat = unlist(feature_test[[feature.id]][seq(2,
+                                                           length(feature_test[[feature.id]]),2)]))  
+  feature_geo_test[[feature.id]] <- df_geojson(featuredf_test[[feature.id]], 
+                                               lon = "long", lat = "lat") %>% 
+    geojson_sf()
 }
+
+### make graphs without the crazy stuff ^^
+get_geometry <-
+  get_acs("tract",
+          table = "C15002B",
+          year = 2019,
+          state = "WA",
+          county = "King",
+          geometry = TRUE, 
+          survey = "acs5",
+          moe = 90,
+          cache_table = TRUE) 
+
+edu_data_test <- get_geometry %>% 
+  select(geometry) 
+
 
 years <- c(2009, 2014, 2019)
 less_than_hs_white_estimate <- list()
@@ -57,9 +73,13 @@ for(year in years){
     data.table()%>% 
     mutate(SE = moe/qnorm(.95)) %>% 
     mutate(CoV = SE/estimate) %>% 
-    st_as_sf() %>%
-    ggplot() +
-    geom_sf(aes(fill = estimate)) +
+    #st_as_sf() %>%
+    
+  ## trying to get this plot to work
+    test <- ggplot() +
+    geom_sf(edu_data, mapping = aes(fill = estimate), 
+            data = st_as_sf(edu_data_test$geometry),
+            stat = "sf", position = "identity") +
     labs(title = "Less than High School",
          subtitle = paste0("Estimate, White alone, ", year)) +
     scale_fill_viridis_c() + 
