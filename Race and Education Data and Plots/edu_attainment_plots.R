@@ -57,6 +57,8 @@ get_geometry <-
 
 edu_data_test <- get_geometry %>% 
   select(geometry) 
+## can i join this data set to the edu_data? i tried to but since they are diff
+## vector lengths it doesn't work for me?
 
 
 years <- c(2009, 2014, 2019)
