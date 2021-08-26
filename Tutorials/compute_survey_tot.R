@@ -1,28 +1,28 @@
-compute_survey_proportions <- function(dataframe){
-
+compute_survey_tot <- function(dataframe){
+  
   print("# Average household size #")
   
   formula<-~hh_size
   
   print("# ALL #")
-  All<-svymean(formula,
+  All<-svytotal(formula,
                my.svydesign,na.rm=T)
   
   print("# by type #")
   hh_type <-svyby(formula,
-              ~hh_type,my.svydesign,svymean,na.rm=T)
-
+                  ~hh_type,my.svydesign,svytotal,na.rm=T)
+  
   print("# by tenure#")
   hh_tenure <-svyby(formula,
-                 ~tenure,my.svydesign,svymean,na.rm=T)
+                    ~tenure,my.svydesign,svytotal,na.rm=T)
   
   print("# by multigen#")
   multigen <-svyby(formula,
-                    ~multigen,my.svydesign,svymean,na.rm=T)
+                   ~multigen,my.svydesign,svytotal,na.rm=T)
   
   print("# both hh_type and hh_tenure and multigen#")
   Both <-svyby(formula,
-               ~hh_type+tenure+multigen,my.svydesign,svymean,na.rm=T)
+               ~hh_type+tenure+multigen,my.svydesign,svytotal,na.rm=T)
   
   
   
@@ -39,24 +39,24 @@ compute_survey_proportions <- function(dataframe){
   formula2<-~as.numeric(hh_size == 1)
   
   print("# ALL #")
-  All2<-svymean(formula2,
-               my.svydesign,na.rm=T)
+  All2<-svytotal(formula2,
+                my.svydesign,na.rm=T)
   
   print("# by type #")
   hh_type2 <-svyby(formula2,
-                  ~hh_type,my.svydesign,svymean,na.rm=T)
+                   ~hh_type,my.svydesign,svytotal,na.rm=T)
   
   print("# by tenure#")
   hh_tenure2 <-svyby(formula2,
-                    ~tenure,my.svydesign,svymean,na.rm=T)
+                     ~tenure,my.svydesign,svytotal,na.rm=T)
   
   print("# by multigen#")
   multigen2 <-svyby(formula2,
-                     ~multigen,my.svydesign,svymean,na.rm=T)
+                    ~multigen,my.svydesign,svytotal,na.rm=T)
   
   print("# both hh_type and hh_tenure#")
   Both2 <-svyby(formula2,
-               ~hh_type+tenure,my.svydesign,svymean,na.rm=T)
+                ~hh_type+tenure,my.svydesign,svytotal,na.rm=T)
   
   
   # rename the standard error to match other conventions #
@@ -76,24 +76,24 @@ compute_survey_proportions <- function(dataframe){
   formula3<-~as.numeric(hh_size == 2)
   
   print("# ALL #")
-  All3<-svymean(formula3,
+  All3<-svytotal(formula3,
                 my.svydesign,na.rm=T)
   
   print("# by type #")
   hh_type3 <-svyby(formula3,
-                   ~hh_type,my.svydesign,svymean,na.rm=T)
+                   ~hh_type,my.svydesign,svytotal,na.rm=T)
   
   print("# by tenure#")
   hh_tenure3 <-svyby(formula3,
-                     ~tenure,my.svydesign,svymean,na.rm=T)
+                     ~tenure,my.svydesign,svytotal,na.rm=T)
   
   print("# by multigen#")
   multigen3 <-svyby(formula3,
-                     ~multigen,my.svydesign,svymean,na.rm=T)
+                    ~multigen,my.svydesign,svytotal,na.rm=T)
   
   print("# both hh_type and hh_tenure#")
   Both3 <-svyby(formula3,
-                ~hh_type+tenure,my.svydesign,svymean,na.rm=T)
+                ~hh_type+tenure,my.svydesign,svytotal,na.rm=T)
   
   
   # rename the standard error to match other conventions #
@@ -113,20 +113,20 @@ compute_survey_proportions <- function(dataframe){
   formula4<-~as.numeric(hh_size == 3)
   
   print("# ALL #")
-  All4<-svymean(formula4,
+  All4<-svytotal(formula4,
                 my.svydesign,na.rm=T)
   
   print("# by type #")
   hh_type4 <-svyby(formula4,
-                   ~hh_type,my.svydesign,svymean,na.rm=T)
+                   ~hh_type,my.svydesign,svytotal,na.rm=T)
   
   print("# by tenure#")
   hh_tenure4 <-svyby(formula4,
-                     ~tenure,my.svydesign,svymean,na.rm=T)
+                     ~tenure,my.svydesign,svytotal,na.rm=T)
   
   print("# both hh_type and hh_tenure#")
   Both4 <-svyby(formula4,
-                ~hh_type+tenure,my.svydesign,svymean,na.rm=T)
+                ~hh_type+tenure,my.svydesign,svytotal,na.rm=T)
   
   
   # rename the standard error to match other conventions #
@@ -145,20 +145,20 @@ compute_survey_proportions <- function(dataframe){
   formula5<-~as.numeric(hh_size == 4)
   
   print("# ALL #")
-  All5<-svymean(formula5,
+  All5<-svytotal(formula5,
                 my.svydesign,na.rm=T)
   
   print("# by type #")
   hh_type5 <-svyby(formula5,
-                   ~hh_type,my.svydesign,svymean,na.rm=T)
+                   ~hh_type,my.svydesign,svytotal,na.rm=T)
   
   print("# by tenure#")
   hh_tenure5 <-svyby(formula5,
-                     ~tenure,my.svydesign,svymean,na.rm=T)
+                     ~tenure,my.svydesign,svytotal,na.rm=T)
   
   print("# both hh_type and hh_tenure#")
   Both5 <-svyby(formula5,
-                ~hh_type+tenure,my.svydesign,svymean,na.rm=T)
+                ~hh_type+tenure,my.svydesign,svytotal,na.rm=T)
   
   
   # rename the standard error to match other conventions #
@@ -177,20 +177,20 @@ compute_survey_proportions <- function(dataframe){
   formula6<-~as.numeric(hh_size == 5)
   
   print("# ALL #")
-  All6<-svymean(formula6,
+  All6<-svytotal(formula6,
                 my.svydesign,na.rm=T)
   
   print("# by type #")
   hh_type6 <-svyby(formula6,
-                   ~hh_type,my.svydesign,svymean,na.rm=T)
+                   ~hh_type,my.svydesign,svytotal,na.rm=T)
   
   print("# by tenure#")
   hh_tenure6 <-svyby(formula6,
-                     ~tenure,my.svydesign,svymean,na.rm=T)
+                     ~tenure,my.svydesign,svytotal,na.rm=T)
   
   print("# both hh_type and hh_tenure#")
   Both6 <-svyby(formula6,
-                ~hh_type+tenure,my.svydesign,svymean,na.rm=T)
+                ~hh_type+tenure,my.svydesign,svytotal,na.rm=T)
   
   
   # rename the standard error to match other conventions #
@@ -209,20 +209,20 @@ compute_survey_proportions <- function(dataframe){
   formula6<-~as.numeric(hh_size == 5)
   
   print("# ALL #")
-  All6<-svymean(formula6,
+  All6<-svytotal(formula6,
                 my.svydesign,na.rm=T)
   
   print("# by type #")
   hh_type6 <-svyby(formula6,
-                   ~hh_type,my.svydesign,svymean,na.rm=T)
+                   ~hh_type,my.svydesign,svytotal,na.rm=T)
   
   print("# by tenure#")
   hh_tenure6 <-svyby(formula6,
-                     ~tenure,my.svydesign,svymean,na.rm=T)
+                     ~tenure,my.svydesign,svytotal,na.rm=T)
   
   print("# both hh_type and hh_tenure#")
   Both6 <-svyby(formula6,
-                ~hh_type+tenure,my.svydesign,svymean,na.rm=T)
+                ~hh_type+tenure,my.svydesign,svytotal,na.rm=T)
   
   
   # rename the standard error to match other conventions #
@@ -241,20 +241,20 @@ compute_survey_proportions <- function(dataframe){
   formula7<-~as.numeric(hh_size == 6)
   
   print("# ALL #")
-  All7<-svymean(formula7,
+  All7<-svytotal(formula7,
                 my.svydesign,na.rm=T)
   
   print("# by type #")
   hh_type7 <-svyby(formula7,
-                   ~hh_type,my.svydesign,svymean,na.rm=T)
+                   ~hh_type,my.svydesign,svytotal,na.rm=T)
   
   print("# by tenure#")
   hh_tenure7 <-svyby(formula7,
-                     ~tenure,my.svydesign,svymean,na.rm=T)
+                     ~tenure,my.svydesign,svytotal,na.rm=T)
   
   print("# both hh_type and hh_tenure#")
   Both7 <-svyby(formula7,
-                ~hh_type+tenure,my.svydesign,svymean,na.rm=T)
+                ~hh_type+tenure,my.svydesign,svytotal,na.rm=T)
   
   
   # rename the standard error to match other conventions #
@@ -273,20 +273,20 @@ compute_survey_proportions <- function(dataframe){
   formula8<-~as.numeric(hh_size == 7)
   
   print("# ALL #")
-  All8<-svymean(formula8,
+  All8<-svytotal(formula8,
                 my.svydesign,na.rm=T)
   
   print("# by type #")
   hh_type8 <-svyby(formula8,
-                   ~hh_type,my.svydesign,svymean,na.rm=T)
+                   ~hh_type,my.svydesign,svytotal,na.rm=T)
   
   print("# by tenure#")
   hh_tenure8 <-svyby(formula8,
-                     ~tenure,my.svydesign,svymean,na.rm=T)
+                     ~tenure,my.svydesign,svytotal,na.rm=T)
   
   print("# both hh_type and hh_tenure#")
   Both8 <-svyby(formula8,
-                ~hh_type+tenure,my.svydesign,svymean,na.rm=T)
+                ~hh_type+tenure,my.svydesign,svytotal,na.rm=T)
   
   
   # rename the standard error to match other conventions #

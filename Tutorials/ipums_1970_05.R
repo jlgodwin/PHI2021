@@ -82,32 +82,32 @@ my.svydesign <- svydesign(id= ~CLUSTER,
 final_1980 <- compute_survey_proportions(hhDF %>%
                                            filter(YEAR == 1980))
 
-# my.svydesign <- svydesign(id= ~CLUSTER,
-#                           strata=~STRATA,
-#                           weights= ~HHWT, data=hhDF %>%
-#                             filter(YEAR == 1990))
-# 
-# final_1990 <- compute_survey_proportions(hhDF %>%
-#                                            filter(YEAR == 1990))
+my.svydesign <- svydesign(id= ~CLUSTER,
+                          strata=~STRATA,
+                          weights= ~HHWT, data=hhDF %>%
+                            filter(YEAR == 1990 & !(STRATA %in% c(38,42,79,115))))
+
+final_1990 <- compute_survey_proportions(hhDF %>%
+                                           filter(YEAR == 1990 & STRATA != 38))
 
 my.svydesign <- svydesign(id= ~CLUSTER,
                           strata=~STRATA,
                           weights= ~HHWT, data=hhDF %>%
-                            filter(YEAR == 2005))
+                            filter(YEAR == 2000& !(STRATA %in% c(50,87,95,107,111,119,122,131))))
 
-final_2005 <- compute_survey_proportions(hhDF %>%
-                                           filter(YEAR == 2005))
+final_2000 <- compute_survey_proportions(hhDF %>%
+                                           filter(YEAR == 2000 & !(STRATA %in% c(50,87,95,107,111,119,122,131))))
 final_1980$year<-1980
-# final_1990$year<-1990
-final_2005$year<-2005
+final_1990$year<-1990
+final_2000$year<-2000
 
 final <- rbind(
   final_1980,
-  # final_1990,
-  final_2005
+  final_1990,
+  final_2000
 )
 
 final$survey <- "ipums_1980"
 
 write_csv(as.data.frame(final),
-          paste0(out_dir,"Processed_1980_2005_IPUMS.csv"))
+          paste0(out_dir,"Processed_1980_2000_IPUMS.csv"))

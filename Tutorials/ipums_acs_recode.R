@@ -14,6 +14,11 @@ ipums_recode_acs5 <- function(dataframe){
       GQ == 0 ~ "vacant",
       GQ %in% c(1:2,5) ~ "household",
       GQ %in% c(3:4) ~ "gq"
+    ),
+    multigen = case_when(
+      MULTGEN == 1 ~ "1 generation",
+      MULTGEN == 2 ~ "2 generations",
+      MULTGEN == 3 ~ "3+ generations",
     )
   )
 }

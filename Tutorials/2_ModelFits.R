@@ -108,7 +108,7 @@ for(j in 1:nrow(results)){
   # --- add predictions to the data set --- #
   ###########################################
   
-  if (j == 1) {
+  if (results$outcome[j] == "hh_size") {
     mod_dat$mean<-mod$summary.fitted.values$`mean`
     mod_dat$up<-mod$summary.fitted.values$`0.975quant`
     mod_dat$low<-mod$summary.fitted.values$`0.025quant`
