@@ -64,7 +64,7 @@ p2 <- diffplot %>%
   scale_x_continuous(breaks = c(2000,2005,2010,2015,2020)) +
   facet_wrap(~hh_type) +
   labs(y="Number of households", x = "Year", color = "Size-of-household", shape = "Tenure",
-       title = "Number of households in King County by size-of-household, type, and tenure") +
+       title = "Difference in number of households by household size since 2000 in King County") +
   guides(fill=FALSE,size = FALSE) + scale_color_brewer(palette = "Accent")
 
 ggsave(p2, filename = paste0(code_dir, "Report_plots/diff_since_2000_hh_by_size_tenure_type.png"), width = 11, height = 6)

@@ -99,8 +99,13 @@ pop_hh_by_HRA <- projDF[, list(pop = sum(value),
 
 pop_hh_by_HRA[, average_hhsize := pop/hh]
 
-write_csv(as.data.frame(pop_hh_by_HRA),
-          paste0(out_dir,"household_forecasts.csv"))
+write_csv(as.data.frame(pop_hh_by_HRA %>%
+                          rename(population = pop,
+                                 number_households = hh) %>%
+                          mutate(
+                            variable = "Household Forecasts by HRA"
+                          )),
+          paste0(code_dir,"Report_estimates/household_forecasts.csv"))
 
 plot.df <- st_as_sf(hra) %>%
   right_join(pop_hh_by_HRA %>%
