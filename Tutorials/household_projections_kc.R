@@ -99,6 +99,9 @@ pop_hh_by_HRA <- projDF[, list(pop = sum(value),
 
 pop_hh_by_HRA[, average_hhsize := pop/hh]
 
+write_csv(as.data.frame(pop_hh_by_HRA),
+          paste0(out_dir,"household_forecasts.csv"))
+
 plot.df <- st_as_sf(hra) %>%
   right_join(pop_hh_by_HRA %>%
               filter(Year %in% c(2025,2035,2045)) %>%
@@ -111,10 +114,10 @@ p1 <- ggplot(plot.df) +
   scale_x_discrete(expand = c(0, 0)) +
   scale_y_discrete(expand = c(0, 0)) +
   map_theme_main + 
-  scale_color_brewer(palette = "Blues") +
+  scale_fill_distiller(palette = "Blues") +
   facet_wrap(~ Year, nrow = 2)
 
-ggsave(p1, filename = paste0(code_dir, "Projected_number_hh_2025-2045.png"),
+ggsave(p1, filename = paste0(code_dir, "Report_plots/Projected_number_hh_2025-2045.png"),
        width = 9, height = 6)
 
 ## Difference in number of households
@@ -138,8 +141,8 @@ p2 <- ggplot(plot.df) +
   scale_x_discrete(expand = c(0, 0)) +
   scale_y_discrete(expand = c(0, 0)) +
   map_theme_main + 
-  scale_color_brewer(palette = "RdBu")
+  scale_fill_distiller(palette = "RdBu")
 
-ggsave(p2, filename = paste0(code_dir, "Difference_in_number_hh_2025-2045.png"),
+ggsave(p2, filename = paste0(code_dir, "Report_plots/Difference_in_number_hh_2025-2045.png"),
        width = 9, height = 6)
 

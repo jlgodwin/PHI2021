@@ -136,26 +136,3 @@ Owner$mean<-mod2$summary.fitted.values$`mean`
 Owner$up<-mod2$summary.fitted.values$`0.975quant`
 Owner$low<-mod2$summary.fitted.values$`0.025quant`
 
-
-post <- inla.posterior.sample(1000,mod)
-post2 <- inla.posterior.sample(1000,mod2)
-
-samps <- matrix(nrow=20,ncol=1000)
-sampsDiff<-matrix(nrow=20,ncol=1000)
-for(k in 2000:2019){
-  for(jj in 1:1000){
-    
-    samps[,jj] <- post2[[jj]]$latent[1:nrow(Owner)][Owner$Year==k]
-    sampsDiff[,jj]<-post[[jj]]$latent[1:nrow(Owner)][Owner$Year==k]-post2[[jj]]$latent[1:nrow(Owner)][Owner$Year==k]
-    
-  }
-}
-
-c(apply(sampsDiff, 1, median),apply(sampsDiff, 1, quantile, c(.025,.975)))
-data.frame(year = 2000:2019, mean = apply(sampsDiff, 1, median),
-           up = apply(sampsDiff, 1, quantile, c(.975)),
-           lo = apply(sampsDiff, 1, quantile, c(.025)))
-hist(sampsDiff)
-
-sampsDiff %>%
-  ggplot()

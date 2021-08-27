@@ -168,8 +168,8 @@ p1 <- plotDF %>%
   scale_x_continuous(breaks = c(2005,2010,2015,2020)) +
   facet_wrap(~hh_type) +
   labs(y="Number of households", x = "Year", color = "Size-of-household", shape = "Tenure",
-       title = "Number of households in King County by size-of-household, type, and tenure") +
+       title = "Figure 1: Number of households in King County by size-of-household, type, and tenure") +
   guides(fill=FALSE,size = FALSE) + scale_color_brewer(palette = "Accent") +
   map_theme_main
 
-ggsave(p1, filename = paste0(code_dir, "HH_by_size_tenure_type.png"), width = 9, height = 6)
+ggsave(p1, filename = paste0(code_dir, "HH_by_size_tenure_type.png"), width = 11, height = 6)

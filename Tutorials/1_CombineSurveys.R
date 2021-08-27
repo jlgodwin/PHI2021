@@ -95,19 +95,25 @@ dat<-dat%>%mutate(hh_size = as.numeric(hh_size),
 ###########################
 write_csv(dat,paste0(out_dir,"All_KC_hh_size.csv"))
 
+total<-list.files(out_dir)[grep("Total",list.files(out_dir))]
+total_full<-total
 
-library(data.table)
-library(ggplot2)
+# combine the DHS
+dat<-read_csv(paste0(out_dir,total[1]))
 
-p1 <- dat %>%
-  # filter(survey == "acs1" | survey == "ipums_1980") %>%
-  dplyr::select(year, survey, hh_type,tenure,hh_size) %>%
-  data.table() %>%
-  melt.data.table(id.vars = c("year","survey", "hh_type","tenure")) %>%
-  ggplot(aes(x = year, y = value, color = tenure, shape = survey)) +
-  geom_point() +
-  geom_line() +
-  facet_wrap(~hh_type) +
-  theme_minimal()
+for(i in 2:length(total)){
+  # i<-8
+  tmp<-read_csv(paste0(out_dir,total[i]))
+  dat<-rbind(dat,tmp[,names(dat)])
+  
+}
 
+colnames(dat)[c(3,5,7,9,11,13,15)] <- c("prevalence.7_person_hh",
+                                        "prevalence.6_person_hh",
+                                        "prevalence.5_person_hh",
+                                        "prevalence.4_person_hh",
+                                        "prevalence.3_person_hh",
+                                        "prevalence.2_person_hh",
+                                        "prevalence.1_person_hh")
 
+write_csv(dat,paste0(out_dir,"All_KC_hh_size_total.csv"))
