@@ -59,10 +59,13 @@ edu_geo <- get_geometry %>%
   select(GEOID, geometry) %>% 
   mutate(GEOID = as.numeric(GEOID))
 
-## create less than hs plots
+## create white less than hs plots
 edu_data_less_hs_white <- edu_data %>% 
+  filter(str_starts(variable, "C15002A")) %>% 
   filter(less_than_hs == 1) %>%
-  group_by(GEOID, less_than_hs) %>% 
+  group_by(Year, GEOID, less_than_hs) %>% 
+  ###once we get to the summarize statement the years disappear and i think that's
+  ### where the issues with the plot looking the same occur
   summarize(
     estimate = sum(estimate),
     moe = sum(moe)
@@ -79,6 +82,7 @@ less_than_hs_white_estimate <- list()
 for(year in years){
   year.idx <- match(year, years)
   less_than_hs_white_estimate[[as.character(year)]] <- edu_data_less_hs_white %>% 
+    filter(Year == year) %>% 
     ggplot() +
     geom_sf(aes(fill = estimate), size = .25) +
     labs(title = "Less than High School",
@@ -86,3 +90,4 @@ for(year in years){
     scale_fill_distiller(type = "seq", palette = "Blues", direction = 1) + 
     theme_void()
 }
+### the above code creates plots, but they are all the same...?
