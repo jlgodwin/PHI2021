@@ -27,3 +27,5 @@ Data/King_County_Parcels___parcel_area/King_County_Parcels___parcel_area.prj
 Data/King_County_Parcels___parcel_area/King_County_Parcels___parcel_area.shp
 Data/King_County_Parcels___parcel_area/King_County_Parcels___parcel_area.shx
 Data/King_County_Parcels___parcel_area/King_County_Parcels___parcel_area.xml
+.DS_Store
+Data/.DS_Store
