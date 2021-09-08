@@ -113,7 +113,7 @@ for(yr in years){
   
   kc_tracts_poly[[paste0("acs5_", yr)]] <- 
     tmp %>% st_geometry() %>%
-    as(., "Spatial", )
+    as(., "Spatial")
 }
 
 
@@ -813,6 +813,12 @@ for(yr in years){
               SE = sum(prop.area*SE)) %>%
     mutate(CoV = SE/estimate)
 }
+
+save(pop_by_agegroup_hra,
+     pop_by_age_hra,
+     pop_by_agegroup_tracts,
+     pop_by_age_tracts,
+     file = paste0('ACS5_ests_hra_and_tract.rda'))
 ```
 
 ### Plots in a loop
@@ -896,10 +902,7 @@ for(yr in years){
                yr, "_age", agelow,
                ".pdf"),
         height = 8, width = 8)
-    par(mfrow = c(2,2),
-        mar = c(0,0,2,0) + 0.1,
-        oma = c(0,0,0,0))
-    
+   
     plot(kc_tracts_poly[[paste0("acs5_",yr)]],
          col = pop.col.tract,
          border = 'grey48', lwd = .25,
