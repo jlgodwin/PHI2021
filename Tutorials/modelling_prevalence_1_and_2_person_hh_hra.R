@@ -218,12 +218,15 @@ All$mean<-expit(mod$summary.fitted.values$`mean`)
 All$up<-expit(mod$summary.fitted.values$`0.975quant`)
 All$low<-expit(mod$summary.fitted.values$`0.025quant`)
 
-write_csv(as.data.frame(All %>%
-                          arrange(Year) %>%
-                          mutate(variable = "Prevalence of 1-person household") %>%
-                          rename(GEOID=HRA2010v2_) %>%
-                          dplyr::select(GEOID, Year, variable, mean, up, low)),
-          file = paste0(code_dir,"Report_estimates/prevalence_1_person_hh_hra.csv"))
+# write_csv(as.data.frame(All %>%
+#                           arrange(Year) %>%
+#                           mutate(variable = "Prevalence of 1-person household") %>%
+#                           rename(GEOID=HRA2010v2_) %>%
+#                           dplyr::select(GEOID, Year, variable, mean, up, low)),
+#           file = paste0(code_dir,"Report_estimates/prevalence_1_person_hh_hra.csv"))
+
+All <- read_csv(paste0(code_dir,"Report_estimates/prevalence_1_person_hh_hra.csv")) %>%
+  rename(HRA2010v2_=GEOID) 
 
 ####################################################
 ## Maps of prevalence 1 - person hh over time ##
@@ -240,7 +243,8 @@ p1 <- ggplot(plot.df) +
   # scale_y_discrete(expand = c(0, 0)) +
   map_theme_main + 
   scale_fill_distiller(palette = "YlGnBu") +
-  facet_wrap(~ Year, nrow = 2)
+  facet_wrap(~ Year, nrow = 2) 
+
 
 ggsave(p1, filename = paste0(code_dir, "Report_plots/1-person_hh_prev_2000-2019.png"),
        width = 9, height = 6)
@@ -269,6 +273,29 @@ p2 <- ggplot(plot.df) +
 
 ggsave(p2, filename = paste0(code_dir, "Report_plots/Difference_in_1-person_hh_prev_2000-2019.png"),
        width = 9, height = 6)
+
+p1 <- ggplot(plot.df) + 
+  geom_sf(aes(fill=mean)) +
+  ggtitle("") +
+  labs(fill = "Proportion", x = "", y = "") +
+  # scale_x_discrete(expand = c(0, 0)) +
+  # scale_y_discrete(expand = c(0, 0)) +
+  map_theme_main + 
+  scale_fill_distiller(palette = "YlGnBu") +
+  facet_wrap(~ Year, nrow = 2) + 
+  theme(legend.position = 'top')
+
+p2 <- ggplot(plot.df) + 
+  geom_sf(aes(fill=diff_prev)) +
+  ggtitle("") +
+  labs(fill = "Difference in proportion", x = "", y = "") +
+  # scale_x_discrete(expand = c(0, 0)) +
+  # scale_y_discrete(expand = c(0, 0)) +
+  map_theme_main + 
+  scale_fill_distiller(palette = "RdBu") +
+  theme(legend.position = 'right')
+
+grid.arrange(p1,p2,nrow = 1)
 
 plot.df <- st_as_sf(hra) %>%
   full_join(All %>%
