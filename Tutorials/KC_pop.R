@@ -94,34 +94,39 @@ hra <- spTransform(hra,
 ## tracts_to_hra ####
 load('../Data/tracts_to_hra.rda')
 
-## Parcels ####
+## Juris ####
 
 ### Shape ####
-parcels <- readOGR('../Data',
+jurisdictions <- readOGR('../Data',
                    layer = "FLU_dissolve")
-parcels <- spTransform(parcels,
-                       kc_tracts_poly@proj4string)
+jurisdictions <- spTransform(jurisdictions,
+                             kc_tracts_poly@proj4string)
 
 juris <- unionSpatialPolygons(SpatialPolygons(parcels@polygons),
                               IDs = parcels@data$Jurisdicti)
-juris_data <- parcels@data %>% 
+juris_data <- jurisdictions@data %>% 
   group_by(Jurisdicti) %>% 
-  summarise(Nobs_in_parcels = n(),
+  summarise(Nobs = n(),
             Res_Use = sum(Res_Use == "Y",
                           na.rm = TRUE),
             Mixed_Use = sum(Mixed_Use == "Y",
                             na.rm = TRUE)) %>% 
   ungroup() %>% 
-  mutate(Res_Prop = Res_Use/Nobs_in_parcels,
-         Mixed_Prop = Mixed_Use/Nobs_in_parcels) %>% 
+  mutate(Res_Prop = Res_Use/Nobs,
+         Mixed_Prop = Mixed_Use/Nobs) %>% 
   filter(!is.na(Jurisdicti)) %>% 
   as.data.frame()
 row.names(juris_data) <- juris_data$Jurisdicti
 juris <- SpatialPolygonsDataFrame(juris,
                                   data = juris_data)
-table(parcels$Jurisdicti)
-table(parcels$Zone_adj)
+table(jurisdictions$Jurisdicti)
+table(jurisdictions$Zone_adj)
 
+## Parcels ####
+
+### Shape ####
+parcels <- readOGR(dsn = '../Data/King_County_Parcels___parcel_area/',
+                   layer = 'King_County_Parcels___parcel_area')
 ### Data ####
 
 parcels_data <- read.csv('../../../EXTR_Parcel.csv')
@@ -444,4 +449,215 @@ for(year in c(2010, 2012, 2015,
 
 # Compare OFM & ACS ####
 
-plot()
+hra_total_pop <- 
+  hra_pop <- list()
+
+for(year in c(2010, 2012, 2015,
+             2017, 2020)){
+  
+  load(paste0('../Data/pop_',
+              year, '_OFM.rda'))
+  hra_pop[[paste0("OFM_", year)]] <- pop %>% 
+    mutate(GEOID = as.character(Geoid)) %>% 
+    left_join(tracts_to_hra$acs5_2019) %>% 
+    group_by(FID_HRA_20, Sex_Lbl, Age, Age_Lbl) %>% 
+    summarise(HRA = unique(HRA2010v2_),
+              Pop = sum(Pop*prop.area)) %>% 
+    filter(!is.na(HRA))
+  
+  hra_total_pop[[paste0("OFM_", year)]] <- 
+    hra_pop[[paste0("OFM_", year)]] %>% 
+    group_by(HRA) %>% 
+    summarise(Pop = sum(Pop))
+}
+
+acs_tmp <- pop_by_agegroup_hra$acs5_2019 %>% 
+  group_by(FID_HRA_20,
+           HRA2010v2_) %>% 
+  summarise(estimate = sum(estimate),
+            SE = sum(SE)) %>% 
+  mutate(CoV = SE/estimate) %>% 
+  ungroup()
+
+pdf('../PopPlots/2017/OFM_ACS5_Compare_2017.pdf',
+    height = 5, width = 5)
+plot(hra_total_pop$OFM_2017$Pop,
+      acs_tmp$estimate,
+     pch = 19,
+     col = pop.cols[3],
+     xlim = c(0, 100000),
+     ylim = c(0, 100000),
+     xaxt = 'n',
+     yaxt = 'n',
+     xlab = "OFM, 2017",
+     ylab = "ACS 2015-2019")
+abline(0,1, lty = 2)
+axis(1, at = seq(0, 100000, 25000))
+axis(2, at = seq(0, 100000, 25000))
+segments(hra_total_pop$OFM_2017$Pop,
+         acs_tmp$estimate + 
+           qnorm(.95)*acs_tmp$SE,
+         hra_total_pop$OFM_2017$Pop,
+         acs_tmp$estimate - 
+           qnorm(.95)*acs_tmp$SE,
+         col = pop.cols[3])
+dev.off()
+
+
+pdf('../PopPlots/2020/OFM_ACS5_Compare_2020.pdf',
+    height = 5, width = 5)
+plot(hra_total_pop$OFM_2020$Pop,
+     acs_tmp$estimate,
+     pch = 19,
+     col = pop.cols[3],
+     xlim = c(0, 100000),
+     ylim = c(0, 100000),
+     xaxt = 'n',
+     yaxt = 'n',
+     xlab = "OFM, 2020",
+     ylab = "ACS 2015-2019")
+abline(0,1, lty = 2)
+axis(1, at = seq(0, 100000, 25000))
+axis(2, at = seq(0, 100000, 25000))
+segments(hra_total_pop$OFM_2020$Pop,
+         acs_tmp$estimate + 
+           qnorm(.95)*acs_tmp$SE,
+         hra_total_pop$OFM_2020$Pop,
+         acs_tmp$estimate - 
+           qnorm(.95)*acs_tmp$SE,
+         col = pop.cols[3])
+dev.off()
+
+
+pdf('../PopPlots/2015/OFM_ACS5_Compare_2015.pdf',
+    height = 5, width = 5)
+plot(hra_total_pop$OFM_2015$Pop,
+     acs_tmp$estimate,
+     pch = 19,
+     col = pop.cols[3],
+     xlim = c(0, 100000),
+     ylim = c(0, 100000),
+     xaxt = 'n',
+     yaxt = 'n',
+     xlab = "OFM, 2015",
+     ylab = "ACS 2015-2019")
+abline(0,1, lty = 2)
+axis(1, at = seq(0, 100000, 25000))
+axis(2, at = seq(0, 100000, 25000))
+segments(hra_total_pop$OFM_2015$Pop,
+         acs_tmp$estimate + 
+           qnorm(.95)*acs_tmp$SE,
+         hra_total_pop$OFM_2015$Pop,
+         acs_tmp$estimate - 
+           qnorm(.95)*acs_tmp$SE,
+         col = pop.cols[3])
+dev.off()
+
+
+acs_tmp <- pop_by_agegroup_hra$acs5_2014 %>% 
+  group_by(FID_HRA_20,
+           HRA2010v2_) %>% 
+  summarise(estimate = sum(estimate),
+            SE = sum(SE)) %>% 
+  mutate(CoV = SE/estimate) %>% 
+  ungroup()
+
+pdf('../PopPlots/2012/OFM_ACS5_Compare_2012.pdf',
+    height = 5, width = 5)
+plot(hra_total_pop$OFM_2012$Pop,
+     acs_tmp$estimate,
+     pch = 19,
+     col = pop.cols[3],
+     xlim = c(0, 100000),
+     ylim = c(0, 100000),
+     xaxt = 'n',
+     yaxt = 'n',
+     xlab = "OFM, 2012",
+     ylab = "ACS 2010-2014")
+abline(0,1, lty = 2)
+axis(1, at = seq(0, 100000, 25000))
+axis(2, at = seq(0, 100000, 25000))
+segments(hra_total_pop$OFM_2012$Pop,
+         acs_tmp$estimate + 
+           qnorm(.95)*acs_tmp$SE,
+         hra_total_pop$OFM_2012$Pop,
+         acs_tmp$estimate - 
+           qnorm(.95)*acs_tmp$SE,
+         col = pop.cols[3])
+dev.off()
+
+pdf('../PopPlots/2010/OFM_ACS5_Compare_2010.pdf',
+    height = 5, width = 5)
+plot(hra_total_pop$OFM_2010$Pop,
+     acs_tmp$estimate,
+     pch = 19,
+     col = pop.cols[3],
+     xlim = c(0, 100000),
+     ylim = c(0, 100000),
+     xaxt = 'n',
+     yaxt = 'n',
+     xlab = "OFM, 2010",
+     ylab = "ACS 2010-2014")
+abline(0,1, lty = 2)
+axis(1, at = seq(0, 100000, 25000))
+axis(2, at = seq(0, 100000, 25000))
+segments(hra_total_pop$OFM_2010$Pop,
+         acs_tmp$estimate + 
+           qnorm(.95)*acs_tmp$SE,
+         hra_total_pop$OFM_2010$Pop,
+         acs_tmp$estimate - 
+           qnorm(.95)*acs_tmp$SE,
+         col = pop.cols[3])
+dev.off()
+
+pdf('../PopPlots/2015/OFM_ACS5_Compare2_2015.pdf',
+    height = 5, width = 5)
+plot(hra_total_pop$OFM_2015$Pop,
+     acs_tmp$estimate,
+     pch = 19,
+     col = pop.cols[3],
+     xlim = c(0, 100000),
+     ylim = c(0, 100000),
+     xaxt = 'n',
+     yaxt = 'n',
+     xlab = "OFM, 2015",
+     ylab = "ACS 2010-2014")
+abline(0,1, lty = 2)
+axis(1, at = seq(0, 100000, 25000))
+axis(2, at = seq(0, 100000, 25000))
+segments(hra_total_pop$OFM_2015$Pop,
+         acs_tmp$estimate + 
+           qnorm(.95)*acs_tmp$SE,
+         hra_total_pop$OFM_2015$Pop,
+         acs_tmp$estimate - 
+           qnorm(.95)*acs_tmp$SE,
+         col = pop.cols[3])
+dev.off()
+
+## By Age ####
+
+
+pdf('../PopPlots/2020/OFM_ACS5_Compare_2020.pdf',
+    height = 5, width = 5)
+plot(hra_total_pop$OFM_2020$Pop,
+     acs_tmp$estimate,
+     pch = 19,
+     col = pop.cols[3],
+     xlim = c(0, 100000),
+     ylim = c(0, 100000),
+     xaxt = 'n',
+     yaxt = 'n',
+     xlab = "OFM, 2020",
+     ylab = "ACS 2015-2019")
+abline(0,1, lty = 2)
+axis(1, at = seq(0, 100000, 25000))
+axis(2, at = seq(0, 100000, 25000))
+segments(hra_total_pop$OFM_2020$Pop,
+         acs_tmp$estimate + 
+           qnorm(.95)*acs_tmp$SE,
+         hra_total_pop$OFM_2020$Pop,
+         acs_tmp$estimate - 
+           qnorm(.95)*acs_tmp$SE,
+         col = pop.cols[3])
+dev.off()
+
