@@ -53,6 +53,9 @@ if(loadOFM){
   year <- 2020
   load('../Data/pop_2020_OFM.rda')
 }
+
+## ACS5 Year ests ####
+load('../Tutorials/ACS5_ests_hra_and_tract.rda')
 ## Census tracts ####
 
 kc_tracts <- get_acs("tract",
@@ -128,7 +131,7 @@ rm(parcels_data)
 for(year in c(2010, 2012, 2015,
               2017, 2020)){
   
-  # Population pyramids by HRA ####
+  # Population (OFM) pyramids by HRA ####
   load(paste0('../Data/pop_', 
               year, '_OFM.rda'))  
   hra_pop <- pop %>% 
@@ -174,7 +177,7 @@ for(year in c(2010, 2012, 2015,
       dplyr::select(Age_Lbl) %>% unlist()
     
     pyr.obj <- get.bPop.pyramid(pyr.tmp,
-                                legend = "",
+                                show.legend = FALSE,
                                 LRcolnames = c("Female", "Male"),
                                 LRmain = c(hra.name, ""))
     
@@ -185,8 +188,8 @@ for(year in c(2010, 2012, 2015,
   dev.off()
   
   ## With County ####
-  pdf(paste0("../PopPlots/",
-             "Pyramid/Pyramid_HRAandCounty_",
+  pdf(paste0("../PopPlots/", year,
+             "/Pyramid/Pyramid_HRAandCounty_",
              year, ".pdf"),
       height = 5, width = 5)
   for(hra.name in unique(hra_pop$HRA)){
@@ -272,16 +275,26 @@ for(year in c(2010, 2012, 2015,
                                   n = 9)
     pop.col.hra <- findColours(pop.int.hra, pop.pal)
     
-    if(!dir.exists(paste0("../PopPlots/OFM_Ages/"))){
-      dir.create(paste0("../PopPlots/OFM_Ages/"))
+    
+    if(!dir.exists(paste0("../PopPlots/", year, "/"))){
+      dir.create(paste0("../PopPlots/",
+                        year, "/"))
+    }
+    if(!dir.exists(paste0("../PopPlots/",
+                          year, "/OFM_Ages/"))){
+      dir.create(paste0("../PopPlots/",
+                        year, "/OFM_Ages/"))
     }
     
-    if(!dir.exists(paste0("../PopPlots/OFM_Ages/",
+    if(!dir.exists(paste0("../PopPlots/", 
+                          year, "/OFM_Ages/",
                           age, "/"))){
-      dir.create(paste0("../PopPlots/OFM_Ages/",
+      dir.create(paste0("../PopPlots/", 
+                        year, "/OFM_Ages/",
                         age, "/"))
     }
-    pdf(paste0("../PopPlots/OFM_Ages/",
+    pdf(paste0("../PopPlots/", 
+               year, "/OFM_Ages/",
                age, "/OFM_",
                year, "_age", age,
                ".pdf"),
@@ -289,12 +302,13 @@ for(year in c(2010, 2012, 2015,
     plot(hra,
          col = pop.col.hra,
          border = 'grey48', lwd = .25,
-         main = paste0("Population ",
-                       age))
+         main = "")
     legend('bottomleft',
+           title = 'Population',
+           title.adj = 0,
            ncol = 2,
            bty = 'n',
-           cex = 0.6,
+           cex = 0.5,
            border = FALSE,
            fill = pop.pal,
            legend = names(attr(pop.col.hra, 'table')))
@@ -341,7 +355,8 @@ for(year in c(2010, 2012, 2015,
                                    n = 9)
     prop.col.hra <- findColours(prop.int.hra, prop.pal)
     
-    pdf(paste0("../PopPlots/OFM_Ages/",
+    pdf(paste0("../PopPlots/", 
+               year, "/OFM_Ages/",
                age, "/OFM_",
                year, "_agePrev_", age,
                ".pdf"),
@@ -349,12 +364,13 @@ for(year in c(2010, 2012, 2015,
     plot(hra,
          col = prop.col.hra,
          border = 'grey48', lwd = .25,
-         main = paste0("Prevalence ",
-                       age))
+         main = "")
     legend('bottomleft',
+           title = 'Prevalence',
+           title.adj = 0,
            ncol = 2,
            bty = 'n',
-           cex = 0.6,
+           cex = 0.5,
            border = FALSE,
            fill = prop.pal,
            legend = names(attr(prop.col.hra, 'table')))
@@ -402,7 +418,8 @@ for(year in c(2010, 2012, 2015,
                                    n = 9)
     prop.col.hra <- findColours(prop.int.hra, prop.pal)
     
-    pdf(paste0("../PopPlots/OFM_Ages/",
+    pdf(paste0("../PopPlots/", 
+               year, "/OFM_Ages/",
                age, "/OFM_",
                year, "_ageDist_", age,
                ".pdf"),
@@ -410,15 +427,21 @@ for(year in c(2010, 2012, 2015,
     plot(hra,
          col = prop.col.hra,
          border = 'grey48', lwd = .25,
-         main = paste0("Distribution by ",
-                       age))
+         main = "")
     legend('bottomleft',
+           title = 'Distribution',
+           title.adj = 0,
            ncol = 2,
            bty = 'n',
-           cex = 0.6,
+           cex = 0.5,
            border = FALSE,
            fill = prop.pal,
            legend = names(attr(prop.col.hra, 'table')))
     dev.off()
   }
 }
+
+
+# Compare OFM & ACS ####
+
+plot()
