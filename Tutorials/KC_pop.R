@@ -105,7 +105,7 @@ load('../Data/tracts_to_hra.rda')
 
 ### Shape ####
 jurisdictions <- readOGR('../Data',
-                   layer = "FLU_dissolve")
+                         layer = "FLU_dissolve")
 jurisdictions <- spTransform(jurisdictions,
                              kc_tracts_poly@proj4string)
 
@@ -1315,13 +1315,16 @@ for(year in c(2010, 2014, 2019)){
 #   filter()
 
 
-covid_KC_overall <- readxl::read_xlsx('../Data/overall_geo-aug-30.xlsx')
+covid_KC_overall <- readxl::read_xlsx('../Data/overall_geo-aug-30.xlsx',
+                                      sheet = "HRA")
 covid_KC <- readxl::read_xlsx('../Data/overall_city_demo-aug-30.xlsx')
+covid_KC_race <- readxl::read_xlsx('../Data/overall_city_demo-aug-30.xlsx',
+                                   sheet = 'Race_Ethnicity')
 
 convert_ages <- expand.grid(AgeStartCovid = seq(0,80,10),
                             AgeStartOFM = seq(0,85,5))
 convert_ages <- convert_ages[(convert_ages$AgeStartCovid -
-                               convert_ages$AgeStartOFM) %in% c(0,-5),]
+                                convert_ages$AgeStartOFM) %in% c(0,-5),]
 convert_ages$AgeCovid <- paste(convert_ages$AgeStartCovid,
                                convert_ages$AgeStartCovid + 9,
                                sep = "-")
@@ -1332,7 +1335,7 @@ convert_ages <- convert_ages %>%
   mutate(AgeCovid = ifelse(AgeStartCovid == 80,
                            "80+", AgeCovid),
          AgeOFM = ifelse(AgeStartOFM == 85,
-                           "85+", AgeOFM))
+                         "85+", AgeOFM))
 
 cases.tmp <- covid_KC %>% 
   filter(Age_Group != "Unknown") %>% 
@@ -1401,15 +1404,493 @@ for(city in cities){
                               LRcolnames = c("Hospitalizations", "Deaths"),
                               LRmain = c("Hospitalizations", "Deaths"))
   if(sum(cases.tmp[,1]) != 0){
+    par(lend = 1)
+    plot(pyr.obj,
+         pyr1.par = list(col = pop.cols[4], 
+                         border = pop.cols[4]),
+         
+         pyr2.par = list(col = pop.cols[2], 
+                         border = pop.cols[2]),
+         main = city)
+  }
+  
+}
+dev.off()
+
+
+
+cities <- unique(covid_KC$City)[-1]
+pdf("../COVIDPlots/Pyramid_City_CasesHospDeath.pdf",
+    height = 5, width = 5)
+for(city in cities){
+  cases.tmp <- covid_KC %>% 
+    filter(Age_Group != "Unknown") %>% 
+    filter(City == city) %>% 
+    dplyr::select(Confirmed_Cases) %>% 
+    mutate(Population2 = Confirmed_Cases) %>% 
+    as.matrix()
+  
+  
+  cov.tmp <- covid_KC %>% 
+    filter(Age_Group != "Unknown") %>% 
+    filter(City == city) %>% 
+    dplyr::select(Hospitalizations, Deaths) %>% 
+    as.matrix()
+  
+  row.names(cov.tmp) <-
+    row.names(cases.tmp) <- unique(convert_ages$AgeCovid)
+  colnames(cov.tmp) <-
+    colnames(cases.tmp) <- c("Hospitalizations", "Deaths")
+  
+  pyr.obj <- get.bPop.pyramid(list(cases.tmp, cov.tmp),
+                              legend = c("Cases", "Hosp/Death"),
+                              LRcolnames = c("Hospitalizations", "Deaths"),
+                              LRmain = c("Hospitalizations", "Deaths"))
+  if(sum(cases.tmp[,1]) != 0){
+    par(lend = 1)
+    plot(pyr.obj,
+         pyr1.par = list(col = pop.cols[4], 
+                         border = pop.cols[4]),
+         
+         pyr2.par = list(col = pop.cols[2], 
+                         border = pop.cols[2]),
+         main = city)
+  }
+  
+}
+dev.off()
+
+
+
+## HRA maps ####
+
+covid_hra_tmp <- covid_KC_overall %>% 
+  filter(Location_Name != "All King County" &
+           Location_Name != "Unknown") %>% 
+  mutate(Location_Name = ifelse(Location_Name == "Fed Way-Dash Pt",
+                                "Fed Way-Dash Point/Woodmont",
+                                Location_Name)) %>% 
+  dplyr::select(Location_Name,
+                Population, Confirmed_Cases,
+                Hospitalizations, Deaths) 
+
+### Cases ####
+range(covid_hra_tmp$Confirmed_Cases)
+covid_hra_tmp$CasesPrev <- covid_hra_tmp$Confirmed_Cases/
+  covid_hra_tmp$Population
+covid_hra_tmp$CasesDist <- covid_hra_tmp$Confirmed_Cases/
+  sum(covid_hra_tmp$Confirmed_Cases)
+
+cases.int.hra <- classIntervals(covid_hra_tmp$Confirmed_Cases,
+                                style = 'jenks',
+                                n = 9)
+
+breaks <- cases.int.hra$brks
+breaks <- c(0, 250, 500,
+            1500, 2500,
+            3500, 4500, 5000, 6000,
+            6600)
+## Get color based on RColorBrwere palette for 
+## each area
+
+cases.pal <- brewer.pal(n = 9, name = "Blues")
+
+covid_hra_tmp <- covid_hra_tmp[match(covid_hra_tmp$Location_Name,
+                                     hra@data$HRA2010v2_), ]
+
+cases.int.hra <- classIntervals(covid_hra_tmp$Confirmed_Cases,
+                                style = "fixed",
+                                fixedBreaks = breaks,
+                                n = 9)
+cases.col.hra <- findColours(cases.int.hra, cases.pal)
+
+
+pdf(paste0("../COVIDPlots/Map_HRA_Cases.pdf"),
+    height = 5, width = 5)
+plot(hra,
+     col = cases.col.hra,
+     border = 'grey48', lwd = .25,
+     main = "")
+legend('bottomleft',
+       title = 'Cases',
+       title.adj = 0,
+       ncol = 2,
+       bty = 'n',
+       cex = 0.5,
+       border = FALSE,
+       fill = cases.pal,
+       legend = names(attr(cases.col.hra, 'table')))
+dev.off()
+
+#### Prevalence ####
+prev.int.hra <- classIntervals(covid_hra_tmp$CasesPrev,
+                                style = 'jenks',
+                                n = 9)
+
+breaks <- prev.int.hra$brks
+breaks <- c(0, .015, .03,
+            .045, .06, .075,
+            .085, .095, .105, .12)
+prev.pal <- brewer.pal(n = 9,  name = "YlGnBu")
+
+covid_hra_tmp <- covid_hra_tmp[match(covid_hra_tmp$Location_Name,
+                                     hra@data$HRA2010v2_), ]
+
+prev.int.hra <- classIntervals(covid_hra_tmp$CasesPrev,
+                               style = "fixed",
+                               fixedBreaks = breaks,
+                               n = 9)
+prev.col.hra <- findColours(prev.int.hra, prev.pal)
+
+
+pdf(paste0("../COVIDPlots/Map_HRA_CasesPrev.pdf"),
+    height = 5, width = 5)
+plot(hra,
+     col = prev.col.hra,
+     border = 'grey48', lwd = .25,
+     main = "")
+legend('bottomleft',
+       title = 'Cases: Prevalence',
+       title.adj = 0,
+       ncol = 2,
+       bty = 'n',
+       cex = 0.5,
+       border = FALSE,
+       fill = prev.pal,
+       legend = names(attr(prev.col.hra, 'table')))
+dev.off()
+
+#### Distribution ####
+dist.int.hra <- classIntervals(covid_hra_tmp$CasesDist,
+                               style = 'jenks',
+                               n = 9)
+
+breaks <- dist.int.hra$brks
+breaks <- c(0, .01, .015, .02,
+            .025, .03, .035,
+            .04, .045, .055)
+
+dist.pal <- brewer.pal(n = 9,  name = "YlGnBu")
+
+covid_hra_tmp <- covid_hra_tmp[match(covid_hra_tmp$Location_Name,
+                                     hra@data$HRA2010v2_), ]
+
+dist.int.hra <- classIntervals(covid_hra_tmp$CasesDist,
+                               style = "fixed",
+                               fixedBreaks = breaks,
+                               n = 9)
+dist.col.hra <- findColours(dist.int.hra, dist.pal)
+
+
+pdf(paste0("../COVIDPlots/Map_HRA_CasesDist.pdf"),
+    height = 5, width = 5)
+plot(hra,
+     col = dist.col.hra,
+     border = 'grey48', lwd = .25,
+     main = "")
+legend('bottomleft',
+       title = 'Cases: Distribution',
+       title.adj = 0,
+       ncol = 2,
+       bty = 'n',
+       cex = 0.5,
+       border = FALSE,
+       fill = dist.pal,
+       legend = names(attr(dist.col.hra, 'table')))
+dev.off()
+
+
+### Hospitalizations ####
+
+range(covid_hra_tmp$Hospitalizations)
+covid_hra_tmp$HospPrev <- covid_hra_tmp$Hospitalizations/
+  covid_hra_tmp$Population
+covid_hra_tmp$HospDist <- covid_hra_tmp$Hospitalizations/
+  sum(covid_hra_tmp$Hospitalizations)
+
+hosp.int.hra <- classIntervals(covid_hra_tmp$Hospitalizations,
+                                style = 'jenks',
+                                n = 9)
+
+breaks <- hosp.int.hra$brks
+breaks <- c(0, 25, 50,
+            75, 100,
+            150, 200, 300, 400,
+            450)
+## Get color based on RColorBrwere palette for 
+## each area
+
+hosp.pal <- brewer.pal(n = 9, name = "Blues")
+
+covid_hra_tmp <- covid_hra_tmp[match(covid_hra_tmp$Location_Name,
+                                     hra@data$HRA2010v2_), ]
+
+hosp.int.hra <- classIntervals(covid_hra_tmp$Hospitalizations,
+                                style = "fixed",
+                                fixedBreaks = breaks,
+                                n = 9)
+hosp.col.hra <- findColours(hosp.int.hra, hosp.pal)
+
+
+pdf(paste0("../COVIDPlots/Map_HRA_Hospitalizations.pdf"),
+    height = 5, width = 5)
+plot(hra,
+     col = hosp.col.hra,
+     border = 'grey48', lwd = .25,
+     main = "")
+legend('bottomleft',
+       title = 'Hospitalizations',
+       title.adj = 0,
+       ncol = 2,
+       bty = 'n',
+       cex = 0.5,
+       border = FALSE,
+       fill = hosp.pal,
+       legend = names(attr(hosp.col.hra, 'table')))
+dev.off()
+
+#### Prevalence ####
+prev.int.hra <- classIntervals(covid_hra_tmp$HospPrev,
+                               style = 'jenks',
+                               n = 9)
+
+breaks <- prev.int.hra$brks
+breaks <- c(0, .0005, .001,
+            .002, .003, .004,
+            .005, .006, .007, .0085)
+prev.pal <- brewer.pal(n = 9,  name = "YlGnBu")
+
+covid_hra_tmp <- covid_hra_tmp[match(covid_hra_tmp$Location_Name,
+                                     hra@data$HRA2010v2_), ]
+
+prev.int.hra <- classIntervals(covid_hra_tmp$HospPrev,
+                               style = "fixed",
+                               fixedBreaks = breaks,
+                               n = 9)
+prev.col.hra <- findColours(prev.int.hra, prev.pal)
+
+
+pdf(paste0("../COVIDPlots/Map_HRA_HospPrev.pdf"),
+    height = 5, width = 5)
+plot(hra,
+     col = prev.col.hra,
+     border = 'grey48', lwd = .25,
+     main = "")
+legend('bottomleft',
+       title = 'Hospitalizations:\n Prevalence',
+       title.adj = 0,
+       ncol = 2,
+       bty = 'n',
+       cex = 0.5,
+       border = FALSE,
+       fill = prev.pal,
+       legend = names(attr(prev.col.hra, 'table')))
+dev.off()
+
+#### Distribution ####
+dist.int.hra <- classIntervals(covid_hra_tmp$HospDist,
+                               style = 'jenks',
+                               n = 9)
+
+breaks <- dist.int.hra$brks
+breaks <- c(0, .01, .015, .02,
+            .025, .03, .035,
+            .04, .045, .055)
+
+dist.pal <- brewer.pal(n = 9,  name = "YlGnBu")
+
+covid_hra_tmp <- covid_hra_tmp[match(covid_hra_tmp$Location_Name,
+                                     hra@data$HRA2010v2_), ]
+
+dist.int.hra <- classIntervals(covid_hra_tmp$CasesDist,
+                               style = "fixed",
+                               fixedBreaks = breaks,
+                               n = 9)
+dist.col.hra <- findColours(dist.int.hra, dist.pal)
+
+
+pdf(paste0("../COVIDPlots/Map_HRA_HospDist.pdf"),
+    height = 5, width = 5)
+plot(hra,
+     col = dist.col.hra,
+     border = 'grey48', lwd = .25,
+     main = "")
+legend('bottomleft',
+       title = 'Hospitalizations:\n Distribution',
+       title.adj = 0,
+       ncol = 2,
+       bty = 'n',
+       cex = 0.5,
+       border = FALSE,
+       fill = dist.pal,
+       legend = names(attr(dist.col.hra, 'table')))
+dev.off()
+
+
+### Deaths ####
+range(covid_hra_tmp$Deaths)
+covid_hra_tmp$DeathPrev <- covid_hra_tmp$Deaths/
+  covid_hra_tmp$Population
+covid_hra_tmp$DeathDist <- covid_hra_tmp$Deaths/
+  sum(covid_hra_tmp$Deaths)
+death.int.hra <- classIntervals(covid_hra_tmp$Deaths,
+                               style = 'jenks',
+                               n = 9)
+
+breaks <- death.int.hra$brks
+breaks <- c(0, 5, 15,
+            30,
+            45, 60, 75, 90,
+            100)
+## Get color based on RColorBrwere palette for 
+## each area
+
+death.pal <- brewer.pal(n = 9, name = "Blues")
+
+covid_hra_tmp <- covid_hra_tmp[match(covid_hra_tmp$Location_Name,
+                                     hra@data$HRA2010v2_), ]
+
+death.int.hra <- classIntervals(covid_hra_tmp$Deaths,
+                               style = "fixed",
+                               fixedBreaks = breaks,
+                               n = 9)
+death.col.hra <- findColours(death.int.hra, death.pal)
+
+
+pdf(paste0("../COVIDPlots/Map_HRA_Deaths.pdf"),
+    height = 5, width = 5)
+plot(hra,
+     col = death.col.hra,
+     border = 'grey48', lwd = .25,
+     main = "")
+legend('bottomleft',
+       title = 'Deaths',
+       title.adj = 0,
+       ncol = 2,
+       bty = 'n',
+       cex = 0.5,
+       border = FALSE,
+       fill = death.pal,
+       legend = names(attr(death.col.hra, 'table')))
+dev.off()
+
+
+
+#### Prevalence ####
+prev.int.hra <- classIntervals(covid_hra_tmp$DeathPrev,
+                               style = 'jenks',
+                               n = 9)
+
+breaks <- prev.int.hra$brks
+breaks <- c(0, .00025, .0005,
+            .0007, .0008, .0009, .001,
+            .00125, .0015, .002, .0085)
+prev.pal <- brewer.pal(n = 9,  name = "YlGnBu")
+
+covid_hra_tmp <- covid_hra_tmp[match(covid_hra_tmp$Location_Name,
+                                     hra@data$HRA2010v2_), ]
+
+prev.int.hra <- classIntervals(covid_hra_tmp$DeathPrev,
+                               style = "fixed",
+                               fixedBreaks = breaks,
+                               n = 9)
+prev.col.hra <- findColours(prev.int.hra, prev.pal)
+
+
+pdf(paste0("../COVIDPlots/Map_HRA_DeathPrev.pdf"),
+    height = 5, width = 5)
+plot(hra,
+     col = prev.col.hra,
+     border = 'grey48', lwd = .25,
+     main = "")
+legend('bottomleft',
+       title = 'Deaths: Prevalence',
+       title.adj = 0,
+       ncol = 2,
+       bty = 'n',
+       cex = 0.5,
+       border = FALSE,
+       fill = prev.pal,
+       legend = names(attr(prev.col.hra, 'table')))
+dev.off()
+
+#### Distribution ####
+dist.int.hra <- classIntervals(covid_hra_tmp$DeathDist,
+                               style = 'jenks',
+                               n = 9)
+
+breaks <- dist.int.hra$brks
+breaks <- c(0, .0025, .005, .0075,
+            .01, .015, .02, .025,
+            .035, .045, .06)
+
+dist.pal <- brewer.pal(n = 9,  name = "YlGnBu")
+
+covid_hra_tmp <- covid_hra_tmp[match(covid_hra_tmp$Location_Name,
+                                     hra@data$HRA2010v2_), ]
+
+dist.int.hra <- classIntervals(covid_hra_tmp$DeathDist,
+                               style = "fixed",
+                               fixedBreaks = breaks,
+                               n = 9)
+dist.col.hra <- findColours(dist.int.hra, dist.pal)
+
+
+pdf(paste0("../COVIDPlots/Map_HRA_DeathDist.pdf"),
+    height = 5, width = 5)
+plot(hra,
+     col = dist.col.hra,
+     border = 'grey48', lwd = .25,
+     main = "")
+legend('bottomleft',
+       title = 'Deaths: Distribution',
+       title.adj = 0,
+       ncol = 2,
+       bty = 'n',
+       cex = 0.5,
+       border = FALSE,
+       fill = dist.pal,
+       legend = names(attr(dist.col.hra, 'table')))
+dev.off()
+
+
+
+for(race in covid_KC_race$Race_Ethnicity){
+  cases.tmp <- covid_KC_race %>% 
+    filter(Age_Group != "Unknown") %>% 
+    filter(City == "All King County") %>% 
+    filter(Race_Ethnicity)
+  dplyr::select(Confirmed_Cases) %>% 
+    mutate(Population2 = Confirmed_Cases) %>% 
+    as.matrix()
+  
+  
+  cov.tmp <- covid_KC %>% 
+    filter(Age_Group != "Unknown") %>% 
+    filter(City == "All King County") %>% 
+    dplyr::select(Hospitalizations, Deaths) %>% 
+    as.matrix()
+  
+  row.names(cov.tmp) <-
+    row.names(cases.tmp) <- unique(convert_ages$AgeCovid)
+  colnames(cov.tmp) <-
+    colnames(cases.tmp) <- c("Hospitalizations", "Deaths")
+  
+  pyr.obj <- get.bPop.pyramid(list(cases.tmp, cov.tmp),
+                              legend = c("Cases", "Hosp/Death"),
+                              LRcolnames = c("Hospitalizations", "Deaths"),
+                              LRmain = c("Hospitalizations", "Deaths"))
+  
+  pdf("../COVIDPlots/Pyramid_",
+      race, "_CasesHospDeath.pdf",
+      height = 5, width = 5)
   par(lend = 1)
   plot(pyr.obj,
        pyr1.par = list(col = pop.cols[4], 
                        border = pop.cols[4]),
        
        pyr2.par = list(col = pop.cols[2], 
-                       border = pop.cols[2]),
-       main = city)
-  }
+                       border = pop.cols[2]))
   
+  dev.off()
 }
-dev.off()
