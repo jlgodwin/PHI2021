@@ -17,6 +17,7 @@ library(classInt)
 library(scales) 
 library(magrittr)
 library(bayesPop)
+library(readxl)
 
 # Clear environment ####
 rm(list = ls())
@@ -103,30 +104,30 @@ load('../Data/tracts_to_hra.rda')
 ## Juris ####
 
 ### Shape ####
-# jurisdictions <- readOGR('../Data',
-#                    layer = "FLU_dissolve")
-# jurisdictions <- spTransform(jurisdictions,
-#                              kc_tracts_poly@proj4string)
-# 
-# juris <- unionSpatialPolygons(SpatialPolygons(parcels@polygons),
-#                               IDs = parcels@data$Jurisdicti)
-# juris_data <- jurisdictions@data %>% 
-#   group_by(Jurisdicti) %>% 
-#   summarise(Nobs = n(),
-#             Res_Use = sum(Res_Use == "Y",
-#                           na.rm = TRUE),
-#             Mixed_Use = sum(Mixed_Use == "Y",
-#                             na.rm = TRUE)) %>% 
-#   ungroup() %>% 
-#   mutate(Res_Prop = Res_Use/Nobs,
-#          Mixed_Prop = Mixed_Use/Nobs) %>% 
-#   filter(!is.na(Jurisdicti)) %>% 
-#   as.data.frame()
-# row.names(juris_data) <- juris_data$Jurisdicti
-# juris <- SpatialPolygonsDataFrame(juris,
-#                                   data = juris_data)
-# table(jurisdictions$Jurisdicti)
-# table(jurisdictions$Zone_adj)
+jurisdictions <- readOGR('../Data',
+                   layer = "FLU_dissolve")
+jurisdictions <- spTransform(jurisdictions,
+                             kc_tracts_poly@proj4string)
+
+juris <- unionSpatialPolygons(SpatialPolygons(parcels@polygons),
+                              IDs = parcels@data$Jurisdicti)
+juris_data <- jurisdictions@data %>%
+  group_by(Jurisdicti) %>%
+  summarise(Nobs = n(),
+            Res_Use = sum(Res_Use == "Y",
+                          na.rm = TRUE),
+            Mixed_Use = sum(Mixed_Use == "Y",
+                            na.rm = TRUE)) %>%
+  ungroup() %>%
+  mutate(Res_Prop = Res_Use/Nobs,
+         Mixed_Prop = Mixed_Use/Nobs) %>%
+  filter(!is.na(Jurisdicti)) %>%
+  as.data.frame()
+row.names(juris_data) <- juris_data$Jurisdicti
+juris <- SpatialPolygonsDataFrame(juris,
+                                  data = juris_data)
+table(jurisdictions$Jurisdicti)
+table(jurisdictions$Zone_adj)
 
 ## Parcels ####
 
@@ -1284,3 +1285,131 @@ for(year in c(2010, 2014, 2019)){
     dev.off()
   }
 }
+
+
+# COVID ####
+
+# covid_WA <- readxl::read_xlsx('../Data/WA_COVID19_Cases_Hospitalizations_Deaths.xlsx',
+#                               sheet = "Deaths")
+# 
+# cases_WA <- readxl::read_xlsx('../Data/WA_COVID19_Cases_Hospitalizations_Deaths.xlsx',
+#                               sheet = "Cases")
+# covid_WA <- covid_WA %>%
+#   filter(County == "King County") %>%
+#   group_by(County) %>%
+#   dplyr::select(-WeekStartDate) %>%
+#   summarise(across(where(is.numeric), ~sum(.x))) %>%
+#   pivot_longer(cols = where(is.numeric),
+#                names_to = "metric",
+#                values_to = "metric_val") %>% 
+#   mutate(metric = gsub("Age ", "",
+#                        metric))
+# cases_WA <- cases_WA %>%
+#   filter(County == "King County") %>%
+#   group_by(County) %>%
+#   dplyr::select(-WeekStartDate) %>%
+#   summarise(across(where(is.numeric), ~sum(.x))) %>%
+#   pivot_longer(cols = where(is.numeric),
+#                names_to = "metric",
+#                values_to = "metric_val") %>%
+#   filter()
+
+
+covid_KC_overall <- readxl::read_xlsx('../Data/overall_geo-aug-30.xlsx')
+covid_KC <- readxl::read_xlsx('../Data/overall_city_demo-aug-30.xlsx')
+
+convert_ages <- expand.grid(AgeStartCovid = seq(0,80,10),
+                            AgeStartOFM = seq(0,85,5))
+convert_ages <- convert_ages[(convert_ages$AgeStartCovid -
+                               convert_ages$AgeStartOFM) %in% c(0,-5),]
+convert_ages$AgeCovid <- paste(convert_ages$AgeStartCovid,
+                               convert_ages$AgeStartCovid + 9,
+                               sep = "-")
+convert_ages$AgeOFM <- paste(convert_ages$AgeStartOFM,
+                             convert_ages$AgeStartOFM + 4,
+                             sep = "-")
+convert_ages <- convert_ages %>% 
+  mutate(AgeCovid = ifelse(AgeStartCovid == 80,
+                           "80+", AgeCovid),
+         AgeOFM = ifelse(AgeStartOFM == 85,
+                           "85+", AgeOFM))
+
+cases.tmp <- covid_KC %>% 
+  filter(Age_Group != "Unknown") %>% 
+  filter(City == "All King County") %>% 
+  dplyr::select(Confirmed_Cases) %>% 
+  mutate(Population2 = Confirmed_Cases) %>% 
+  as.matrix()
+
+
+cov.tmp <- covid_KC %>% 
+  filter(Age_Group != "Unknown") %>% 
+  filter(City == "All King County") %>% 
+  dplyr::select(Hospitalizations, Deaths) %>% 
+  as.matrix()
+
+row.names(cov.tmp) <-
+  row.names(cases.tmp) <- unique(convert_ages$AgeCovid)
+colnames(cov.tmp) <-
+  colnames(cases.tmp) <- c("Hospitalizations", "Deaths")
+
+pyr.obj <- get.bPop.pyramid(list(cases.tmp, cov.tmp),
+                            legend = c("Cases", "Hosp/Death"),
+                            LRcolnames = c("Hospitalizations", "Deaths"),
+                            LRmain = c("Hospitalizations", "Deaths"))
+
+if(!dir.exists("../COVIDPlots/")){
+  dir.create("../COVIDPlots/")
+}
+pdf("../COVIDPlots/Pyramid_CasesHospDeath.pdf",
+    height = 5, width = 5)
+par(lend = 1)
+plot(pyr.obj,
+     pyr1.par = list(col = pop.cols[4], 
+                     border = pop.cols[4]),
+     
+     pyr2.par = list(col = pop.cols[2], 
+                     border = pop.cols[2]))
+
+dev.off()
+
+cities <- unique(covid_KC$City)[-1]
+pdf("../COVIDPlots/Pyramid_City_CasesHospDeath.pdf",
+    height = 5, width = 5)
+for(city in cities){
+  cases.tmp <- covid_KC %>% 
+    filter(Age_Group != "Unknown") %>% 
+    filter(City == city) %>% 
+    dplyr::select(Confirmed_Cases) %>% 
+    mutate(Population2 = Confirmed_Cases) %>% 
+    as.matrix()
+  
+  
+  cov.tmp <- covid_KC %>% 
+    filter(Age_Group != "Unknown") %>% 
+    filter(City == city) %>% 
+    dplyr::select(Hospitalizations, Deaths) %>% 
+    as.matrix()
+  
+  row.names(cov.tmp) <-
+    row.names(cases.tmp) <- unique(convert_ages$AgeCovid)
+  colnames(cov.tmp) <-
+    colnames(cases.tmp) <- c("Hospitalizations", "Deaths")
+  
+  pyr.obj <- get.bPop.pyramid(list(cases.tmp, cov.tmp),
+                              legend = c("Cases", "Hosp/Death"),
+                              LRcolnames = c("Hospitalizations", "Deaths"),
+                              LRmain = c("Hospitalizations", "Deaths"))
+  if(sum(cases.tmp[,1]) != 0){
+  par(lend = 1)
+  plot(pyr.obj,
+       pyr1.par = list(col = pop.cols[4], 
+                       border = pop.cols[4]),
+       
+       pyr2.par = list(col = pop.cols[2], 
+                       border = pop.cols[2]),
+       main = city)
+  }
+  
+}
+dev.off()
