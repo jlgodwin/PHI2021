@@ -2,7 +2,7 @@ pop.pyramid.bayesPop.pyramid <- function(pop.object, main=NULL, show.legend=TRUE
                                          pyr1.par=list(border='black', col=NA, density=NULL, height=0.9),
                                          pyr2.par =list(density=-1, height=0.3), 
                                          col.pi = NULL, ann=par('ann'), axes=TRUE, grid=TRUE, 
-                                         cex.main=0.9, cex.sub=1, cex=1, cex.axis=1,
+                                         cex.main=0.9, cex.sub=1, cex=1, cex.axis=1, x_lims = NULL,
                                          x_at=NULL, x_labels=NULL, legend_pos, legend_text = NULL, ...) {
   cur.par <- par(lend = 1,
                  mar = c(2,3,3,3),
@@ -33,7 +33,11 @@ pop.pyramid.bayesPop.pyramid <- function(pop.object, main=NULL, show.legend=TRUE
   #	cohort.labels <- if("_cohorts_" %in% colnames(pyr1)) pyr1[,"_cohorts_"] else age.labels
   #else cohort.labels <- if(!is.null(pyr2) && "_cohorts_" %in% colnames(pyr2)) pyr2[,"_cohorts_"] else age.labels
   with(pop.object, {
-    maxx <- pop.max	
+    if(is.null(x_lims)){
+      maxx <- pop.max	
+    }else{
+      maxx <- max(abs(x_lims))
+    }
     proportion <- !is.null(is.proportion) && is.proportion
     male <- LRcolnames[1]
     female <- LRcolnames[2]
