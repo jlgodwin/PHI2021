@@ -10,7 +10,7 @@ rm(list=ls())
 library(dplyr)
 library(survey)
 library(tidyverse)
-
+library(data.table)
 
 # constants
 main_dir <- "C:/Users/allorant/OneDrive - UW/Shared with Everyone/UW/4thYear/PHI2021/"
@@ -76,7 +76,17 @@ p1 <- plotDF %>%
   facet_wrap(~hh_type) +
   labs(y="Number of households", x = "Year", color = "Household size", shape = "Tenure",
        title = "Number of households in King County by household size, type, and tenure") +
-  guides(fill=FALSE,size = FALSE) + scale_color_brewer(palette = "Accent")
+  guides(fill=FALSE,size = FALSE) + scale_color_brewer(palette = "Accent") +
+  theme(text= element_text(family= "Serif"), panel.grid.major = element_blank(), panel.grid.minor  = element_blank(),
+        axis.line = element_line(colour = "black"), plot.title = element_text(hjust = 0.5, size = 14),
+        axis.title = element_text(size = 12, face = "bold"),
+        axis.text.y = element_text( 
+          size=10),
+        axis.text.x = element_text(size=10),
+        # legend.justification = c("right", "bottom"),
+        # legend.box.just = "right",
+        legend.margin = margin(6, 6, 6, 6), legend.title = element_text(size = 12, face = "bold"),
+        panel.spacing = unit(2, "lines"))
 
 ggsave(p1, filename = paste0(code_dir, "Report_plots/hh_by_size_tenure_type.png"), width = 11, height = 6)
 
@@ -107,7 +117,17 @@ p2 <- diffplot %>%
   facet_wrap(~hh_type) +
   labs(y="Number of new households since 2000", x = "Year", color = "Household size", shape = "Tenure",
        title = "Difference in number of households by household size, type, and tenure since 2000 in King County") +
-  guides(fill=FALSE,size = FALSE) + scale_color_brewer(palette = "Accent")
+  guides(fill=FALSE,size = FALSE) + scale_color_brewer(palette = "Accent") +
+  theme(text= element_text(family= "Serif"), panel.grid.major = element_blank(), panel.grid.minor  = element_blank(),
+        axis.line = element_line(colour = "black"), plot.title = element_text(hjust = 0.5, size = 14),
+        axis.title = element_text(size = 12, face = "bold"),
+        axis.text.y = element_text( 
+          size=10),
+        axis.text.x = element_text(size=10),
+        # legend.justification = c("right", "bottom"),
+        # legend.box.just = "right",
+        legend.margin = margin(6, 6, 6, 6), legend.title = element_text(size = 12, face = "bold"),
+        panel.spacing = unit(2, "lines"))
 
 ggsave(p2, filename = paste0(code_dir, "Report_plots/diff_since_2000_hh_by_size_tenure_type.png"), width = 11, height = 6)
 
@@ -134,7 +154,17 @@ p3 <- popDF %>%
   facet_wrap(~hh_type) +
   labs(y="Household population", x = "Year", color = "Household size", shape = "Tenure",
        title = "Household population in King County by household size, type, and tenure") +
-  guides(fill=FALSE,size = FALSE) + scale_color_brewer(palette = "Accent")
+  guides(fill=FALSE,size = FALSE) + scale_color_brewer(palette = "Accent") +
+  theme(text= element_text(family= "Serif"), panel.grid.major = element_blank(), panel.grid.minor  = element_blank(),
+        axis.line = element_line(colour = "black"), plot.title = element_text(hjust = 0.5, size = 14),
+        axis.title = element_text(size = 12, face = "bold"),
+        axis.text.y = element_text( 
+          size=10),
+        axis.text.x = element_text(size=10),
+        # legend.justification = c("right", "bottom"),
+        # legend.box.just = "right",
+        legend.margin = margin(6, 6, 6, 6), legend.title = element_text(size = 12, face = "bold"),
+        panel.spacing = unit(2, "lines"))
 
 ggsave(p3, filename = paste0(code_dir, "Report_plots/hh_pop_by_size_tenure_type.png"), width = 11, height = 6)
 
@@ -168,8 +198,18 @@ p4 <- diffplot %>%
   scale_y_continuous(limits = c(0,60000)) +
   facet_wrap(~hh_type) +
   labs(y="Household population gains since 2000", x = "Year", color = "Household size", shape = "Tenure",
-       title = "Difference in number of households by household size, type, and tenure since 2000 in King County") +
-  guides(fill=FALSE,size = FALSE) + scale_color_brewer(palette = "Accent")
+       title = "Difference in household population since 2000 in King County, by household size, type, and tenure") +
+  guides(fill=FALSE,size = FALSE) + scale_color_brewer(palette = "Accent") +
+  theme(text= element_text(family= "Serif"), panel.grid.major = element_blank(), panel.grid.minor  = element_blank(),
+        axis.line = element_line(colour = "black"), plot.title = element_text(hjust = 0.5, size = 14),
+        axis.title = element_text(size = 12, face = "bold"),
+        axis.text.y = element_text( 
+          size=10),
+        axis.text.x = element_text(size=10),
+        # legend.justification = c("right", "bottom"),
+        # legend.box.just = "right",
+        legend.margin = margin(6, 6, 6, 6), legend.title = element_text(size = 12, face = "bold"),
+        panel.spacing = unit(2, "lines"))
 
 ggsave(p4, filename = paste0(code_dir, "Report_plots/diff_since_2000_hh_pop_by_size_tenure_type.png"), width = 11, height = 6)
 
