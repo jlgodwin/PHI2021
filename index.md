@@ -28,6 +28,8 @@ layout: default
 **Population Projections**
    * [Slides](https://jlgodwin.github.io/PHI2021/Lectures/Population_Projections_Overview.pdf) | [Recording--Cohort Change Ratios and Hamilton-Perry with Crystal Yu](https://washington.zoom.us/rec/share/JrhvDjcIVRAARF1Wbrzx9Mk6XynPM6uSWziziBYEDf4CtJjzhXvKbmgPdCH5jFVL.dwSvG-R3FDiqVaYb?startTime=1625077413000)
 
+**King County/Seattle growth**
+  * [Tech clusters](https://jlgodwin.github.io/PHI2021/Readings/Kerr2020.pdf)
 
 ## Census and Demographic data
 
