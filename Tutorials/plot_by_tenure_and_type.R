@@ -1,4 +1,17 @@
+rm(list=ls())
 
+#####################################
+# -- load packages and functions -- #
+#####################################
+library(tidyverse)
+library(data.table)
+
+# constants
+main_dir <- "/Users/adrienallorant/Documents/UW/PHI2021/"
+data_dir <- paste0(main_dir, "data/")
+out_dir <- paste0(main_dir, "output/")
+
+code_dir <- paste0(main_dir, "Code/PHI2021/household_size/")
 plotDF <- read_csv(paste0(out_dir,"All_KC_hh_size_total.csv")) %>%
   data.table() %>%
   dplyr::select(year,hh_type,tenure,

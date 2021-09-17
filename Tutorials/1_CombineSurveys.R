@@ -11,15 +11,16 @@ rm(list=ls())
 # -- load packages and functions -- #
 #####################################
 
-# function
-source(paste0(main_dir,"PHI2021/Tutorials/expit_logit.R"))
+
 # constants
-main_dir <- "C:/Users/allorant/OneDrive - UW/Shared with Everyone/UW/4thYear/PHI2021/"
+main_dir <- "/Users/adrienallorant/Documents/UW/PHI2021/"
 data_dir <- paste0(main_dir, "data/")
 out_dir <- paste0(main_dir, "output/")
 
-code_dir <- paste0(main_dir, "PHI2021/household_size/")
+code_dir <- paste0(main_dir, "Code/PHI2021/household_size/")
 
+# function
+source(paste0(main_dir,"Code/PHI2021/Tutorials/expit_logit.R"))
 
 processed<-list.files(out_dir)[grep("Processed",list.files(out_dir))]
 processed_full<-processed
