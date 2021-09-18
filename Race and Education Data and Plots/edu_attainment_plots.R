@@ -21,7 +21,7 @@ edu_data <- read.csv("edu_attainment_data.csv")
 horrid <- fromJSON(file = "kc_tract.json")
 ##tracts <- geojson_sf(tracts)
 
-
+## create hra data set to use - it was confusing!!! 
 feature_test <- list()
 featuredf_test <- list()
 feature_geo_test <- list()
