@@ -3488,7 +3488,7 @@ legend('bottomleft',
        title.adj = 0,
        ncol = 2,
        bty = 'n',
-       cex 0.75,
+       cex= 0.75,
        border = FALSE,
        fill = cases.pal,
        legend = names(attr(cases.col.hra, 'table')))

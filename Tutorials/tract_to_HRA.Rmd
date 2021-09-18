@@ -274,61 +274,95 @@ kc_tracts_poly$acs5_2009 <- spTransform(kc_tracts_poly$acs5_2009,
 tracts_to_hra <- list()
 
 for(yr in years){
-  yr.idx <- match(yr, years)
+  yr.idx <- grep(yr, names(kc_tracts_poly))
   
+  ## use sp::over() function
   tracts_to_hra[[paste0("acs5_", yr)]] <-
-    over(kc_tracts_poly[[paste0("acs5_", yr)]],
+    over(kc_tracts_poly[[yr.idx]],
          hra, returnList = TRUE)
   n.tracts <- length(tracts_to_hra[[yr.idx]])
-  nested.idx <- unlist(lapply(tracts_to_hra[[paste0("acs5_", yr)]],
+  
+  ## find tracts wholly nested within an hra
+  nested.idx <- unlist(lapply(tracts_to_hra[[yr.idx]],
                               function(x){
                                 nrow(x) == 1
                               }))
-  kc_tracts_poly[[paste0("acs5_", yr)]]$nested_in_hra <- 0
-  kc_tracts_poly[[paste0("acs5_", yr)]]$nested_in_hra[nested.idx] <- 1
   
+  ## and assign indicator for that tract
+  kc_tracts_poly[[yr.idx]]$nested_in_hra <- 0
+  kc_tracts_poly[[yr.idx]]$nested_in_hra[nested.idx] <- 1
+  
+  ## Go through tracts in order of kc_tracts_poly@acs5_YYYY
   for(tract.idx in 1:n.tracts){
+    
+    ## Add empty columns to list elemnt from sp:over() output
+    ## for tract.idx element of tracts_to_hra[[yr.idx]]
     tracts_to_hra[[yr.idx]][[tract.idx]]$prop.area <- NA
     tracts_to_hra[[yr.idx]][[tract.idx]]$total.area <- NA
     tracts_to_hra[[yr.idx]][[tract.idx]]$total.minus.sum <- NA
     
+    ## Add tract.idx for record keeping 
     tracts_to_hra[[yr.idx]][[tract.idx]]$tract.idx <- tract.idx
+    
+    ## If tract is nested, then prop.area is 1 
     if(nested.idx[tract.idx]){
+      # If nested, prop area in that HRA is 1
       tracts_to_hra[[yr.idx]][[tract.idx]]$prop.area <- 1
-      tracts_to_hra[[paste0("acs5_", yr)]][[tract.idx]]$total.sum <-
-        tracts_to_hra[[paste0("acs5_", yr)]][[tract.idx]]$total.area <-
+      
+      # Calculate polygon area with raster::area()
+      tracts_to_hra[[yr.idx]][[tract.idx]]$total.sum <-
+        tracts_to_hra[[yr.idx]][[tract.idx]]$total.area <-
         area(kc_tracts_poly[[yr.idx]][tract.idx,])
       
-      tracts_to_hra[[paste0("acs5_", yr)]][[tract.idx]]$total.minus.sum <-
-        (tracts_to_hra[[paste0("acs5_", yr)]][[tract.idx]]$total.area[1] - 
-           sum(tract.areas))/(sum(tract.areas))
+      tracts_to_hra[[yr.idx]][[tract.idx]]$total.minus.sum <-
+        (tracts_to_hra[[yr.idx]][[tract.idx]]$total.area - 
+           tracts_to_hra[[yr.idx]][[tract.idx]]$total.sum)/
+        (tracts_to_hra[[yr.idx]][[tract.idx]]$total.sum)
     }else{
-      hras.for.tract <- tracts_to_hra[[paste0("acs5_", yr)]][[tract.idx]]$FID_HRA_20
+      # If isn't nested, find HRAs it intersects
+      hras.for.tract <- tracts_to_hra[[yr.idx]][[tract.idx]]$FID_HRA_20
+      
+      # initialize empty vector to store the area
+      # of the intersection between tract.idx and HRAS
       tract.areas <- rep(NA, length(hras.for.tract))
+      
       for(hra.no in hras.for.tract){
+        # Which elemnt of hras.for.tract is hra.no
         hra.idx <- match(hra.no, hras.for.tract)
         
         ## Calculate area of intersections
-        tract.areas[hra.idx] <- area(intersect(kc_tracts_poly[[yr.idx]][tract.idx,],
-                                               hra[hra$FID_HRA_20 == hra.no,]))
+        tract.areas[hra.idx] <- 
+          area(intersect(kc_tracts_poly[[yr.idx]][tract.idx,],
+                         hra[hra$FID_HRA_20 == hra.no,]))
       }
-      tracts_to_hra[[paste0("acs5_", yr)]][[tract.idx]]$prop.area <-
+      # Calculate proportion of each interestection
+      tracts_to_hra[[yr.idx]][[tract.idx]]$prop.area <-
         tract.areas/sum(tract.areas)
-      tracts_to_hra[[paste0("acs5_", yr)]][[tract.idx]]$total.sum <-
-        tract.areas/sum(tract.areas)
-      tracts_to_hra[[paste0("acs5_", yr)]][[tract.idx]]$total.area <-
+      # Calculate total area from intersection calls
+      tracts_to_hra[[yr.idx]][[tract.idx]]$total.sum <-
+        sum(tract.areas)
+      
+      # Calculate area of tract for double checking above
+      tracts_to_hra[[yr.idx]][[tract.idx]]$total.area <-
         area(kc_tracts_poly[[yr.idx]][tract.idx,])
       
-      tracts_to_hra[[paste0("acs5_", yr)]][[tract.idx]]$total.minus.sum <-
-        (tracts_to_hra[[paste0("acs5_", yr)]][[tract.idx]]$total.area[1] - 
+      
+      tracts_to_hra[[yr.idx]][[tract.idx]]$total.minus.sum <-
+        (tracts_to_hra[[yr.idx]][[tract.idx]]$total.area[1] - 
            sum(tract.areas))/(sum(tract.areas))
     }
   }
   
+  ## Rbind into a single data frame the 
+  ## modified over output
+  
   transform.df <- do.call(rbind.data.frame,
                           tracts_to_hra[[yr.idx]])
   
+  ## Add the GEOID to this dataframe
   transform.df$GEOID <- kc_tracts_poly[[yr.idx]]$GEOID[transform.df$tract.idx]
+  
+  tracts_to_hra[[yr.idx]] <- transform.df
   
   kc_tracts_poly[[yr.idx]]@data <- kc_tracts_poly[[yr.idx]]@data %>%
     left_join(transform.df %>%
@@ -336,7 +370,8 @@ for(yr in years){
                               -STATE,
                               -CNTYN,
                               -CNTY,
-                              -FIPS)) 
+                              -FIPS),
+              by = c("GEOID"  = "GEOID")) 
 }
 ```
 
@@ -349,16 +384,7 @@ hist(abs(unlist(lapply(tracts_to_hra$acs5_2019, function(x){
 main = "",
 xlab = "")
 
-tracts_to_hra <- lapply(tracts_to_hra,
-                        function(x){
-                          do.call(rbind.data.frame,x)
-                        })
 
-for(year in years){
-  list.name <- paste0("acs5_", year)
-  tracts_to_hra[[list.name]]$GEOID <-
-    kc_tracts_poly[[list.name]]@data$GEOID[tracts_to_hra[[list.name]]$tract.idx]
-}
 save(tracts_to_hra, file = '../Data/tracts_to_hra.rda')
 ```
 
