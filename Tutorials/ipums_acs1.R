@@ -14,16 +14,17 @@ library(tidyverse)
 
 
 # constants
-main_dir <- "C:/Users/allorant/OneDrive - UW/Shared with Everyone/UW/4thYear/PHI2021/"
+main_dir <- "/Users/adrienallorant/Documents/UW/PHI2021/"
 data_dir <- paste0(main_dir, "data/")
 out_dir <- paste0(main_dir, "output/")
 
-code_dir <- paste0(main_dir, "PHI2021/household_size/")
+code_dir <- paste0(main_dir, "Code/PHI2021/household_size/")
 
 # loading functions
 source(paste0(code_dir,"../Tutorials/ipums_acs_recode.R"))
 source(paste0(code_dir,"../Tutorials/map_main_theme.R"))
 source(paste0(code_dir,"../Tutorials/compute_survey_proportions.R"))
+source(paste0(code_dir,"../Tutorials/compute_survey_tot.R"))
 # loading data
 ipums <- readRDS(file = paste0(code_dir, "kc_ACS1_IPUMS.RDS"))
 
