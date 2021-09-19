@@ -159,146 +159,152 @@ breaks
 
 for(yr in c(2009, 2014, 2018)){
   for(tenure.type in c("Renter", "Owner")){
-  ## Make sure your df is in right order for mapping,
-  ## i.e. tenure_hra_tmp is ordered like hra@data
-  
-  tenure_hra_tmp <- tenure_hra %>% 
-    filter(Year == yr) %>% 
-    filter(tenure == tenure.type) 
-  
-  tenure_hra_tmp <- tenure_hra_tmp[match(tenure_hra_tmp$HRA2010v2_,
-                                         hra@data$HRA2010v2_), ]
-  
-  ## Bin with fixed colors
-  breaks <- c(0, 2500, 5000,
-              7500, 10000, 20000,
-              30000, 40000, 50000,
-              75000)
-  pop.int.hra <- classIntervals(tenure_hra_tmp$value,
-                                style = "fixed",
-                                fixedBreaks = breaks,
-                                n = 9)
-  pop.col.hra <- findColours(pop.int.hra, pop.pal)
-  
-  jpeg(paste0("../TenurePlots/Map_HRA_",
-              tenure.type, "_",
-              yr, ".jpeg"),
-       height = 480, width = 480)
-  par(lend = 1,
-      mar = c(0,0,2,0),
-      oma = c(0,0,1,0))
-  plot(hra,
-       col = pop.col.hra,
-       border = 'grey48', lwd = .25,
-       main = "")
-  legend('bottomleft',
-         title = 'Households',
-         title.adj = 0,
-         ncol = 2,
-         bty = 'n',
-         cex= 0.75,
-         border = FALSE,
-         fill = pop.pal,
-         legend = names(attr(pop.col.hra, 'table')))
-  title(paste0(tenure.type, "-occupied Households\n",
-               ""),
-        font.main = 2, outer = FALSE,
-        adj = 0, cex.main = 1)
-  
-  title(paste0("\n",
-               "King County (ACS ",
-               yr - 5, "-", yr,")"),
-        font.main = 1, outer = FALSE,
-        adj = 0, cex.main = 1)
-  dev.off()
-  
-  ### Tract ####
-  tenure_tmp <- tenure %>% 
-    filter(Year == yr) %>% 
-    mutate(tenure = gsub(" occupied", "",
-                         short_label)) %>% 
-    filter(tenure == tenure.type) %>% 
-    mutate(Density = 0) 
-  tenure_tmp$Density[tenure_tmp$CoV >= 1/qnorm(.9)] <- 50
-  tenure_tmp$Density[tenure_tmp$CoV < 1/qnorm(.9) &
-                       tenure_tmp$CoV >= 1/qnorm(.95)] <- 25
-  
-  if(yr < 2010){
-    spatialdf <- data.frame(GEOID = kc_tracts_2000$GEOID)
-    row.names(spatialdf) <- names(kc_tracts_2000_poly)
-    tract_spatialdf <- SpatialPolygonsDataFrame(kc_tracts_2000_poly,
-                                                data = spatialdf)
-  }else{
-    spatialdf <- data.frame(GEOID = kc_tracts$GEOID)
-    row.names(spatialdf) <- names(kc_tracts_poly)
-    tract_spatialdf <- SpatialPolygonsDataFrame(kc_tracts_poly,
-                                                data = spatialdf)
-  }
-  tenure_tmp <- tenure_tmp %>% 
-    filter(GEOID %in% tract_spatialdf$GEOID)
-  tenure_tmp <- tenure_tmp[match(tenure_tmp$GEOID,
-                                 tract_spatialdf$GEOID),]
-  ## Bin with fixed colors
-  breaks <- c(0, 500, 1000,
-              2000, 3000, 4000,
-              5000, 7500, 10000,
-              14000)
-  pop.int.hra <- classIntervals(tenure_tmp$value,
-                                style = "fixed",
-                                fixedBreaks = breaks,
-                                n = 9)
-  pop.col.hra <- findColours(pop.int.hra, pop.pal)
-  
-  jpeg(paste0("../TenurePlots/Map_Tract_",
-              tenure.type, "_CoV_",
-              yr, ".jpeg"),
-       height = 480, width = 480)
-  par(lend = 1,
-      mar = c(0,0,2,0),
-      oma = c(0,0,1,0))
-  plot(tract_spatialdf,
-       col = pop.col.hra,
-       border = 'grey48', lwd = .25,
-       main = "")
-  hatch.idx <- which(tenure_tmp$Density > 0)
-  for(poly in hatch.idx){
-    points <- tract_spatialdf@polygons[[poly]]@Polygons[[1]]@coords
-    polygon(points[,1], points[,2],
-            border = FALSE,
-            density = tenure_tmp$Density[poly])
-  }
-  legend('bottomleft',
-         title = 'Households',
-         title.adj = 0,
-         ncol = 2,
-         bty = 'n',
-         cex= 0.75,
-         border = FALSE,
-         fill = pop.pal,
-         legend = names(attr(pop.col.hra, 'table')))
-  legend('bottomright',
-         title = 'Significance',
-         title.adj = 0,
-         ncol = 1,
-         bty = 'n',
-         cex= 0.75,
-         border = 'black',
-         fill = 'black',
-         density = c(0,25,50),
-         legend = c(">= 95%",
-                    "80% to 90%",
-                    "< 80%"))
-  title(paste0(tenure.type, "-occupied Households\n",
-               ""),
-        font.main = 2, outer = FALSE,
-        adj = 0, cex.main = 1)
-  
-  title(paste0("\n",
-               "King County (ACS ",
-               yr - 5, "-", yr,")"),
-        font.main = 1, outer = FALSE,
-        adj = 0, cex.main = 1)
-  dev.off()
+    ## Make sure your df is in right order for mapping,
+    ## i.e. tenure_hra_tmp is ordered like hra@data
+    
+    tenure_hra_tmp <- tenure_hra %>% 
+      filter(Year == yr) %>% 
+      filter(tenure == tenure.type) 
+    
+    tenure_hra_tmp <- tenure_hra_tmp[match(tenure_hra_tmp$HRA2010v2_,
+                                           hra@data$HRA2010v2_), ]
+    
+    ## Bin with fixed colors
+    breaks <- c(0, 2500, 5000,
+                7500, 10000, 20000,
+                30000, 40000, 50000,
+                75000)
+    pop.int.hra <- classIntervals(tenure_hra_tmp$value,
+                                  style = "fixed",
+                                  fixedBreaks = breaks,
+                                  n = 9)
+    pop.col.hra <- findColours(pop.int.hra, pop.pal)
+    
+    jpeg(paste0("../TenurePlots/Map_HRA_",
+                tenure.type, "_",
+                yr, ".jpeg"),
+         height = 480, width = 480)
+    par(lend = 1,
+        mar = c(0,0,2,0),
+        oma = c(0,0,1,0))
+    plot(hra,
+         col = pop.col.hra,
+         border = 'grey48', lwd = .25,
+         main = "")
+    legend('bottomleft',
+           title = 'Households',
+           title.adj = 0,
+           ncol = 2,
+           bty = 'n',
+           cex= 0.75,
+           border = FALSE,
+           fill = pop.pal,
+           legend = names(attr(pop.col.hra, 'table')))
+    title(paste0(tenure.type, "-occupied Households\n",
+                 ""),
+          font.main = 2, outer = FALSE,
+          adj = 0, cex.main = 1)
+    
+    title(paste0("\n",
+                 "King County (ACS ",
+                 yr - 5, "-", yr,")"),
+          font.main = 1, outer = FALSE,
+          adj = 0, cex.main = 1)
+    dev.off()
+    
+    ### Tract ####
+    tenure_tmp <- tenure %>% 
+      filter(Year == yr) %>% 
+      mutate(tenure = gsub(" occupied", "",
+                           short_label)) %>% 
+      filter(tenure == tenure.type) %>% 
+      mutate(Density = 0) 
+    
+    # less than 80% significance
+    tenure_tmp$Density[tenure_tmp$CoV >= 1/qnorm(.9)] <- 50
+    
+    # between 80 and 90%
+    tenure_tmp$Density[tenure_tmp$CoV < 1/qnorm(.9) &
+                         tenure_tmp$CoV >= 1/qnorm(.95)] <- 25
+    
+    if(yr < 2010){
+      spatialdf <- data.frame(GEOID = kc_tracts_2000$GEOID)
+      row.names(spatialdf) <- names(kc_tracts_2000_poly)
+      tract_spatialdf <- SpatialPolygonsDataFrame(kc_tracts_2000_poly,
+                                                  data = spatialdf)
+    }else{
+      spatialdf <- data.frame(GEOID = kc_tracts$GEOID)
+      row.names(spatialdf) <- names(kc_tracts_poly)
+      tract_spatialdf <- SpatialPolygonsDataFrame(kc_tracts_poly,
+                                                  data = spatialdf)
+    }
+    tenure_tmp <- tenure_tmp %>% 
+      filter(GEOID %in% tract_spatialdf$GEOID)
+    tenure_tmp <- tenure_tmp[match(tenure_tmp$GEOID,
+                                   tract_spatialdf$GEOID),]
+    ## Bin with fixed colors
+    breaks <- c(0, 500, 1000,
+                2000, 3000, 4000,
+                5000, 7500, 10000,
+                14000)
+    pop.int.hra <- classIntervals(tenure_tmp$value,
+                                  style = "fixed",
+                                  fixedBreaks = breaks,
+                                  n = 9)
+    pop.col.hra <- findColours(pop.int.hra, pop.pal)
+    
+    jpeg(paste0("../TenurePlots/Map_Tract_",
+                tenure.type, "_CoV_",
+                yr, ".jpeg"),
+         height = 480, width = 480)
+    {
+      par(lend = 1,
+          mar = c(0,0,2,0),
+          oma = c(0,0,1,0))
+      plot(tract_spatialdf,
+           col = pop.col.hra,
+           border = 'grey48', lwd = .25,
+           main = "")
+      hatch.idx <- which(tenure_tmp$Density > 0)
+      for(poly in hatch.idx){
+        points <- tract_spatialdf@polygons[[poly]]@Polygons[[1]]@coords
+        polygon(points[,1], points[,2],
+                border = FALSE,
+                density = tenure_tmp$Density[poly])
+      }
+      legend('bottomleft',
+             title = 'Households',
+             title.adj = 0,
+             ncol = 2,
+             bty = 'n',
+             cex= 0.75,
+             border = FALSE,
+             fill = pop.pal,
+             legend = names(attr(pop.col.hra, 'table')))
+      legend('bottomright',
+             title = 'Significance',
+             title.adj = 0,
+             ncol = 1,
+             bty = 'n',
+             cex= 0.75,
+             border = 'black',
+             fill = 'black',
+             density = c(0,25,50),
+             legend = c(">= 95%",
+                        "80% to 90%",
+                        "< 80%"))
+      title(paste0(tenure.type, "-occupied Households\n",
+                   ""),
+            font.main = 2, outer = FALSE,
+            adj = 0, cex.main = 1)
+      
+      title(paste0("\n",
+                   "King County (ACS ",
+                   yr - 5, "-", yr,")"),
+            font.main = 1, outer = FALSE,
+            adj = 0, cex.main = 1)
+    }
+    dev.off()
   }
 }
 
@@ -337,8 +343,8 @@ quantile(tenure_prev_hra$Prev,
          probs = seq(0,1,.1))
 
 prop.int.hra <- classIntervals(tenure_prev_hra$Prev,
-                              style = 'jenks',
-                              n = 9)
+                               style = 'jenks',
+                               n = 9)
 
 breaks <- prop.int.hra$brks
 breaks
@@ -359,13 +365,13 @@ for(yr in c(2009, 2014, 2018)){
       filter(tenure == tenure.type)
     
     tenure_prev_hra_tmp <- tenure_prev_hra_tmp[match(tenure_prev_hra_tmp$HRA2010v2_,
-                                                      hra@data$HRA2010v2_), ]
+                                                     hra@data$HRA2010v2_), ]
     
     ## Bin with fixed colors
     prop.int.hra <- classIntervals(tenure_prev_hra_tmp$Prev,
-                                  style = "fixed",
-                                  fixedBreaks = breaks,
-                                  n = 9)
+                                   style = "fixed",
+                                   fixedBreaks = breaks,
+                                   n = 9)
     prop.col.hra <- findColours(prop.int.hra, prop.pal)
     
     jpeg(paste0("../TenurePlots/Map_HRA_",
@@ -408,8 +414,8 @@ for(yr in c(2009, 2014, 2018)){
       mutate(tenure = gsub(" occupied", "",
                            short_label)) %>% 
       group_by(GEOID) %>% 
-        summarise(value = sum(value),
-                  SE = sum(SE)) 
+      summarise(value = sum(value),
+                SE = sum(SE)) 
     tenure_tmp <- tenure %>% 
       filter(Year == yr) %>% 
       mutate(tenure = gsub(" occupied", "",
@@ -442,9 +448,9 @@ for(yr in c(2009, 2014, 2018)){
                                    tract_spatialdf$GEOID),]
     ## Bin with fixed colors
     prop.int.hra <- classIntervals(tenure_tmp$Prev,
-                                  style = "fixed",
-                                  fixedBreaks = breaks,
-                                  n = 9)
+                                   style = "fixed",
+                                   fixedBreaks = breaks,
+                                   n = 9)
     prop.col.hra <- findColours(prop.int.hra, prop.pal)
     
     jpeg(paste0("../TenurePlots/Map_Tract_",
@@ -645,10 +651,10 @@ for(yr in c(2009, 2014, 2018)){
                                    tract_spatialdf$GEOID),]
     ## Bin with fixed colors
     breaks <- c(0, .001,
-                  .002, .003,
-                  .004, .005,
-                  .0075, .01,
-                  .0125)
+                .002, .003,
+                .004, .005,
+                .0075, .01,
+                .0125)
     prop.int.hra <- classIntervals(tenure_tmp$Dist,
                                    style = "fixed",
                                    fixedBreaks = breaks,
