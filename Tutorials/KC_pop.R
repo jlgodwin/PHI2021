@@ -1439,6 +1439,10 @@ for(year in c(2010, 2012, 2015,
       dev.off()
       
       ### Prevalence Pyramid by Race ####
+      hra.name.file <- gsub("\\.","",
+                            hra.name)
+      hra.name.file <- gsub("/","",
+                            hra.name.file)
       jpeg(paste0("../PopPlots/",
                   year, "/Pyramid/Prevalence/Pyramid_Prevalence_HRA_",
                   hra.name.file, "_",
@@ -1658,7 +1662,7 @@ for(year in c(2010, 2012, 2015,
                            name = 'Blues')
     
     
-## Population Maps ####
+    ## Population Maps ####
     
     hra_age_pop <- hra_pop %>% 
       filter(Race_Lbl == race) %>% 
@@ -2097,6 +2101,7 @@ for(year in c(2010, 2012, 2015,
 
 if(!dir.exists("../household_size/Pyramid/")){
   dir.create("../household_size/Pyramid")
+  dir.create("../household_size/Pyramid/HRA/")
 }
 
 if(!dir.exists("../household_size/HRA/")){
@@ -2128,6 +2133,8 @@ pop.pyrs <- list()
 
 ## Pyramids ####
 for(year in c(2010, 2014, 2019)){
+  
+  #### Households by HRA by year ####
   # pdf(paste0("../household_size/Pyramid/Pyramid_",
   #            year, "_hhsize_by_tenure_HRA.pdf"),
   #     height = 5, width = 5)
@@ -2167,34 +2174,36 @@ for(year in c(2010, 2014, 2019)){
                           hra.name)
     hra.name.file <- gsub("/","",
                           hra.name.file)
-    jpeg(paste0("../household_size/Pyramid/Pyramid_",
+    jpeg(paste0("../household_size/Pyramid/HRA/Pyramid_",
                 year, "_hhsize_by_tenure_HRA_",
                 hra.name.file, ".jpeg"),
          height = 480, width = 480)
-    pop.pyramid.bayesPop.pyramid(pyr.obj, pyr1.par = list(col = pop.cols[3] , 
-                                                          border = pop.cols[3]),
-                                 legend_pos = "topright",
-                                 legend_text = paste0("ACS ", 
-                                                      year-4, 
-                                                      "-", year),
-                                 x_at = c(rev(-x_at[-1]), x_at),
-                                 x_labels = c(rev(x_at[-1]), x_at),
-                                 cex.axis = .75,
-                                 cex.sub = .75,
-                                 x_lims = c(-17000,17000))
-    title(paste0("Households by Size and Tenure\n",
-                 ""),
-          font.main = 2, outer = FALSE,
-          adj = 0, cex.main = 1)
-    
-    title(paste0("\n",
-                 hra.name),
-          font.main = 1, outer = FALSE,
-          adj = 0, cex.main = 1)
+    {
+      pop.pyramid.bayesPop.pyramid(pyr.obj, pyr1.par = list(col = pop.cols[3] , 
+                                                            border = pop.cols[3]),
+                                   legend_pos = "topright",
+                                   legend_text = paste0("ACS ", 
+                                                        year-4, 
+                                                        "-", year),
+                                   x_at = c(rev(-x_at[-1]), x_at),
+                                   x_labels = c(rev(x_at[-1]), x_at),
+                                   cex.axis = .75,
+                                   cex.sub = .75,
+                                   x_lims = c(-17000,17000))
+      title(paste0("Households by Size and Tenure\n",
+                   ""),
+            font.main = 2, outer = FALSE,
+            adj = 0, cex.main = 1)
+      
+      title(paste0("\n",
+                   hra.name, " (Estimated from ACS)"),
+            font.main = 1, outer = FALSE,
+            adj = 0, cex.main = 1)
+    }
     dev.off()
   }
   
-  
+  ## Households by year ####
   
   # pdf(paste0("../household_size/Pyramid/Pyramid_",
   #            year, "_hhsize_by_tenure.pdf"),
@@ -2238,21 +2247,23 @@ for(year in c(2010, 2014, 2019)){
                                                       "-", year),
                                  x_at = c(rev(-x_at[-1]), x_at),
                                  x_labels = c(rev(x_at[-1]), x_at),
-                                 cex.axis = .75,
-                                 cex.sub = .75)
+                                 cex.axis = .65,
+                                 cex.sub = .75,
+                                 x_lims = c(-185000,185000))
     title(paste0("Households by Size and Tenure\n",
                  ""),
           font.main = 2, outer = FALSE,
           adj = 0, cex.main = 1)
     
     title(paste0("\n",
-                 "King County"),
+                 "King County (Estimated from ACS)"),
           font.main = 1, outer = FALSE,
           adj = 0, cex.main = 1)
   }
   dev.off()
   ## Compare 2010, 2015-2019 ####
   if(year == 2019){
+    ### Households ####
     # pdf(paste0("../household_size/Pyramid/Pyramid_",
     #            "20102019_hhsize_by_tenure.pdf"),
     #     height = 5, width = 5)
@@ -2260,7 +2271,7 @@ for(year in c(2010, 2014, 2019)){
                 "20102019_hhsize_by_tenure.jpeg"),
          height = 480, width = 480)
     {
-      x_at <- round(seq(0, max(unlist(pop.pyrs)), length.out = 5),-4)
+      x_at <- round(seq(0, max(unlist(pop.pyrs)), length.out = 5),-2)
       pyr.obj <- get.bPop.pyramid(list(pop.pyrs$year_2019, pop.pyrs$year_2010),
                                   legend = c("ACS 2015-2019", "Census 2010"),
                                   LRcolnames = c("Owner", "Renter"),
@@ -2277,18 +2288,19 @@ for(year in c(2010, 2014, 2019)){
                                    x_at = c(rev(-x_at[-1]), x_at),
                                    x_labels = c(rev(x_at[-1]), x_at),
                                    cex.axis = .65,
-                                   cex.sub = .75)
+                                   cex.sub = .75,
+                                   x_lims = c(-185000,185000))
       title(paste0("Households by Size and Tenure\n",
                    ""),
             font.main = 2, outer = FALSE,
             adj = 0, cex.main = 1)
       title(paste0("\n",
-                   "King County"),
+                   "King County (Estimated from Census, ACS)"),
             font.main = 1, outer = FALSE,
             adj = 0, cex.main = 1)
     }
     dev.off()
-    
+    ### Prevalence ####
     # pdf(paste0("../household_size/Pyramid/Pyramid_Prevalence_",
     #            "20102019_hhsize_by_tenure.pdf"),
     #     height = 5, width = 5)
@@ -2324,13 +2336,14 @@ for(year in c(2010, 2014, 2019)){
             adj = 0, cex.main = 1)
       
       title(paste0("\n",
-                   "King County"),
+                   "King County (Estimated from Census, ACS)"),
             font.main = 1, outer = FALSE,
             adj = 0, cex.main = 1)
       
     }
     dev.off()
     
+    ### Households by HRA ####
     # pdf(paste0("../household_size/Pyramid/Pyramid_",
     #            "20102019_hhsize_by_tenure_HRA.pdf"),
     #     height = 5, width = 5)
@@ -2375,36 +2388,39 @@ for(year in c(2010, 2014, 2019)){
                                   legend = c("ACS 2015-2019", "Census 2010"),
                                   LRcolnames = c("Owner", "Renter"),
                                   LRmain = c("Owner", "Renter"))
-      jpeg(paste0("../household_size/Pyramid/Pyramid_",
+      jpeg(paste0("../household_size/Pyramid/HRA/Pyramid_",
                   "20102019_hhsize_by_tenure_HRA_",
-                  hra.name, ".jpeg"),
+                  hra.name.file, ".jpeg"),
            height = 480, width = 480)
-      pop.pyramid.bayesPop.pyramid(pyr.obj,
-                                   pyr1.par = list(col = pop.cols[5] ,
-                                                   border = pop.cols[5]),
-                                   pyr2.par = list(col = pop.cols[3] , 
-                                                   border = pop.cols[3]),
-                                   legend_pos = "topright",
-                                   legend_text = c("ACS 2015-2019",
-                                                   "Census 2010"),
-                                   x_at = c(rev(-x_at[-1]), x_at),
-                                   x_labels = c(rev(x_at[-1]), x_at),
-                                   cex.axis = .65,
-                                   cex.sub = .75,
-                                   x_lims = c(-8750, 8750))
-      title(paste0("Households by Size and Tenure\n",
-                   ""),
-            font.main = 2, outer = FALSE,
-            adj = 0, cex.main = 1)
-      
-      title(paste0("\n",
-                   hra.name),
-            font.main = 1, outer = FALSE,
-            adj = 0, cex.main = 1)
+      {
+        pop.pyramid.bayesPop.pyramid(pyr.obj,
+                                     pyr1.par = list(col = pop.cols[5] ,
+                                                     border = pop.cols[5]),
+                                     pyr2.par = list(col = pop.cols[3] , 
+                                                     border = pop.cols[3]),
+                                     legend_pos = "topright",
+                                     legend_text = c("ACS 2015-2019",
+                                                     "Census 2010"),
+                                     x_at = c(rev(-x_at[-1]), x_at),
+                                     x_labels = c(rev(x_at[-1]), x_at),
+                                     cex.axis = .65,
+                                     cex.sub = .75,
+                                     x_lims = c(-8750, 8750))
+        title(paste0("Households by Size and Tenure\n",
+                     ""),
+              font.main = 2, outer = FALSE,
+              adj = 0, cex.main = 1)
+        
+        title(paste0("\n",
+                     hra.name, " (Estimated from Census, ACS)"),
+              font.main = 1, outer = FALSE,
+              adj = 0, cex.main = 1)
+      }
       dev.off()
     }
     
     
+    ### Prevalence by HRA ####
     # pdf(paste0("../household_size/Pyramid/Pyramid_Prevalence_",
     #            "20102019_hhsize_by_tenure_HRA.pdf"),
     #     height = 5, width = 5)
@@ -2455,44 +2471,43 @@ for(year in c(2010, 2014, 2019)){
                             hra.name)
       hra.name.file <- gsub("/","",
                             hra.name.file)
-      jpeg(paste0("../household_size/Pyramid/Pyramid_Prevalence_",
+      jpeg(paste0("../household_size/Pyramid/HRA/Pyramid_Prevalence_",
                   "20102019_hhsize_by_tenure_HRA_",
                   hra.name.file, ".jpeg"),
            height = 480, width = 480)
-      pop.pyramid.bayesPop.pyramid(pyr.obj,
-                                   pyr1.par = list(col = pop.cols[5] ,
-                                                   border = pop.cols[5]),
-                                   pyr2.par = list(col = pop.cols[3] , 
-                                                   border = pop.cols[3]),
-                                   legend_pos = "topright",
-                                   legend_text = c("ACS 2015-2019",
-                                                   "Census 2010"),
-                                   x_at = x_at,
-                                   x_labels = x_labels,
-                                   cex.axis = .75,
-                                   cex.sub = .75,
-                                   x_lims = c(-.3, .3))
-      title(paste0("Prevalence of Households by Size and Tenure\n",
-                   ""),
-            font.main = 2, outer = FALSE,
-            adj = 0, cex.main = 1)
-      
-      title(paste0("\n",
-                   hra.name),
-            font.main = 1, outer = FALSE,
-            adj = 0, cex.main = 1)
+      {
+        pop.pyramid.bayesPop.pyramid(pyr.obj,
+                                     pyr1.par = list(col = pop.cols[5] ,
+                                                     border = pop.cols[5]),
+                                     pyr2.par = list(col = pop.cols[3] , 
+                                                     border = pop.cols[3]),
+                                     legend_pos = "topright",
+                                     legend_text = c("ACS 2015-2019",
+                                                     "Census 2010"),
+                                     x_at = x_at,
+                                     x_labels = x_labels,
+                                     cex.axis = .75,
+                                     cex.sub = .75,
+                                     x_lims = c(-.3, .3))
+        title(paste0("Prevalence of Households by Size and Tenure\n",
+                     ""),
+              font.main = 2, outer = FALSE,
+              adj = 0, cex.main = 1)
+        
+        title(paste0("\n",
+                     hra.name, " (Estimated from Census, ACS)"),
+              font.main = 1, outer = FALSE,
+              adj = 0, cex.main = 1)
+      }
       dev.off()
     }
-    
-    
-    
   }
-  
-  
 }
 
 ## Pyramids: pre 2010 ####
 for(year in c(2000, 2009)){
+  
+  ### Households by HRA by year ####
   # pdf(paste0("../household_size/Pyramid/Pyramid_",
   #            year, "_hhsize_by_tenure_HRA.pdf"),
   #     height = 5, width = 5)
@@ -2519,7 +2534,7 @@ for(year in c(2000, 2009)){
     row.names(pop.pyr) <- c(1:6, "7+")
     
     
-    x_at <- round(seq(0, max(pop.pyr), length.out = 5),-2)
+    x_at <- c(0, 1000, 5000, 10000, 15000)
     pyr.obj <- get.bPop.pyramid(pop.pyr,
                                 legend = paste0("ACS ", 
                                                 year-4, 
@@ -2530,33 +2545,44 @@ for(year in c(2000, 2009)){
                           hra.name)
     hra.name.file <- gsub("/","",
                           hra.name.file)
-    jpeg(paste0("../household_size/Pyramid/Pyramid_",
+    jpeg(paste0("../household_size/Pyramid/HRA/Pyramid_",
                 year, "_hhsize_by_tenure_HRA_",
                 hra.name.file, ".jpeg"),
          height = 480, width = 480)
-    
-    pop.pyramid.bayesPop.pyramid(pyr.obj, pyr1.par = list(col = pop.cols[3] , 
-                                                          border = pop.cols[3]),
-                                 legend_pos = "topright",
-                                 legend_text = paste0("ACS ", 
-                                                      year-4, 
-                                                      "-", year),
-                                 x_at = c(rev(-x_at[-1]), x_at),
-                                 x_labels = c(rev(x_at[-1]), x_at),
-                                 cex.axis = .76,
-                                 cex.sub = .75)
-    title(paste0("Households by Size and Tenure\n",
-                 ""),
-          font.main = 2, outer = FALSE,
-          adj = 0, cex.main = 1)
-    
-    title(paste0("\n",
-                 hra.name),
-          font.main = 1, outer = FALSE,
-          adj = 0, cex.main = 1)
+    {
+      if(year != 2000){
+        legend_string <- paste0("ACS ", 
+                                year - 4, 
+                                "-", year)
+        title_string <- "ACS"
+      }else{
+        legend_string <- paste0("Census ", year)
+        title_string <- "Census"
+      }
+      pop.pyramid.bayesPop.pyramid(pyr.obj, pyr1.par = list(col = pop.cols[3] , 
+                                                            border = pop.cols[3]),
+                                   legend_pos = "topright",
+                                   legend_text = legend_string,
+                                   x_at = c(rev(-x_at[-1]), x_at),
+                                   x_labels = c(rev(x_at[-1]), x_at),
+                                   cex.axis = .76,
+                                   cex.sub = .75,
+                                   x_lims = c(-17000,17000))
+      title(paste0("Households by Size and Tenure\n",
+                   ""),
+            font.main = 2, outer = FALSE,
+            adj = 0, cex.main = 1)
+      
+      title(paste0("\n",
+                   hra.name, " (Estimated from ",
+                   title_string, ")"),
+            font.main = 1, outer = FALSE,
+            adj = 0, cex.main = 1)
+    }
     dev.off()
   }
   
+  ## Households by year ####
   
   # pdf(paste0("../household_size/Pyramid/Pyramid_",
   #            year, "_hhsize_by_tenure.pdf"),
@@ -2564,95 +2590,155 @@ for(year in c(2000, 2009)){
   jpeg(paste0("../household_size/Pyramid/Pyramid_",
               year, "_hhsize_by_tenure.jpeg"),
        height = 480, width = 480)
-  hh_size_kc <- hh_size_hra_2000 %>% 
-    filter(Year == year) %>%
-    filter(!is.na(hh_size) &
-             hh_size > 0) %>% 
-    group_by(hh_size, tenure) %>% 
-    summarise(estimate = sum(estimate, na.rm = TRUE),
-              SE = sum(SE, na.rm = TRUE)) %>% 
-    mutate(CoV = SE/estimate)
-  
-  pop.pyrs[[paste0("year_",year)]] <- hh_size_kc %>% 
-    filter(hh_size > 0) %>% 
-    pivot_wider(id_cols = hh_size,
-                names_from = tenure,
-                values_from = estimate,
-                values_fill = 0) %>% 
-    ungroup() %>% 
-    dplyr::select(Owner, Renter) %>% 
-    as.matrix()
-  row.names(pop.pyrs[[paste0("year_", year)]]) <- c(1:6, "7+")
-  x_at <- round(seq(0, max(unlist(pop.pyrs)), length.out = 5),-2)
-  pyr.obj <- get.bPop.pyramid(pop.pyrs[[paste0("year_", year)]],
-                              legend = paste0("ACS ", 
-                                              year-4, 
-                                              "-", year),
-                              LRcolnames = c("Owner", "Renter"),
-                              LRmain = c("Owner", "Renter"))
-  
-  pop.pyramid.bayesPop.pyramid(pyr.obj, pyr1.par = list(col = pop.cols[3] , 
-                                                        border = pop.cols[3]),
-                               legend_pos = "topright",
-                               legend_text = paste0("ACS ", 
-                                                    year-4, 
-                                                    "-", year),
-                               x_at = c(rev(-x_at[-1]), x_at),
-                               x_labels = c(rev(x_at[-1]), x_at),
-                               cex.axis = .76,
-                               cex.sub = .75)
-  title(paste0("Households by Size and Tenure\n",
-               ""),
-        font.main = 2, outer = FALSE,
-        adj = 0, cex.main = 1)
-  
-  title(paste0("\n",
-               hra.name),
-        font.main = 1, outer = FALSE,
-        adj = 0, cex.main = 1)
+  {
+    hh_size_kc <- hh_size_hra_2000 %>% 
+      filter(Year == year) %>%
+      filter(!is.na(hh_size) &
+               hh_size > 0) %>% 
+      group_by(hh_size, tenure) %>% 
+      summarise(estimate = sum(estimate, na.rm = TRUE),
+                SE = sum(SE, na.rm = TRUE)) %>% 
+      mutate(CoV = SE/estimate)
+    
+    pop.pyrs[[paste0("year_",year)]] <- hh_size_kc %>% 
+      filter(hh_size > 0) %>% 
+      pivot_wider(id_cols = hh_size,
+                  names_from = tenure,
+                  values_from = estimate,
+                  values_fill = 0) %>% 
+      ungroup() %>% 
+      dplyr::select(Owner, Renter) %>% 
+      as.matrix()
+    row.names(pop.pyrs[[paste0("year_", year)]]) <- c(1:6, "7+")
+    x_at <- round(seq(0, max(unlist(pop.pyrs)), length.out = 5),-2)
+    pyr.obj <- get.bPop.pyramid(pop.pyrs[[paste0("year_", year)]],
+                                legend = paste0("ACS ", 
+                                                year-4, 
+                                                "-", year),
+                                LRcolnames = c("Owner", "Renter"),
+                                LRmain = c("Owner", "Renter"))
+    if(year != 2000){
+      legend_string <- paste0("ACS ", 
+                              year - 4, 
+                              "-", year)
+      title_string <- "ACS"
+    }else{
+      legend_string <- paste0("Census ", year)
+      title_string <- "Census"
+    }
+    pop.pyramid.bayesPop.pyramid(pyr.obj, pyr1.par = list(col = pop.cols[3] , 
+                                                          border = pop.cols[3]),
+                                 legend_pos = "topright",
+                                 legend_text = legend_string,
+                                 x_at = c(rev(-x_at[-1]), x_at),
+                                 x_labels = c(rev(x_at[-1]), x_at),
+                                 cex.axis = .65,
+                                 cex.sub = .75,
+                                 x_lims = c(-185000,185000))
+    title(paste0("Households by Size and Tenure\n",
+                 ""),
+          font.main = 2, outer = FALSE,
+          adj = 0, cex.main = 1)
+    
+    title(paste0("\n",
+                 hra.name, " (Estimated from ",
+                 title_string, ")"),
+          font.main = 1, outer = FALSE,
+          adj = 0, cex.main = 1)
+  }
   dev.off()
   
 }
 
 ## Compare 2000, 2015-2019 ####
+### Households ####
 # pdf(paste0("../household_size/Pyramid/Pyramid_",
 #            "20002019_hhsize_by_tenure.pdf"),
 #     height = 5, width = 5)
 jpeg(paste0("../household_size/Pyramid/Pyramid_",
             "20002019_hhsize_by_tenure.jpeg"),
      height = 480, width = 480)
-x_at <- round(seq(0, max(unlist(pop.pyrs)),
-                  length.out = 5), -4)
-pyr.obj <- get.bPop.pyramid(list(pop.pyrs$year_2019,
-                                 pop.pyrs$year_2000),
-                            legend = c("ACS 2015-2019",
-                                       "Census 2000"),
-                            LRcolnames = c("Owner", "Renter"),
-                            LRmain = c("Owner", "Renter"))
-
-pop.pyramid.bayesPop.pyramid(pyr.obj,
-                             pyr1.par = list(col = pop.cols[5] ,
-                                             border = pop.cols[5]),
-                             pyr2.par = list(col = pop.cols[3] , 
-                                             border = pop.cols[3]),
-                             legend_pos = "topright",
-                             legend_text = c("ACS 2015-2019",
-                                             "Census 2000"),
-                             x_at = c(rev(-x_at[-1]), x_at),
-                             x_labels = c(rev(x_at[-1]), x_at),
-                             cex.axis = .65,
-                             cex.sub = .75)
-title(paste0("Households by Size and Tenure\n",
-             ""),
-      font.main = 2, outer = FALSE,
-      adj = 0, cex.main = 1)
-
-title(paste0("\n",
-             "King County"),
-      font.main = 1, outer = FALSE,
-      adj = 0, cex.main = 1)
+{
+  x_at <- round(seq(0, max(unlist(pop.pyrs)),
+                    length.out = 5), -2)
+  pyr.obj <- get.bPop.pyramid(list(pop.pyrs$year_2019,
+                                   pop.pyrs$year_2000),
+                              legend = c("ACS 2015-2019",
+                                         "Census 2000"),
+                              LRcolnames = c("Owner", "Renter"),
+                              LRmain = c("Owner", "Renter"))
+  
+  pop.pyramid.bayesPop.pyramid(pyr.obj,
+                               pyr1.par = list(col = pop.cols[5] ,
+                                               border = pop.cols[5]),
+                               pyr2.par = list(col = pop.cols[2] , 
+                                               border = pop.cols[2]),
+                               legend_pos = "topright",
+                               legend_text = c("ACS 2015-2019",
+                                               "Census 2000"),
+                               x_at = c(rev(-x_at[-1]), x_at),
+                               x_labels = c(rev(x_at[-1]), x_at),
+                               cex.axis = .65,
+                               cex.sub = .75,
+                               x_lims = c(-185000,185000))
+  title(paste0("Households by Size and Tenure\n",
+               ""),
+        font.main = 2, outer = FALSE,
+        adj = 0, cex.main = 1)
+  
+  title(paste0("\n",
+               "King County (Estimated from Census, ACS)"),
+        font.main = 1, outer = FALSE,
+        adj = 0, cex.main = 1)
+}
 dev.off()
 
+### Prevalence ####
+# pdf(paste0("../household_size/Pyramid/Pyramid_",
+#            "20002019_hhsize_by_tenure.pdf"),
+#     height = 5, width = 5)
+jpeg(paste0("../household_size/Pyramid/Pyramid_Prevalence",
+            "20002019_hhsize_by_tenure.jpeg"),
+     height = 480, width = 480)
+{
+  x_at <- c(-.2, -.15, -.1, -.05, 0, .05, .1, .15, .2)
+  x_labels <- abs(x_at)
+  pyr.obj <- get.bPop.pyramid(list(pop.pyrs$year_2019/
+                                     sum(pop.pyrs$year_2019),
+                                   pop.pyrs$year_2000/
+                                     sum(pop.pyrs$year_2000)),
+                              legend = c("ACS 2015-2019",
+                                         "Census 2000"),
+                              LRcolnames = c("Owner", "Renter"),
+                              LRmain = c("Owner", "Renter"))
+  
+  pop.pyramid.bayesPop.pyramid(pyr.obj,
+                               pyr1.par = list(col = pop.cols[5] ,
+                                               border = pop.cols[5]),
+                               pyr2.par = list(col = pop.cols[2] , 
+                                               border = pop.cols[2]),
+                               legend_pos = "topright",
+                               legend_text = c("ACS 2015-2019",
+                                               "Census 2000"),
+                               x_at = x_at,
+                               x_labels = x_labels,
+                               cex.axis = .65,
+                               cex.sub = .75,
+                               x_lims = c(-.25, .25))
+  title(paste0("Prevalence of Households by Size and Tenure\n",
+               ""),
+        font.main = 2, outer = FALSE,
+        adj = 0, cex.main = 1)
+  
+  title(paste0("\n",
+               "King County (Estimated from Census, ACS)"),
+        font.main = 1, outer = FALSE,
+        adj = 0, cex.main = 1)
+}
+dev.off()
+
+
+### Households by HRA ####
 # pdf(paste0("../household_size/Pyramid/Pyramid_",
 #            "20002019_hhsize_by_tenure_HRA.pdf"),
 #     height = 5, width = 5)
@@ -2708,34 +2794,37 @@ for(hra.name in hra@data$HRA2010v2_){
                         hra.name)
   hra.name.file <- gsub("/","",
                         hra.name.file)
-  jpeg(paste0("../household_size/Pyramid/Pyramid_",
+  jpeg(paste0("../household_size/Pyramid/HRA/Pyramid_",
               "20002019_hhsize_by_tenure_HRA_",
               hra.name.file, ".jpeg"),
        height = 480, width = 480)
-  pop.pyramid.bayesPop.pyramid(pyr.obj,
-                               pyr1.par = list(col = pop.cols[5] ,
-                                               border = pop.cols[5]),
-                               pyr2.par = list(col = pop.cols[3] , 
-                                               border = pop.cols[3]),
-                               legend_pos = "topright",
-                               legend_text = c("ACS 2015-2019",
-                                               "Census 2000"),
-                               x_at = c(rev(-x_at[-1]), x_at),
-                               x_labels = c(rev(x_at[-1]), x_at),
-                               cex.axis = .6,
-                               cex.sub = .75,
-                               x_lims = c(-8750,8750))
-  title(paste0("Households by Tenure\n",
-               ""),
-        font.main = 2, outer = FALSE,
-        adj = 0, cex.main = 1)
-  title(paste0("\n",
-               hra.name),
-        font.main = 1, outer = FALSE,
-        adj = 0, cex.main = .8)
+  {
+    pop.pyramid.bayesPop.pyramid(pyr.obj,
+                                 pyr1.par = list(col = pop.cols[5] ,
+                                                 border = pop.cols[5]),
+                                 pyr2.par = list(col = pop.cols[2] , 
+                                                 border = pop.cols[2]),
+                                 legend_pos = "topright",
+                                 legend_text = c("ACS 2015-2019",
+                                                 "Census 2000"),
+                                 x_at = c(rev(-x_at[-1]), x_at),
+                                 x_labels = c(rev(x_at[-1]), x_at),
+                                 cex.axis = .6,
+                                 cex.sub = .75,
+                                 x_lims = c(-8750,8750))
+    title(paste0("Households by Tenure\n",
+                 ""),
+          font.main = 2, outer = FALSE,
+          adj = 0, cex.main = 1)
+    title(paste0("\n",
+                 hra.name, " (Estimated from Census, ACS)"),
+          font.main = 1, outer = FALSE,
+          adj = 0, cex.main = .8)
+  }
   dev.off()
 }
 
+### Prevalence by HRA ####
 
 # pdf(paste0("../household_size/Pyramid/Pyramid_Prevalence_",
 #            "20002019_hhsize_by_tenure_HRA.pdf"),
@@ -2801,67 +2890,125 @@ for(hra.name in hra@data$HRA2010v2_){
                         hra.name)
   hra.name.file <- gsub("/","",
                         hra.name.file)
-  jpeg(paste0("../household_size/Pyramid/Pyramid_Prevalence_",
+  jpeg(paste0("../household_size/Pyramid/HRA/Pyramid_Prevalence_",
               "20002019_hhsize_by_tenure_HRA_",
               hra.name.file, ".pdf"),
        height = 480, width = 480)
-  pop.pyramid.bayesPop.pyramid(pyr.obj,
-                               pyr1.par = list(col = pop.cols[5] ,
-                                               border = pop.cols[5]),
-                               pyr2.par = list(col = pop.cols[2] , 
-                                               border = pop.cols[2]),
-                               legend_pos = "topright",
-                               legend_text = c("ACS 2015-2019",
-                                               "Census 2000"),
-                               x_at = x_at,
-                               x_labels = abs(x_at),
-                               cex.axis = .65,
-                               cex.sub = .75,
-                               x_lims = c(-.35,.35))
-  title(paste0("Prevalence of Households by Tenure\n",
-               ""),
-        font.main = 2, outer = FALSE,
-        adj = 0, cex.main = 1)
-  title(paste0("\n", hra.name),
-        font.main = 1, outer = FALSE,
-        adj = 0, cex.main = .8)
+  {
+    pop.pyramid.bayesPop.pyramid(pyr.obj,
+                                 pyr1.par = list(col = pop.cols[5] ,
+                                                 border = pop.cols[5]),
+                                 pyr2.par = list(col = pop.cols[2] , 
+                                                 border = pop.cols[2]),
+                                 legend_pos = "topright",
+                                 legend_text = c("ACS 2015-2019",
+                                                 "Census 2000"),
+                                 x_at = x_at,
+                                 x_labels = abs(x_at),
+                                 cex.axis = .65,
+                                 cex.sub = .75,
+                                 x_lims = c(-.35,.35))
+    title(paste0("Prevalence of Households by Tenure\n",
+                 ""),
+          font.main = 2, outer = FALSE,
+          adj = 0, cex.main = 1)
+    title(paste0("\n", hra.name, " (Estimated from Census, ACS)"),
+          font.main = 1, outer = FALSE,
+          adj = 0, cex.main = .8)
+  }
   dev.off()
 }
 
 
-
-
-
 ## Compare 2000, 2010 ####
+### Households ####
 # pdf(paste0("../household_size/Pyramid/Pyramid_",
 #            "20002010_hhsize_by_tenure.pdf"),
 #     height = 5, width = 5)
 jpeg(paste0("../household_size/Pyramid/Pyramid_",
             "20002010_hhsize_by_tenure.jpeg"),
      height = 480, width = 480)
-x_at <- round(seq(0, max(unlist(pop.pyrs)),
-                  length.out = 5), -4)
-pyr.obj <- get.bPop.pyramid(list(pop.pyrs$year_2010,
-                                 pop.pyrs$year_2000),
-                            legend = c("Census 2010",
-                                       "Census 2000"),
-                            LRcolnames = c("Owner", "Renter"),
-                            LRmain = c("Owner", "Renter"))
-
-pop.pyramid.bayesPop.pyramid(pyr.obj,
-                             pyr1.par = list(col = pop.cols[4] ,
-                                             border = pop.cols[4]),
-                             pyr2.par = list(col = pop.cols[2] , 
-                                             border = pop.cols[2]),
-                             legend_pos = "topright",
-                             legend_text = c("Census 2010",
-                                             "Census 2000"),
-                             x_at = c(rev(-x_at[-1]), x_at),
-                             x_labels = c(rev(x_at[-1]), x_at),
-                             cex.axis = .65,
-                             cex.sub = .75)
+{
+  x_at <- round(seq(0, max(unlist(pop.pyrs)),
+                    length.out = 5), -2)
+  pyr.obj <- get.bPop.pyramid(list(pop.pyrs$year_2010,
+                                   pop.pyrs$year_2000),
+                              legend = c("Census 2010",
+                                         "Census 2000"),
+                              LRcolnames = c("Owner", "Renter"),
+                              LRmain = c("Owner", "Renter"))
+  
+  pop.pyramid.bayesPop.pyramid(pyr.obj,
+                               pyr1.par = list(col = pop.cols[4] ,
+                                               border = pop.cols[4]),
+                               pyr2.par = list(col = pop.cols[2] , 
+                                               border = pop.cols[2]),
+                               legend_pos = "topright",
+                               legend_text = c("Census 2010",
+                                               "Census 2000"),
+                               x_at = c(rev(-x_at[-1]), x_at),
+                               x_labels = c(rev(x_at[-1]), x_at),
+                               cex.axis = .65,
+                               cex.sub = .75,
+                               x_lims = c(-185000,185000))
+  title(paste0("Households by Size and Tenure\n",
+               ""),
+        font.main = 2, outer = FALSE,
+        adj = 0, cex.main = 1)
+  
+  title(paste0("\n",
+               "King County (Estimated from Census, ACS)"),
+        font.main = 1, outer = FALSE,
+        adj = 0, cex.main = 1)
+}
 dev.off()
 
+### Prevalence ####
+# pdf(paste0("../household_size/Pyramid/Pyramid_",
+#            "20002019_hhsize_by_tenure.pdf"),
+#     height = 5, width = 5)
+jpeg(paste0("../household_size/Pyramid/Pyramid_Prevalence",
+            "20002010_hhsize_by_tenure.jpeg"),
+     height = 480, width = 480)
+{
+  x_at <- c(-.2, -.15, -.1, -.05, 0, .05, .1, .15, .2)
+  x_labels <- abs(x_at)
+  pyr.obj <- get.bPop.pyramid(list(pop.pyrs$year_2010/
+                                     sum(pop.pyrs$year_2010),
+                                   pop.pyrs$year_2000/
+                                     sum(pop.pyrs$year_2000)),
+                              legend = c("Census 2010",
+                                         "Census 2000"),
+                              LRcolnames = c("Owner", "Renter"),
+                              LRmain = c("Owner", "Renter"))
+  
+  pop.pyramid.bayesPop.pyramid(pyr.obj,
+                               pyr1.par = list(col = pop.cols[4] ,
+                                               border = pop.cols[4]),
+                               pyr2.par = list(col = pop.cols[2] , 
+                                               border = pop.cols[2]),
+                               legend_pos = "topright",
+                               legend_text = c("Census 2010",
+                                               "Census 2000"),
+                               x_at = x_at,
+                               x_labels = x_labels,
+                               cex.axis = .65,
+                               cex.sub = .75,
+                               x_lims = c(-.25, .25))
+  title(paste0("Prevalence of Households by Size and Tenure\n",
+               ""),
+        font.main = 2, outer = FALSE,
+        adj = 0, cex.main = 1)
+  
+  title(paste0("\n",
+               "King County (Estimated from Census)"),
+        font.main = 1, outer = FALSE,
+        adj = 0, cex.main = 1)
+}
+dev.off()
+
+
+### Households by HRA ####
 # pdf(paste0("../household_size/Pyramid/Pyramid_",
 #            "20002010_hhsize_by_tenure_HRA.pdf"),
 #     height = 5, width = 5)
@@ -2917,34 +3064,37 @@ for(hra.name in hra@data$HRA2010v2_){
                         hra.name)
   hra.name.file <- gsub("/","",
                         hra.name.file)
-  jpeg(paste0("../household_size/Pyramid/Pyramid_",
+  jpeg(paste0("../household_size/Pyramid/HRA/Pyramid_",
               "20002010_hhsize_by_tenure_HRA_",
               hra.name.file, ".pdf"),
        height = 480, width = 480)
-  pop.pyramid.bayesPop.pyramid(pyr.obj,
-                               pyr1.par = list(col = pop.cols[4] ,
-                                               border = pop.cols[4]),
-                               pyr2.par = list(col = pop.cols[2] , 
-                                               border = pop.cols[2]),
-                               legend_pos = "topright",
-                               legend_text = c("Census 2010",
-                                               "Census 2000"),
-                               x_at = c(rev(-x_at[-1]), x_at),
-                               x_labels = c(rev(x_at[-1]), x_at),
-                               cex.axis = .75,
-                               cex.sub = .75,
-                               x_lims = c(-8750, 8750))
-  title(paste0("Households by Tenure\n",
-               ""),
-        font.main = 2, outer = FALSE,
-        adj = 0, cex.main = 1)
-  title(paste0("\n", hra.name),
-        font.main = 1, outer = FALSE,
-        adj = 0, cex.main = .8)
+  {
+    pop.pyramid.bayesPop.pyramid(pyr.obj,
+                                 pyr1.par = list(col = pop.cols[4] ,
+                                                 border = pop.cols[4]),
+                                 pyr2.par = list(col = pop.cols[2] , 
+                                                 border = pop.cols[2]),
+                                 legend_pos = "topright",
+                                 legend_text = c("Census 2010",
+                                                 "Census 2000"),
+                                 x_at = c(rev(-x_at[-1]), x_at),
+                                 x_labels = c(rev(x_at[-1]), x_at),
+                                 cex.axis = .75,
+                                 cex.sub = .75,
+                                 x_lims = c(-8750, 8750))
+    title(paste0("Households by Tenure\n",
+                 ""),
+          font.main = 2, outer = FALSE,
+          adj = 0, cex.main = 1)
+    title(paste0("\n", hra.name, " (Estimated from Census)"),
+          font.main = 1, outer = FALSE,
+          adj = 0, cex.main = .8)
+  }
   dev.off()
 }
 
 
+### Prevalence by HRA ####
 hh_size_total <- hh_size_hra %>% 
   filter(!is.na(hh_size) &
            hh_size > 0) %>% 
@@ -3025,36 +3175,34 @@ for(hra.name in hra@data$HRA2010v2_){
                         hra.name)
   hra.name.file <- gsub("/","",
                         hra.name.file)
-  jpeg(paste0("../household_size/Pyramid/Pyramid_Prevalence_",
+  jpeg(paste0("../household_size/Pyramid/HRA/Pyramid_Prevalence_",
               "20002010_hhsize_by_tenure_HRA_",
               hra.name.file, ".jpeg"),
        height = 480, width = 480)
-  pop.pyramid.bayesPop.pyramid(pyr.obj,
-                               pyr1.par = list(col = pop.cols[4] ,
-                                               border = pop.cols[4]),
-                               pyr2.par = list(col = pop.cols[2] , 
-                                               border = pop.cols[2]),
-                               legend_pos = "topright",
-                               legend_text = c("Census 2010",
-                                               "Census 2000"),
-                               x_at = x_at,
-                               x_labels = abs(x_at),
-                               cex.axis = .65,
-                               cex.sub = .75,
-                               x_lims = c(-.35,.35))
-  title(paste0("Prevalence of Households by Tenure\n",
-               ""),
-        font.main = 2, outer = FALSE,
-        adj = 0, cex.main = 1)
-  title(paste0("\n", hra.name),
-        font.main = 1, outer = FALSE,
-        adj = 0, cex.main = .8)
+  {
+    pop.pyramid.bayesPop.pyramid(pyr.obj,
+                                 pyr1.par = list(col = pop.cols[4] ,
+                                                 border = pop.cols[4]),
+                                 pyr2.par = list(col = pop.cols[2] , 
+                                                 border = pop.cols[2]),
+                                 legend_pos = "topright",
+                                 legend_text = c("Census 2010",
+                                                 "Census 2000"),
+                                 x_at = x_at,
+                                 x_labels = abs(x_at),
+                                 cex.axis = .65,
+                                 cex.sub = .75,
+                                 x_lims = c(-.35,.35))
+    title(paste0("Prevalence of Households by Tenure\n",
+                 ""),
+          font.main = 2, outer = FALSE,
+          adj = 0, cex.main = 1)
+    title(paste0("\n", hra.name, " (Estimated from Census)"),
+          font.main = 1, outer = FALSE,
+          adj = 0, cex.main = .8)
+  }
   dev.off()
 }
-
-
-
-
 
 
 ## Maps ####
@@ -3109,7 +3257,7 @@ for(year in c(2010, 2014, 2019)){
           adj = 0, cex.main = 1)
     
     title(paste0("\n",
-                 hra.name),
+                 hra.name, " (Estimated from ACS)"),
           font.main = 1, outer = FALSE,
           adj = 0, cex.main = 1)
   }
