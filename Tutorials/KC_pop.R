@@ -1632,9 +1632,33 @@ for(year in c(2010, 2012, 2015,
       }
       dev.off() 
     }
+  }
+}
+
+for(year in c(2010, 2012, 2015,
+              2017, 2020)){
+  for(race in unique(hra_pop$Race_Lbl)){
+    race.clean <- gsub(" and ", "/",
+                       race)
+    race.clean <- gsub(" or ", "/",
+                       race.clean)
     
     
-    ## Population Maps ####
+    load(paste0('../Data/pop_', 
+                year, '_OFM.rda'))  
+    hra_pop <- pop %>% 
+      mutate(GEOID = as.character(Geoid)) %>% 
+      left_join(tracts_to_hra$acs5_2019) %>% 
+      group_by(FID_HRA_20, Race, Race_Lbl, Sex_Lbl, Age, Age_Lbl) %>% 
+      summarise(HRA = unique(HRA2010v2_),
+                Pop = sum(Pop*prop.area)) %>% 
+      filter(!is.na(HRA)) %>% 
+      arrange(Race,Age)
+    pop.cols <- brewer.pal(n = 5,
+                           name = 'Blues')
+    
+    
+## Population Maps ####
     
     hra_age_pop <- hra_pop %>% 
       filter(Race_Lbl == race) %>% 
@@ -1650,8 +1674,8 @@ for(year in c(2010, 2012, 2015,
     breaks <- pop.int.hra$brks
     breaks <- c(0, 250, 500,
                 750, 1000, 1500,
-                2000, 3000,
-                5000, 7250)
+                2500, 5000,
+                7500, 10000)
     ## Get color based on RColorBrwere palette for 
     ## each area
     
@@ -1671,7 +1695,7 @@ for(year in c(2010, 2012, 2015,
                                     n = 9)
       pop.col.hra <- findColours(pop.int.hra, pop.pal)
       
-
+      
       # pdf(paste0("../PopPlots/", 
       #            year, "/OFM_Ages/",
       #            age, "/OFM_",
@@ -1719,8 +1743,8 @@ for(year in c(2010, 2012, 2015,
     ### by Race only ####
     breaks <- c(0, 250, 500,
                 1000, 
-                2500, 5000, 7500, 10000,
-                25000, 62500)
+                2500, 5000, 10000,
+                25000, 50000, 70000)
     hra_tmp <- hra_age_pop %>% 
       group_by(HRA) %>% 
       summarise(Pop = sum(Pop, na.rm = TRUE))
@@ -1799,8 +1823,8 @@ for(year in c(2010, 2012, 2015,
     breaks <- prop.int.hra$brks
     breaks <- c(0, .005, .01,
                 .02, .03, .04,
-                .05, .075, .10, .125)
-    
+                .05, .075, .10, .15)
+    ### by Race x Age ####
     for(age in unique(hra_age_pop$Age_Lbl)){
       
       hra_age_tmp <- hra_age_pop %>% 
@@ -1813,7 +1837,7 @@ for(year in c(2010, 2012, 2015,
                                      fixedBreaks = breaks,
                                      n = 9)
       prop.col.hra <- findColours(prop.int.hra, prop.pal)
-      ### County Population Prevalence by Age, Race, and Year ####
+      
       # pdf(paste0("../PopPlots/", 
       #            year, "/OFM_Ages/",
       #            age, "/OFM_",
@@ -1826,33 +1850,35 @@ for(year in c(2010, 2012, 2015,
                   year, "_agePrev_", age,
                   "_", race, ".jpeg"),
            height = 480, width = 480)
-      par(lend = 1,
-          mar = c(0,0,2,0),
-          oma = c(1,1,1,1))
-      plot(hra,
-           col = prop.col.hra,
-           border = 'grey48', lwd = .25,
-           main = "",
-           adj = 0)
-      legend('bottomleft',
-             title = 'Prevalence',
-             title.adj = 0,
-             ncol = 2,
-             bty = 'n',
-             cex = 0.75,
-             border = FALSE,
-             fill = prop.pal,
-             legend = names(attr(prop.col.hra, 'table')))
-      title(paste0("Prevalence of Population Ages ", age, "\n",
-                   ""),
-            font.main = 2, outer = FALSE,
-            adj = 0, cex.main = 1)
-      
-      title(paste0("\n",
-                   "King County, ", 
-                   race.clean, " (WA OFM ", year, ")"),
-            font.main = 1, outer = FALSE,
-            adj = 0, cex.main = 1)
+      {
+        par(lend = 1,
+            mar = c(0,0,2,0),
+            oma = c(1,1,1,1))
+        plot(hra,
+             col = prop.col.hra,
+             border = 'grey48', lwd = .25,
+             main = "",
+             adj = 0)
+        legend('bottomleft',
+               title = 'Prevalence',
+               title.adj = 0,
+               ncol = 2,
+               bty = 'n',
+               cex = 0.75,
+               border = FALSE,
+               fill = prop.pal,
+               legend = names(attr(prop.col.hra, 'table')))
+        title(paste0("Prevalence of Population Ages ", age, "\n",
+                     ""),
+              font.main = 2, outer = FALSE,
+              adj = 0, cex.main = 1)
+        
+        title(paste0("\n",
+                     "King County, ", 
+                     race.clean, " (WA OFM ", year, ")"),
+              font.main = 1, outer = FALSE,
+              adj = 0, cex.main = 1)
+      }
       dev.off()
     }
     
@@ -1874,48 +1900,52 @@ for(year in c(2010, 2012, 2015,
     breaks <- prop.int.hra$brks
     breaks <- c(0, .005, .01,
                 .025, .05, .1,
-                .25, .5, .75, .85)
+                .25, .5, .75, .95)
     prop.int.hra <- classIntervals(hra_tmp$RacePrev,
                                    style = "fixed",
                                    fixedBreaks = breaks,
                                    n = 9)
     prop.col.hra <- findColours(prop.int.hra, prop.pal)
-    #### Race, Year only ####
-    ## Maps ####
+    ### by Race only ####
+    
     jpeg(paste0("../PopPlots/", 
                 year, "/Prevalence/OFM_",
                 year, 
                 "_", race, ".jpeg"),
          height = 480, width = 480)
-    par(lend = 1,
-        mar = c(0,0,2,0),
-        oma = c(1,1,1,1))
-    plot(hra,
-         col = prop.col.hra,
-         border = 'grey48', lwd = .25,
-         main = "")
-    legend('bottomleft',
-           title = 'Prevalence',
-           title.adj = 0,
-           ncol = 2,
-           bty = 'n',
-           cex = 0.75,
-           border = FALSE,
-           fill = prop.pal,
-           legend = names(attr(prop.col.hra, 'table')))
-    title(paste0("Population Prevalence\n",
-                 ""),
-          font.main = 2, outer = FALSE,
-          adj = 0, cex.main = 1)
-    
-    title(paste0("\n",
-                 "King County, ",
-                 race.clean, " (WA OFM, ", year, ")"),
-          font.main = 1, outer = FALSE,
-          adj = 0, cex.main = 1)
+    {
+      par(lend = 1,
+          mar = c(0,0,2,0),
+          oma = c(1,1,1,1))
+      plot(hra,
+           col = prop.col.hra,
+           border = 'grey48', lwd = .25,
+           main = "")
+      legend('bottomleft',
+             title = 'Prevalence',
+             title.adj = 0,
+             ncol = 2,
+             bty = 'n',
+             cex = 0.75,
+             border = FALSE,
+             fill = prop.pal,
+             legend = names(attr(prop.col.hra, 'table')))
+      title(paste0("Population Prevalence\n",
+                   ""),
+            font.main = 2, outer = FALSE,
+            adj = 0, cex.main = 1)
+      
+      title(paste0("\n",
+                   "King County, ",
+                   race.clean, " (WA OFM, ", year, ")"),
+            font.main = 1, outer = FALSE,
+            adj = 0, cex.main = 1)
+    }
     dev.off()
     
-    ### Distribution of age/race group across HRAs ####
+    
+    
+    ## Distribution Maps ####
     age_total_pop <- hra_pop %>%
       filter(Race_Lbl == race) %>% 
       group_by(Age, Age_Lbl) %>% 
@@ -1931,19 +1961,20 @@ for(year in c(2010, 2012, 2015,
       arrange(Age) %>% 
       left_join(age_total_pop) %>% 
       group_by(HRA, Age, Age_Lbl) %>% 
-      mutate(AgePrev = Pop/PopTotal)
+      mutate(AgeDist = Pop/PopTotal)
     
     prop.pal <- brewer.pal(n = 9, name = "YlGnBu")
     
-    prop.int.hra <- classIntervals(hra_age_pop$AgePrev,
+    prop.int.hra <- classIntervals(hra_age_pop$AgeDist,
                                    style = 'jenks',
                                    n = 9)
     
     breaks <- prop.int.hra$brks
     breaks <- c(0, .005, .01,
                 .02, .03, .04,
-                .05, .065, .08, .1)
+                .05, .1, .15, .3)
     
+    ### by Race x Age ####
     for(age in unique(hra_age_pop$Age_Lbl)){
       
       hra_age_tmp <- hra_age_pop %>% 
@@ -1951,12 +1982,12 @@ for(year in c(2010, 2012, 2015,
       hra_age_tmp <- hra_age_tmp[match(hra_age_tmp$HRA,
                                        hra@data$HRA2010v2_), ]
       
-      prop.int.hra <- classIntervals(hra_age_tmp$AgePrev,
+      prop.int.hra <- classIntervals(hra_age_tmp$AgeDist,
                                      style = "fixed",
                                      fixedBreaks = breaks,
                                      n = 9)
       prop.col.hra <- findColours(prop.int.hra, prop.pal)
-      ### County Population Distribution by Age, Race, and Year ####
+      
       # pdf(paste0("../PopPlots/", 
       #            year, "/OFM_Ages/",
       #            age, "/OFM_",
@@ -1986,14 +2017,15 @@ for(year in c(2010, 2012, 2015,
              border = FALSE,
              fill = prop.pal,
              legend = names(attr(prop.col.hra, 'table')))
-      title(paste0("Distribution of ", race.clean,
+      title(paste0("Distribution of ",
                    " Population Ages ", age, "\n",
                    ""),
             font.main = 2, outer = FALSE,
             adj = 0, cex.main = 1)
       
       title(paste0("\n",
-                   "King County (WA OFM, ", year, ")"),
+                   "King County, ",
+                   race.clean, " (WA OFM, ", year, ")"),
             font.main = 1, outer = FALSE,
             adj = 0, cex.main = 1)
       dev.off()
@@ -2014,45 +2046,47 @@ for(year in c(2010, 2012, 2015,
     breaks <- prop.int.hra$brks
     breaks <- c(0, .005, .01,
                 .02, .03, .04,
-                .05, .065, .085, .10)
+                .05, .065, .085, .11)
     prop.int.hra <- classIntervals(hra_tmp$Dist,
                                    style = "fixed",
                                    fixedBreaks = breaks,
                                    n = 9)
     prop.col.hra <- findColours(prop.int.hra, prop.pal)
     
-    ## Maps ####
+    ### by Race only ####
     jpeg(paste0("../PopPlots/", 
                 year, "/Distribution/OFM_",
                 year, 
                 "_", race, ".jpeg"),
          height = 480, width = 480)
-    par(lend = 1,
-        mar = c(0,0,2,0),
-        oma = c(1,1,1,1))
-    plot(hra,
-         col = prop.col.hra,
-         border = 'grey48', lwd = .25,
-         main = "")
-    legend('bottomleft',
-           title = 'Distribution',
-           title.adj = 0,
-           ncol = 2,
-           bty = 'n',
-           cex = 0.75,
-           border = FALSE,
-           fill = prop.pal,
-           legend = names(attr(prop.col.hra, 'table')))
-    title(paste0("Population Distribution\n",
-                 ""),
-          font.main = 2, outer = FALSE,
-          adj = 0, cex.main = 1)
-    
-    title(paste0("\n",
-                 "King County, ",
-                 race.clean, " (WA OFM, ", year, ")"),
-          font.main = 1, outer = FALSE,
-          adj = 0, cex.main = 1)
+    {
+      par(lend = 1,
+          mar = c(0,0,2,0),
+          oma = c(1,1,1,1))
+      plot(hra,
+           col = prop.col.hra,
+           border = 'grey48', lwd = .25,
+           main = "")
+      legend('bottomleft',
+             title = 'Distribution',
+             title.adj = 0,
+             ncol = 2,
+             bty = 'n',
+             cex = 0.75,
+             border = FALSE,
+             fill = prop.pal,
+             legend = names(attr(prop.col.hra, 'table')))
+      title(paste0("Population Distribution\n",
+                   ""),
+            font.main = 2, outer = FALSE,
+            adj = 0, cex.main = 1)
+      
+      title(paste0("\n",
+                   "King County, ",
+                   race.clean, " (WA OFM, ", year, ")"),
+            font.main = 1, outer = FALSE,
+            adj = 0, cex.main = 1)
+    }
     dev.off()
     
   }          
