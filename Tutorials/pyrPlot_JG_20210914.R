@@ -62,7 +62,7 @@ pop.pyramid.bayesPop.pyramid <- function(pop.object, main=NULL, show.legend=TRUE
       axis(4, at=age.axis.at, labels=age.labels, las=2, cex.axis=.9)
     }
     if(grid) {#grid(length(labels))
-      gridxat <- xat[seq(1, length(xat), by=2)]
+      gridxat <- x_at[seq(1, length(x_at), by=2)]
       segments(gridxat, rep(-0.5-lages/25, length(gridxat)), gridxat, lages-1+lages/25, col="lightgray", lty = "dotted")
       gridyat <- age.axis.at[seq(1, lages, by=2)]
       segments(rep(-maxx-2*maxx/25, length(gridyat)), gridyat, rep(maxx+2*maxx/25, length(gridyat)), 
