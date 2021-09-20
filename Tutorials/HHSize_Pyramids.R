@@ -1438,26 +1438,60 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
 }
 
 ### Household Size by Tenure ####
-for(year in c(2010, 2014, 2019)){
+for(year in c(2000, 2009, 2010, 2014, 2019)){
   
-  hh_year_tmp <- hh_size_hra %>% 
-    filter(Year == year) %>% 
-    filter(hh_size > 0) %>% 
-    filter(!is.na(HRA2010v2_)) %>% 
-    group_by(FID_HRA_20, HRA2010v2_, hh_size, tenure) %>% 
-    summarise(estimate = sum(estimate),
-              SE = sum(SE)) %>% 
-    ungroup() %>% 
-    arrange(FID_HRA_20, hh_size) %>% 
-    mutate(CoV = SE/estimate)
   
-  hh_year_total <- hh_year_tmp %>% 
-    group_by(FID_HRA_20, HRA2010v2_) %>% 
-    summarise(estimate = sum(estimate),
-              SE = sum(SE)) %>% 
-    ungroup() %>% 
-    arrange(FID_HRA_20) %>% 
-    mutate(CoV = SE/estimate)
+  if(year >= 2010){
+    
+    hh_year_tmp <- hh_size_hra %>% 
+      filter(Year == year) %>% 
+      filter(hh_size > 0) %>% 
+      filter(!is.na(HRA2010v2_)) %>% 
+      group_by(FID_HRA_20, HRA2010v2_, hh_size, tenure) %>% 
+      summarise(estimate = sum(estimate),
+                SE = sum(SE)) %>% 
+      ungroup() %>% 
+      arrange(FID_HRA_20, hh_size) %>% 
+      mutate(CoV = SE/estimate)
+    
+    hh_year_total <- hh_year_tmp %>% 
+      group_by(FID_HRA_20, HRA2010v2_) %>% 
+      summarise(estimate = sum(estimate),
+                SE = sum(SE)) %>% 
+      ungroup() %>% 
+      arrange(FID_HRA_20) %>% 
+      mutate(CoV = SE/estimate)
+  }else{
+    
+    hh_year_tmp <- hh_size_hra_2000 %>% 
+      filter(Year == year) %>% 
+      filter(hh_size > 0) %>% 
+      filter(!is.na(HRA2010v2_)) %>% 
+      group_by(FID_HRA_20, HRA2010v2_, hh_size, tenure) %>% 
+      summarise(estimate = sum(estimate),
+                SE = sum(SE)) %>% 
+      ungroup() %>% 
+      arrange(FID_HRA_20, hh_size) %>% 
+      mutate(CoV = SE/estimate)
+    
+    hh_year_total <- hh_year_tmp %>% 
+      group_by(FID_HRA_20, HRA2010v2_) %>% 
+      summarise(estimate = sum(estimate),
+                SE = sum(SE)) %>% 
+      ungroup() %>% 
+      arrange(FID_HRA_20) %>% 
+      mutate(CoV = SE/estimate)
+  }
+  
+  if(year != 2010 &
+     year != 2000){
+    title_string <- paste0(year - 4, 
+                           "-", year)
+    
+  }else{
+    title_string <- year
+  }
+ 
   
   ### Households ####
   hh.int.hra <- classIntervals(hh_year_tmp$estimate,
