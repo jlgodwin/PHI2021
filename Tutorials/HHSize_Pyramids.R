@@ -32,13 +32,23 @@ options(tigris_use_cache = TRUE)
 ## load pyramid script ###
 source('pyrPlot_JG_20210914.R')
 
-## load WA OFM raw? ####
-loadOFM <- FALSE
-
 # Load data ####
 ## Household Size ####
 
-hh_tract <- readRDS('../household_size/hh_by_hh_size_and_tenure_ct.RDS')
+### Direct ####
+
+hh_tract <- readRDS(paste0('../household_size/',
+                           'hh_by_hh_size_and_tenure_ct.RDS'))
+
+
+### Smoothed ####
+
+# hh_hra_smoothed <- readRDS(paste0('../household_size/',
+#                                   'Report_estimates/',
+#                                   'average_hh_size_renters_hra.RDS'))
+# hh_kc_preds <- readRDS(paste0('../household_size/',
+#                               'Report_estimates/',
+#                               'housing_indicators_kc_preds.rds'))
 
 ## Census tracts ####
 
@@ -50,14 +60,33 @@ kc_tracts <- get_acs("tract",
                      state = "WA",
                      county = "King",
                      cache_table = TRUE) %>%
-  filter(variable == "B01001_001")
+  filter(variable == "B01001_001") %>% 
+  filter(!st_is_empty(geometry))
+
+kc_tracts_2000 <- get_acs("tract",
+                          table = "B01001",
+                          geometry = TRUE,
+                          year = 2009,
+                          survey = "acs5",
+                          state = "WA",
+                          county = "King",
+                          cache_table = TRUE) %>%
+  filter(variable == "B01001_001") %>% 
+  filter(!st_is_empty(geometry))
 
 names(kc_tracts)
 
+### Convert to sp ####
 kc_tracts_poly <- kc_tracts %>% 
-  filter(!st_is_empty(geometry)) %>% 
   st_geometry() %>%
   as(., "Spatial")
+
+
+kc_tracts_2000_poly <- kc_tracts_2000 %>% 
+  st_geometry() %>%
+  as(., "Spatial")
+kc_tracts_2000_poly <- spTransform(kc_tracts_2000_poly,
+                                   kc_tracts_poly@proj4string)
 
 
 ## HRA ####
@@ -70,7 +99,7 @@ hra <- spTransform(hra,
 ## tracts_to_hra ####
 load('../Data/tracts_to_hra.rda')
 
-# Household Size ####
+# Household Size: Direct Estimates ####
 
 if(!dir.exists("../household_size/Pyramid/")){
   dir.create("../household_size/Pyramid")
@@ -104,6 +133,8 @@ hh_size_hra_2000 <- hh_tract %>%
   mutate(SE = moe/qnorm(.95),
          CoV = SE/estimate)
 
+pop.cols <- brewer.pal(n = 5,
+                       name = 'Blues')
 
 pop.pyrs <- list()
 
@@ -172,7 +203,7 @@ for(year in c(2010, 2014, 2019)){
             adj = 0, cex.main = 1)
       
       title(paste0("\n",
-                   hra.name, " (Modeled from Census, ACS)"),
+                   hra.name, " (Estimated from ", legend_string, ")"),
             font.main = 1, outer = FALSE,
             adj = 0, cex.main = 1)
     }
@@ -232,7 +263,7 @@ for(year in c(2010, 2014, 2019)){
           adj = 0, cex.main = 1)
     
     title(paste0("\n",
-                 "King County (Modeled from Census, ACS)"),
+                 "King County (Estimated from ", legend_string, ")"),
           font.main = 1, outer = FALSE,
           adj = 0, cex.main = 1)
   }
@@ -271,7 +302,7 @@ for(year in c(2010, 2014, 2019)){
             font.main = 2, outer = FALSE,
             adj = 0, cex.main = 1)
       title(paste0("\n",
-                   "King County (Modeled from Census, ACS)"),
+                   "King County (Estimated from ", legend_string, ")"),
             font.main = 1, outer = FALSE,
             adj = 0, cex.main = 1)
     }
@@ -313,7 +344,7 @@ for(year in c(2010, 2014, 2019)){
       
       title(paste0("\n",
                    "King County, ",
-                   year, "(Modeled from Census, ACS)"),
+                   year, "(Estimated from ", legend_string, ")"),
             font.main = 1, outer = FALSE,
             adj = 0, cex.main = 1)
       
@@ -393,7 +424,7 @@ for(year in c(2010, 2014, 2019)){
               adj = 0, cex.main = 1)
         
         title(paste0("\n",
-                     hra.name, " (Modeled from Census, ACS)"),
+                     hra.name, " (Estimated from ", legend_string, ")"),
               font.main = 1, outer = FALSE,
               adj = 0, cex.main = 1)
       }
@@ -476,7 +507,7 @@ for(year in c(2010, 2014, 2019)){
               adj = 0, cex.main = 1)
         
         title(paste0("\n",
-                     hra.name, " (Modeled from Census, ACS)"),
+                     hra.name, " (Estimated from ", legend_string, ")"),
               font.main = 1, outer = FALSE,
               adj = 0, cex.main = 1)
       }
@@ -547,7 +578,7 @@ for(year in c(2000, 2009)){
             adj = 0, cex.main = 1)
       
       title(paste0("\n",
-                   hra.name, " (Modeled from Census, ACS)"),
+                   hra.name, " (Estimated from ", legend_string, ")"),
             font.main = 1, outer = FALSE,
             adj = 0, cex.main = 1)
     }
@@ -611,7 +642,7 @@ for(year in c(2000, 2009)){
           adj = 0, cex.main = 1)
     
     title(paste0("\n",
-                 hra.name, " (Modeled from Census, ACS)"),
+                 hra.name, " (Estimated from ", legend_string, ")"),
           font.main = 1, outer = FALSE,
           adj = 0, cex.main = 1)
   }
@@ -656,7 +687,7 @@ jpeg(paste0("../household_size/Pyramid/Pyramid_",
         adj = 0, cex.main = 1)
   
   title(paste0("\n",
-               "King County (Modeled from Census, ACS)"),
+               "King County (Estimated from ", legend_string, ")"),
         font.main = 1, outer = FALSE,
         adj = 0, cex.main = 1)
 }
@@ -700,7 +731,7 @@ jpeg(paste0("../household_size/Pyramid/Pyramid_Prevalence",
         adj = 0, cex.main = 1)
   
   title(paste0("\n",
-               "King County (Modeled from Census, ACS)"),
+               "King County (Estimated from ", legend_string, ")"),
         font.main = 1, outer = FALSE,
         adj = 0, cex.main = 1)
 }
@@ -786,7 +817,7 @@ for(hra.name in hra@data$HRA2010v2_){
           font.main = 2, outer = FALSE,
           adj = 0, cex.main = 1)
     title(paste0("\n",
-                 hra.name, " (Modeled from Census, ACS)"),
+                 hra.name, " (Estimated from ", legend_string, ")"),
           font.main = 1, outer = FALSE,
           adj = 0, cex.main = .8)
   }
@@ -881,7 +912,7 @@ for(hra.name in hra@data$HRA2010v2_){
                  ""),
           font.main = 2, outer = FALSE,
           adj = 0, cex.main = 1)
-    title(paste0("\n", hra.name, " (Modeled from Census, ACS)"),
+    title(paste0("\n", hra.name, " (Estimated from ", legend_string, ")"),
           font.main = 1, outer = FALSE,
           adj = 0, cex.main = .8)
   }
@@ -926,7 +957,7 @@ jpeg(paste0("../household_size/Pyramid/Pyramid_",
         adj = 0, cex.main = 1)
   
   title(paste0("\n",
-               "King County (Modeled from Census, ACS)"),
+               "King County (Estimated from ", legend_string, ")"),
         font.main = 1, outer = FALSE,
         adj = 0, cex.main = 1)
 }
@@ -970,7 +1001,7 @@ jpeg(paste0("../household_size/Pyramid/Pyramid_Prevalence",
         adj = 0, cex.main = 1)
   
   title(paste0("\n",
-               "King County (Modeled from Census)"),
+               "King County (Estimated from Census)"),
         font.main = 1, outer = FALSE,
         adj = 0, cex.main = 1)
 }
@@ -1055,7 +1086,7 @@ for(hra.name in hra@data$HRA2010v2_){
                  ""),
           font.main = 2, outer = FALSE,
           adj = 0, cex.main = 1)
-    title(paste0("\n", hra.name, " (Modeled from Census)"),
+    title(paste0("\n", hra.name, " (Estimated from Census)"),
           font.main = 1, outer = FALSE,
           adj = 0, cex.main = .8)
   }
@@ -1166,7 +1197,7 @@ for(hra.name in hra@data$HRA2010v2_){
                  ""),
           font.main = 2, outer = FALSE,
           adj = 0, cex.main = 1)
-    title(paste0("\n", hra.name, " (Modeled from Census)"),
+    title(paste0("\n", hra.name, " (Estimated from Census)"),
           font.main = 1, outer = FALSE,
           adj = 0, cex.main = .8)
   }
@@ -1174,7 +1205,7 @@ for(hra.name in hra@data$HRA2010v2_){
 }
 
 
-## Maps ####
+## HRA Maps: Direct Estimates ####
 ### Household Size ####
 for(year in c(2000, 2009, 2010, 2014, 2019)){
   
@@ -1307,7 +1338,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
             adj = 0, cex.main = 1)
       
       title(paste0("\n",
-                   title_string, " (Modeled from Census, ACS)"),
+                   title_string, " (Estimated from ", legend_string, ")"),
             font.main = 1, outer = FALSE,
             adj = 0, cex.main = 1)
     }
@@ -1361,7 +1392,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
             adj = 0, cex.main = 1)
       
       title(paste0("\n",
-                   title_string, " (Modeled from Census, ACS)"),
+                   title_string, " (Estimated from ", legend_string, ")"),
             font.main = 1, outer = FALSE,
             adj = 0, cex.main = 1)
     }
@@ -1439,7 +1470,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
             adj = 0, cex.main = 1)
       
       title(paste0("\n",
-                   title_string, " (Modeled from Census, ACS)"),
+                   title_string, " (Estimated from ", legend_string, ")"),
             font.main = 1, outer = FALSE,
             adj = 0, cex.main = 1)
     }
@@ -1494,7 +1525,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
             adj = 0, cex.main = 1)
       
       title(paste0("\n",
-                   title_string, " (Modeled from Census, ACS)"),
+                   title_string, " (Estimated from ", legend_string, ")"),
             font.main = 1, outer = FALSE,
             adj = 0, cex.main = 1)
     }
@@ -1558,7 +1589,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
             adj = 0, cex.main = 1)
       
       title(paste0("\n",
-                   title_string, " (Modeled from Census, ACS)"),
+                   title_string, " (Estimated from ", legend_string, ")"),
             font.main = 1, outer = FALSE,
             adj = 0, cex.main = 1)
     }
@@ -1611,7 +1642,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
             adj = 0, cex.main = 1)
       
       title(paste0("\n",
-                   title_string, " (Modeled from Census, ACS)"),
+                   title_string, " (Estimated from ", legend_string, ")"),
             font.main = 1, outer = FALSE,
             adj = 0, cex.main = 1)
     }
@@ -1720,10 +1751,12 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
       
       if(nrow(hh_size_tmp) != 0){
         hra@data$Est[match(hh_size_tmp$FID_HRA_20,
-                           hra@data$FID_HRA_20)] <- hh_size_tmp$estimate
+                           hra@data$FID_HRA_20)] <-
+          hh_size_tmp$estimate
         
         hra@data$Density[match(hh_size_tmp$FID_HRA_20,
-                               hra@data$FID_HRA_20)] <- hh_size_tmp$Density
+                               hra@data$FID_HRA_20)] <- 
+          hh_size_tmp$Density
         
         hh.int.hra <- classIntervals(hra@data$Est,
                                      style = "fixed",
@@ -1764,7 +1797,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
               adj = 0, cex.main = 1)
         
         title(paste0("\n",
-                     title_string, " (Modeled from Census, ACS)"),
+                     title_string, " (Estimated from ", legend_string, ")"),
               font.main = 1, outer = FALSE,
               adj = 0, cex.main = 1)
       }
@@ -1820,7 +1853,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
               adj = 0, cex.main = 1)
         
         title(paste0("\n",
-                     title_string, " (Modeled from Census, ACS)"),
+                     title_string, " (Estimated from ", legend_string, ")"),
               font.main = 1, outer = FALSE,
               adj = 0, cex.main = 1)
       }
@@ -1861,10 +1894,12 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
       
       if(nrow(hh_size_tmp) != 0){
         hra@data$Prev[match(hh_size_tmp$FID_HRA_20,
-                            hra@data$FID_HRA_20)] <- hh_size_tmp$Prev
+                            hra@data$FID_HRA_20)] <-
+          hh_size_tmp$Prev
         
         hra@data$Density[match(hh_size_tmp$FID_HRA_20,
-                               hra@data$FID_HRA_20)] <- hh_size_tmp$Density
+                               hra@data$FID_HRA_20)] <- 
+          hh_size_tmp$Density
         prev.int.hra <- classIntervals(hra@data$Prev,
                                        style = "fixed",
                                        fixedBreaks = breaks,
@@ -1905,7 +1940,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
               adj = 0, cex.main = 1)
         
         title(paste0("\n",
-                     title_string, " (Modeled from Census, ACS)"),
+                     title_string, " (Estimated from ", legend_string, ")"),
               font.main = 1, outer = FALSE,
               adj = 0, cex.main = 1)
       }
@@ -1962,7 +1997,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
               adj = 0, cex.main = 1)
         
         title(paste0("\n",
-                     title_string, " (Modeled from Census, ACS)"),
+                     title_string, " (Estimated from ", legend_string, ")"),
               font.main = 1, outer = FALSE,
               adj = 0, cex.main = 1)
       }
@@ -1988,9 +2023,11 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
       
       if(nrow(hh_size_tmp) != 0){
         hra@data$Dist[match(hh_size_tmp$FID_HRA_20,
-                            hra@data$FID_HRA_20)] <- hh_size_tmp$Dist
+                            hra@data$FID_HRA_20)] <- 
+          hh_size_tmp$Dist
         hra@data$Density[match(hh_size_tmp$FID_HRA_20,
-                               hra@data$FID_HRA_20)] <- hh_size_tmp$Density
+                               hra@data$FID_HRA_20)] <-
+          hh_size_tmp$Density
         
         prev.int.hra <- classIntervals(hra@data$Dist,
                                        style = "fixed",
@@ -2032,7 +2069,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
               adj = 0, cex.main = 1)
         
         title(paste0("\n",
-                     title_string, " (Modeled from Census, ACS)"),
+                     title_string, " (Estimated from ", legend_string, ")"),
               font.main = 1, outer = FALSE,
               adj = 0, cex.main = 1)
       }
@@ -2069,7 +2106,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
                border = FALSE,
                fill = prev.pal,
                legend = names(attr(prev.col.hra, 'table')))
-
+        
         legend('bottomright',
                title = 'Significance',
                title.adj = 0,
@@ -2082,14 +2119,14 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
                legend = c(">= 95%",
                           "80% to 90%",
                           "< 80%"))
-    
+        
         title(paste0("Distribution of ",
                      tenure.type, " Households of Size ", size, "\n",
                      ""),
               font.main = 2, outer = FALSE,
               adj = 0, cex.main = 1)
         title(paste0("\n",
-                     title_string, " (Modeled from Census, ACS)"),
+                     title_string, " (Estimated from ", legend_string, ")"),
               font.main = 1, outer = FALSE,
               adj = 0, cex.main = 1)
       }
@@ -2098,4 +2135,1037 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
   }
   # End year loop
 }
- 
+
+
+## Tract Maps: Direct Estimates ####
+if(!dir.exists('../household_size/Tract/')){
+  dir.create('../household_size/Tract/')
+  dir.create('../household_size/Tract/Population/')
+  dir.create('../household_size/Tract/Prevalence/')
+  dir.create('../household_size/Tract/Distribution/')
+}
+### Household Size ####
+hh_size_tract <- hh_tract %>% 
+  filter(Year >= 2010) %>% 
+  mutate(SE = moe/qnorm(.95),
+         CoV = SE/estimate)
+
+hh_size_tract_2000 <- hh_tract %>% 
+  filter(Year < 2010) %>% 
+  mutate(SE = moe/qnorm(.95),
+         CoV = SE/estimate)
+
+
+for(year in c(2000, 2009, 2010, 2014, 2019)){
+  
+  ## Get appropriate census tract SpatialPolygonsDataFrame
+  if(year < 2010){
+    spatialdf <- data.frame(GEOID = kc_tracts_2000$GEOID)
+    row.names(spatialdf) <- names(kc_tracts_2000_poly)
+    tract_spatialdf <- SpatialPolygonsDataFrame(kc_tracts_2000_poly,
+                                                data = spatialdf)
+  }else{
+    spatialdf <- data.frame(GEOID = kc_tracts$GEOID)
+    row.names(spatialdf) <- names(kc_tracts_poly)
+    tract_spatialdf <- SpatialPolygonsDataFrame(kc_tracts_poly,
+                                                data = spatialdf)
+  }
+  
+  ## Get appropriate estimates
+  ## Based on Census tract definition
+  
+  if(year >= 2010){
+    hh_year_tmp <- hh_size_tract %>% 
+      filter(Year == year) %>% 
+      filter(hh_size > 0) %>% 
+      filter(!is.na(GEOID)) %>% 
+      filter(GEOID %in% tract_spatialdf@data$GEOID) %>% 
+      group_by(GEOID, hh_size) %>% 
+      summarise(estimate = sum(estimate),
+                SE = sum(SE)) %>% 
+      ungroup() %>% 
+      arrange(GEOID, hh_size) %>% 
+      mutate(CoV = SE/estimate) %>% 
+      mutate(Density = 0) 
+    
+    # No Info
+    hh_year_tmp$CoVOver1 <- ifelse(hh_year_tmp$CoV >= 1,
+                                   1, 0)
+    
+    # less than 80% significance
+    
+    
+    hh_year_tmp$Density[hh_year_tmp$CoV < 1 & 
+                          hh_year_tmp$CoV >= 1/qnorm(.9)] <- 50
+    
+    # between 80 and 90%
+    hh_year_tmp$Density[hh_year_tmp$CoV < 1/qnorm(.9) &
+                          hh_year_tmp$CoV >= 1/qnorm(.95)] <- 25
+    
+    hh_year_total <- hh_year_tmp %>% 
+      group_by(GEOID) %>% 
+      summarise(estimate = sum(estimate),
+                SE = sum(SE)) %>% 
+      ungroup() %>% 
+      mutate(CoV = SE/estimate)
+  }else{
+    hh_year_tmp <- hh_size_tract_2000 %>% 
+      filter(Year == year) %>% 
+      filter(hh_size > 0) %>% 
+      filter(!is.na(GEOID)) %>% 
+      filter(GEOID %in% tract_spatialdf@data$GEOID) %>% 
+      group_by(GEOID, hh_size) %>% 
+      summarise(estimate = sum(estimate),
+                SE = sum(SE)) %>% 
+      ungroup() %>% 
+      arrange(GEOID, hh_size) %>% 
+      mutate(CoV = SE/estimate) %>% 
+      mutate(Density = 0) 
+    
+    # No Info
+    hh_year_tmp$CoVOver1 <- ifelse(hh_year_tmp$CoV >= 1,
+                                   1, 0)
+    # less than 80% significance
+    hh_year_tmp$Density[hh_year_tmp$CoV < 1 &
+                          hh_year_tmp$CoV >= 1/qnorm(.9)] <- 50
+    
+    # between 80 and 90%
+    hh_year_tmp$Density[hh_year_tmp$CoV < 1/qnorm(.9) &
+                          hh_year_tmp$CoV >= 1/qnorm(.95)] <- 25
+    
+    hh_year_total <- hh_year_tmp %>% 
+      group_by(GEOID) %>% 
+      summarise(estimate = sum(estimate),
+                SE = sum(SE)) %>% 
+      ungroup() %>%  
+      mutate(CoV = SE/estimate)
+  }
+  
+  if(year != 2010 &
+     year != 2000){
+    title_string <- paste0(year - 4, 
+                           "-", year)
+    legend_string <- "ACS"
+  }else{
+    title_string <- year
+    legend_string <- "Census"
+  }
+  
+  ### Households ####
+  if(FALSE){
+    ## Test to figure it out
+    ## Takes time to run on Tracts
+    hh.int.tract <- classIntervals(hh_year_tmp$estimate,
+                                   style = 'jenks',
+                                   n = 9)
+    
+    breaks <- hh.int.tract$brks
+    breaks
+  }
+  breaks <- c(0, 50, 100,
+              250, 500, 750,
+              1000, 2000, 3000, 4500)
+  
+  hh.pal <- brewer.pal(n = 9, name = "Blues")
+  
+  for(size in unique(hh_year_tmp$hh_size)){
+    
+    hh_size_tmp <- hh_year_tmp %>% 
+      filter(hh_size == size) 
+    
+    tract_spatialdf@data$Est <-
+      tract_spatialdf@data$Density <- 0
+    
+    if(nrow(hh_size_tmp) != 0){
+      poly_order.idx <- match(hh_size_tmp$GEOID,
+                              tract_spatialdf@data$GEOID)
+      tract_spatialdf@data$Est[poly_order.idx] <-
+        hh_size_tmp$estimate
+      tract_spatialdf@data$Density[poly_order.idx] <-
+        hh_size_tmp$Density
+    }
+    hh.int.tract <- classIntervals(tract_spatialdf@data$Est,
+                                   style = "fixed",
+                                   fixedBreaks = breaks,
+                                   n = 9)
+    hh.col.tract <- findColours(hh.int.tract, hh.pal)
+    
+    
+    
+    
+    jpeg(paste0("../household_size/Tract/Population/", 
+                "Households_Size",
+                size, "_", year, ".jpeg"),
+         height = 480, width = 480)
+    {
+      par(lend = 1,
+          mar = c(0,0,2,0),
+          oma = c(1,1,1,1))
+      plot(tract_spatialdf,
+           col = hh.col.tract,
+           border = 'grey48', lwd = .25,
+           main = "")
+      legend('bottomleft',
+             title = 'Households',
+             title.adj = 0,
+             ncol = 2,
+             bty = 'n',
+             cex = 0.75,
+             border = FALSE,
+             fill = hh.pal,
+             legend = names(attr(hh.col.tract, 'table')))
+      title(paste0("Households of Size ", size, "\n",
+                   ""),
+            font.main = 2, outer = FALSE,
+            adj = 0, cex.main = 1)
+      
+      title(paste0("\n",
+                   title_string, " (Estimated from ", legend_string, ")"),
+            font.main = 1, outer = FALSE,
+            adj = 0, cex.main = 1)
+    }
+    dev.off()
+    
+    ### Add CoV ####
+    jpeg(paste0("../household_size/Tract/Population/", 
+                "Households_Size",
+                size, "_CoV_", year, ".jpeg"),
+         height = 480, width = 480)
+    {
+      par(lend = 1,
+          mar = c(0,0,2,0),
+          oma = c(1,1,1,1))
+      plot(tract_spatialdf,
+           col = hh.col.tract,
+           border = 'grey48', lwd = .25,
+           main = "")
+      
+      hatch.idx <- which(tract_spatialdf@data$Density > 0)
+      for(poly in hatch.idx){
+        points <- tract_spatialdf@polygons[[poly]]@Polygons[[1]]@coords
+        polygon(points[,1], points[,2],
+                border = FALSE,
+                density = tract_spatialdf@data$Density[poly])
+      }
+      legend('bottomleft',
+             title = 'Households',
+             title.adj = 0,
+             ncol = 2,
+             bty = 'n',
+             cex = 0.75,
+             border = FALSE,
+             fill = hh.pal,
+             legend = names(attr(hh.col.tract, 'table')))
+      legend('bottomright',
+             title = 'Significance',
+             title.adj = 0,
+             ncol = 1,
+             bty = 'n',
+             cex= 0.75,
+             border = 'black',
+             fill = 'black',
+             density = c(0,25,50),
+             legend = c(">= 95%",
+                        "80% to 90%",
+                        "< 80%"))
+      title(paste0("Households of Size ", size, "\n",
+                   ""),
+            font.main = 2, outer = FALSE,
+            adj = 0, cex.main = 1)
+      
+      title(paste0("\n",
+                   title_string, " (Estimated from ", legend_string, ")"),
+            font.main = 1, outer = FALSE,
+            adj = 0, cex.main = 1)
+    }
+    dev.off()
+  }
+  
+  ### Prevalence ####
+  prev.pal <- brewer.pal(n = 9, name = "YlGnBu")
+  
+  hh_year_tmp <- hh_year_tmp %>% 
+    left_join(hh_year_total,
+              by = c("GEOID" = "GEOID"),
+              suffix = c("", "_Total")) %>% 
+    mutate(Prev = estimate/estimate_Total)
+  
+  ## Test to find good breaks
+  if(FALSE){
+    prev.int.tract <- classIntervals(hh_year_tmp$Prev,
+                                     style = 'jenks',
+                                     n = 9)
+    
+    breaks <- prev.int.tract$brks
+    breaks
+  }
+  breaks <- c(0, .005, .01,
+              .05, .1, .2,
+              .25, .5, .75, .9)
+  
+  for(size in unique(hh_year_tmp$hh_size)){
+    
+    hh_size_tmp <- hh_year_tmp %>% 
+      filter(hh_size == size)
+    tract_spatialdf@data$Density <- 
+      tract_spatialdf@data$Prev <- 0
+    
+    if(nrow(hh_size_tmp) != 0){
+      tract_spatialdf@data$Prev[match(hh_size_tmp$GEOID,
+                                      tract_spatialdf@data$GEOID)] <- 
+        hh_size_tmp$Prev
+      tract_spatialdf@data$Density[match(hh_size_tmp$GEOID,
+                                         tract_spatialdf@data$GEOID)] <-
+        hh_size_tmp$Density
+    }
+    
+    
+    prev.int.tract <- classIntervals(tract_spatialdf@data$Prev,
+                                     style = "fixed",
+                                     fixedBreaks = breaks,
+                                     n = 9)
+    prev.col.tract <- findColours(prev.int.tract, prev.pal)
+    
+    
+    jpeg(paste0("../household_size/Tract/Prevalence/", 
+                "Households_Size",
+                size, "_Prevalence_", year, ".jpeg"),
+         height = 480, width = 480)
+    {
+      par(lend = 1,
+          mar = c(0,0,2,0),
+          oma = c(1,1,1,1))
+      plot(tract_spatialdf,
+           col = prev.col.tract,
+           border = 'grey48', lwd = .25,
+           main = "")
+      legend('bottomleft',
+             title = 'Prevalence',
+             title.adj = 0,
+             ncol = 2,
+             bty = 'n',
+             cex = 0.75,
+             border = FALSE,
+             fill = prev.pal,
+             legend = names(attr(prev.col.tract, 'table')))
+      title(paste0("Prevalence of Households of Size ", size, "\n",
+                   ""),
+            font.main = 2, outer = FALSE,
+            adj = 0, cex.main = 1)
+      
+      title(paste0("\n",
+                   title_string, " (Estimated from ", legend_string, ")"),
+            font.main = 1, outer = FALSE,
+            adj = 0, cex.main = 1)
+    }
+    dev.off()
+    
+    ### Add CoV ####
+    
+    jpeg(paste0("../household_size/Tract/Prevalence/", 
+                "Households_Size",
+                size, "_Prevalence_CoV_", year, ".jpeg"),
+         height = 480, width = 480)
+    {
+      par(lend = 1,
+          mar = c(0,0,2,0),
+          oma = c(1,1,1,1))
+      plot(tract_spatialdf,
+           col = prev.col.tract,
+           border = 'grey48', lwd = .25,
+           main = "")
+      
+      hatch.idx <- which(tract_spatialdf@data$Density > 0)
+      for(poly in hatch.idx){
+        points <- tract_spatialdf@polygons[[poly]]@Polygons[[1]]@coords
+        polygon(points[,1], points[,2],
+                border = FALSE,
+                density = tract_spatialdf@data$Density[poly])
+      }
+      legend('bottomleft',
+             title = 'Prevalence',
+             title.adj = 0,
+             ncol = 2,
+             bty = 'n',
+             cex = 0.75,
+             border = FALSE,
+             fill = prev.pal,
+             legend = names(attr(prev.col.tract, 'table')))
+      legend('bottomright',
+             title = 'Significance',
+             title.adj = 0,
+             ncol = 1,
+             bty = 'n',
+             cex= 0.75,
+             border = 'black',
+             fill = 'black',
+             density = c(0,25,50),
+             legend = c(">= 95%",
+                        "80% to 90%",
+                        "< 80%"))
+      title(paste0("Prevalence of Households of Size ", size, "\n",
+                   ""),
+            font.main = 2, outer = FALSE,
+            adj = 0, cex.main = 1)
+      
+      title(paste0("\n",
+                   title_string, " (Estimated from ", legend_string, ")"),
+            font.main = 1, outer = FALSE,
+            adj = 0, cex.main = 1)
+    }
+    dev.off()
+  }
+  
+  ### Distribution ####
+  
+  breaks <- c(0, .0005, .001,
+              .0025, .005, .0075,
+              .01, .0125, .015, .2)
+  
+  for(size in unique(hh_year_tmp$hh_size)){
+    
+    hh_size_tmp <- hh_year_tmp %>% 
+      filter(hh_size == size) %>% 
+      mutate(Dist = estimate/sum(estimate))
+    hh_size_tmp$Dist %>% summary() %>% print()
+    tract_spatialdf@data$Density <-
+      tract_spatialdf@data$Dist <- 0
+    
+    if(nrow(hh_size_tmp) != 0){
+      tract_spatialdf@data$Dist[match(hh_size_tmp$GEOID,
+                                      tract_spatialdf@data$GEOID)] <-
+        hh_size_tmp$Dist
+      tract_spatialdf@data$Density[match(hh_size_tmp$GEOID,
+                                         tract_spatialdf@data$GEOID)] <-
+        hh_size_tmp$Density
+    }
+    prev.int.tract <- classIntervals(tract_spatialdf@data$Dist,
+                                     style = "fixed",
+                                     fixedBreaks = breaks,
+                                     n = 9)
+    prev.col.tract <- findColours(prev.int.tract, prev.pal)
+    
+    
+    
+    jpeg(paste0("../household_size/Tract/Distribution/", 
+                "Households_Size",
+                size, "_Distribution_", year, ".jpeg"),
+         height = 480, width = 480)
+    {
+      par(lend = 1,
+          mar = c(0,0,2,0),
+          oma = c(1,1,1,1))
+      plot(tract_spatialdf,
+           col = prev.col.tract,
+           border = 'grey48', lwd = .25,
+           main = "")
+      
+      legend('bottomleft',
+             title = 'Distribution',
+             title.adj = 0,
+             ncol = 2,
+             bty = 'n',
+             cex = 0.75,
+             border = FALSE,
+             fill = prev.pal,
+             legend = names(attr(prev.col.tract, 'table')))
+      title(paste0("Distribution of Households of Size ", size, "\n",
+                   ""),
+            font.main = 2, outer = FALSE,
+            adj = 0, cex.main = 1)
+      
+      title(paste0("\n",
+                   title_string, " (Estimated from ", legend_string, ")"),
+            font.main = 1, outer = FALSE,
+            adj = 0, cex.main = 1)
+    }
+    dev.off()
+    
+    ### Add CoV ####
+    jpeg(paste0("../household_size/Tract/Distribution/", 
+                "Households_Size",
+                size, "_Distribution_CoV_", year, ".jpeg"),
+         height = 480, width = 480)
+    {
+      par(lend = 1,
+          mar = c(0,0,2,0),
+          oma = c(1,1,1,1))
+      plot(tract_spatialdf,
+           col = prev.col.tract,
+           border = 'grey48', lwd = .25,
+           main = "")
+      hatch.idx <- which(tract_spatialdf@data$Density > 0)
+      for(poly in hatch.idx){
+        points <- tract_spatialdf@polygons[[poly]]@Polygons[[1]]@coords
+        polygon(points[,1], points[,2],
+                border = FALSE,
+                density = tract_spatialdf@data$Density[poly])
+      }
+      legend('bottomleft',
+             title = 'Distribution',
+             title.adj = 0,
+             ncol = 2,
+             bty = 'n',
+             cex = 0.75,
+             border = FALSE,
+             fill = prev.pal,
+             legend = names(attr(prev.col.tract, 'table')))
+      legend('bottomright',
+             title = 'Significance',
+             title.adj = 0,
+             ncol = 1,
+             bty = 'n',
+             cex= 0.75,
+             border = 'black',
+             fill = 'black',
+             density = c(0,25,50),
+             legend = c(">= 95%",
+                        "80% to 90%",
+                        "< 80%"))
+      title(paste0("Distribution of Households of Size ", size, "\n",
+                   ""),
+            font.main = 2, outer = FALSE,
+            adj = 0, cex.main = 1)
+      
+      title(paste0("\n",
+                   title_string, " (Estimated from ", legend_string, ")"),
+            font.main = 1, outer = FALSE,
+            adj = 0, cex.main = 1)
+    }
+    dev.off()
+    
+    # End size dist loop
+  }
+  # End year loop
+}
+
+### Household Size by Tenure ####
+
+for(year in c(2000, 2009, 2010, 2014, 2019)){
+  
+  ## Get appropriate census tract SpatialPolygonsDataFrame
+  if(year < 2010){
+    spatialdf <- data.frame(GEOID = kc_tracts_2000$GEOID)
+    row.names(spatialdf) <- names(kc_tracts_2000_poly)
+    tract_spatialdf <- SpatialPolygonsDataFrame(kc_tracts_2000_poly,
+                                                data = spatialdf)
+  }else{
+    spatialdf <- data.frame(GEOID = kc_tracts$GEOID)
+    row.names(spatialdf) <- names(kc_tracts_poly)
+    tract_spatialdf <- SpatialPolygonsDataFrame(kc_tracts_poly,
+                                                data = spatialdf)
+  }
+  
+  ## Get appropriate estimates
+  ## Based on Census tract definition
+  
+  if(year >= 2010){
+    hh_year_tmp <- hh_size_tract %>% 
+      filter(Year == year) %>% 
+      filter(hh_size > 0) %>% 
+      filter(!is.na(GEOID)) %>% 
+      filter(GEOID %in% tract_spatialdf@data$GEOID) %>% 
+      group_by(GEOID, hh_size, tenure) %>% 
+      summarise(estimate = sum(estimate),
+                SE = sum(SE)) %>% 
+      ungroup() %>% 
+      arrange(GEOID, hh_size, tenure) %>% 
+      mutate(CoV = SE/estimate) %>% 
+      mutate(Density = 0) 
+    
+    # No Info
+    hh_year_tmp$CoVOver1 <- ifelse(hh_year_tmp$CoV >= 1,
+                                   1, 0)
+    
+    # less than 80% significance
+    
+    
+    hh_year_tmp$Density[hh_year_tmp$CoV < 1 & 
+                          hh_year_tmp$CoV >= 1/qnorm(.9)] <- 50
+    
+    # between 80 and 90%
+    hh_year_tmp$Density[hh_year_tmp$CoV < 1/qnorm(.9) &
+                          hh_year_tmp$CoV >= 1/qnorm(.95)] <- 25
+    
+    hh_year_total <- hh_year_tmp %>% 
+      group_by(GEOID) %>% 
+      summarise(estimate = sum(estimate),
+                SE = sum(SE)) %>% 
+      ungroup() %>% 
+      mutate(CoV = SE/estimate)
+  }else{
+    hh_year_tmp <- hh_size_tract_2000 %>% 
+      filter(Year == year) %>% 
+      filter(hh_size > 0) %>% 
+      filter(!is.na(GEOID)) %>% 
+      filter(GEOID %in% tract_spatialdf@data$GEOID) %>% 
+      group_by(GEOID, hh_size, tenure) %>% 
+      summarise(estimate = sum(estimate),
+                SE = sum(SE)) %>% 
+      ungroup() %>% 
+      arrange(GEOID, hh_size, tenure) %>% 
+      mutate(CoV = SE/estimate) %>% 
+      mutate(Density = 0) 
+    
+    # No Info
+    hh_year_tmp$CoVOver1 <- ifelse(hh_year_tmp$CoV >= 1,
+                                   1, 0)
+    # less than 80% significance
+    hh_year_tmp$Density[hh_year_tmp$CoV < 1 &
+                          hh_year_tmp$CoV >= 1/qnorm(.9)] <- 50
+    
+    # between 80 and 90%
+    hh_year_tmp$Density[hh_year_tmp$CoV < 1/qnorm(.9) &
+                          hh_year_tmp$CoV >= 1/qnorm(.95)] <- 25
+    
+    hh_year_total <- hh_year_tmp %>% 
+      group_by(GEOID) %>% 
+      summarise(estimate = sum(estimate),
+                SE = sum(SE)) %>% 
+      ungroup() %>%  
+      mutate(CoV = SE/estimate)
+  }
+  
+  if(year != 2010 &
+     year != 2000){
+    title_string <- paste0(year - 4, 
+                           "-", year)
+    legend_string <- "ACS"
+  }else{
+    title_string <- year
+    legend_string <- "Census"
+  }
+  
+  ### Households ####
+  if(FALSE){
+    ## Test to figure it out
+    ## Takes time to run on Tracts
+    hh.int.tract <- classIntervals(hh_year_tmp$estimate,
+                                   style = 'jenks',
+                                   n = 9)
+    
+    breaks <- hh.int.tract$brks
+    breaks
+  }
+  breaks <- c(0, 50, 100,
+              250, 500, 750,
+              1000, 2000, 3000, 4500)
+  
+  hh.pal <- brewer.pal(n = 9, name = "Blues")
+  
+  for(size in unique(hh_year_tmp$hh_size)){
+    for(tenure.type in c("Renter", "Owner")){
+      
+      hh_size_tmp <- hh_year_tmp %>% 
+        filter(hh_size == size &
+                 tenure == tenure.type) 
+      
+      tract_spatialdf@data$Est <-
+        tract_spatialdf@data$Density <- 0
+      
+      if(nrow(hh_size_tmp) != 0){
+        poly_order.idx <- match(hh_size_tmp$GEOID,
+                                tract_spatialdf@data$GEOID)
+        tract_spatialdf@data$Est[poly_order.idx] <-
+          hh_size_tmp$estimate
+        tract_spatialdf@data$Density[poly_order.idx] <-
+          hh_size_tmp$Density
+        hh.int.tract <- classIntervals(tract_spatialdf@data$Est,
+                                       style = "fixed",
+                                       fixedBreaks = breaks,
+                                       n = 9)
+        hh.col.tract <- findColours(hh.int.tract, hh.pal)
+      }else{
+        hh.int.tract$var <- rep(0, nrow(tract_spatialdf@data))
+        hh.col.tract <- findColours(hh.int.tract, hh.pal)
+      }
+      
+      
+      
+      jpeg(paste0("../household_size/Tract/Population/", 
+                  "Households_Size",
+                  size, "_",
+                  tenure.type, "_", 
+                  year, ".jpeg"),
+           height = 480, width = 480)
+      {
+        par(lend = 1,
+            mar = c(0,0,2,0),
+            oma = c(1,1,1,1))
+        plot(tract_spatialdf,
+             col = hh.col.tract,
+             border = 'grey48', lwd = .25,
+             main = "")
+        legend('bottomleft',
+               title = 'Households',
+               title.adj = 0,
+               ncol = 2,
+               bty = 'n',
+               cex = 0.75,
+               border = FALSE,
+               fill = hh.pal,
+               legend = names(attr(hh.col.tract, 'table')))
+        title(paste0(tenure.type,
+                     " Households of Size ", size, "\n",
+                     ""),
+              font.main = 2, outer = FALSE,
+              adj = 0, cex.main = 1)
+        
+        title(paste0("\n",
+                     title_string,
+                     " (Estimated from ", 
+                     legend_string, ")"),
+              font.main = 1, outer = FALSE,
+              adj = 0, cex.main = 1)
+      }
+      dev.off()
+      
+      ### Add CoV ####
+      jpeg(paste0("../household_size/Tract/Population/", 
+                  "Households_Size",
+                  size, "_",
+                  tenure.type,
+                  "_CoV_", year, ".jpeg"),
+           height = 480, width = 480)
+      {
+        par(lend = 1,
+            mar = c(0,0,2,0),
+            oma = c(1,1,1,1))
+        plot(tract_spatialdf,
+             col = hh.col.tract,
+             border = 'grey48', lwd = .25,
+             main = "")
+        
+        hatch.idx <- which(tract_spatialdf@data$Density > 0)
+        for(poly in hatch.idx){
+          points <- tract_spatialdf@polygons[[poly]]@Polygons[[1]]@coords
+          polygon(points[,1], points[,2],
+                  border = FALSE,
+                  density = tract_spatialdf@data$Density[poly])
+        }
+        legend('bottomleft',
+               title = 'Households',
+               title.adj = 0,
+               ncol = 2,
+               bty = 'n',
+               cex = 0.75,
+               border = FALSE,
+               fill = hh.pal,
+               legend = names(attr(hh.col.tract, 'table')))
+        legend('bottomright',
+               title = 'Significance',
+               title.adj = 0,
+               ncol = 1,
+               bty = 'n',
+               cex= 0.75,
+               border = 'black',
+               fill = 'black',
+               density = c(0,25,50),
+               legend = c(">= 95%",
+                          "80% to 90%",
+                          "< 80%"))
+        title(paste0(tenure.type,
+                     "Households of Size ", size, "\n",
+                     ""),
+              font.main = 2, outer = FALSE,
+              adj = 0, cex.main = 1)
+        
+        title(paste0("\n",
+                     title_string, 
+                     " (Estimated from ", 
+                     legend_string, ")"),
+              font.main = 1, outer = FALSE,
+              adj = 0, cex.main = 1)
+      }
+      dev.off()
+      # End tenure loop
+    }
+    # End size loop
+  }
+  
+  ### Prevalence ####
+  prev.pal <- brewer.pal(n = 9, name = "YlGnBu")
+  
+  hh_year_tmp <- hh_year_tmp %>% 
+    left_join(hh_year_total,
+              by = c("GEOID" = "GEOID"),
+              suffix = c("", "_Total")) %>% 
+    mutate(Prev = estimate/estimate_Total)
+  
+  ## Test to find good breaks
+  if(FALSE){
+    prev.int.tract <- classIntervals(hh_year_tmp$Prev,
+                                     style = 'jenks',
+                                     n = 9)
+    
+    breaks <- prev.int.tract$brks
+    breaks
+  }
+  breaks <- c(0, .005, .01,
+              .05, .1, .2,
+              .25, .5, .75, .9)
+  
+  for(size in unique(hh_year_tmp$hh_size)){
+    for(tenure.type in c("Renter", "Owner")){
+      hh_size_tmp <- hh_year_tmp %>% 
+        filter(hh_size == size &
+                 tenure == tenure.type) 
+      tract_spatialdf@data$Density <- 
+        tract_spatialdf@data$Prev <- 0
+      
+      if(nrow(hh_size_tmp) != 0){
+        poly_order.idx <- match(hh_size_tmp$GEOID,
+                                tract_spatialdf@data$GEOID)
+        tract_spatialdf@data$Prev[poly_order.idx] <-
+          hh_size_tmp$Prev
+        tract_spatialdf@data$Density[poly_order.idx] <-
+          hh_size_tmp$Density
+        prev.int.tract <- classIntervals(tract_spatialdf@data$Prev,
+                                         style = "fixed",
+                                         fixedBreaks = breaks,
+                                         n = 9)
+        prev.col.tract <- findColours(prev.int.tract, prev.pal)
+      }else{
+        prev.int.tract$var <- rep(0, nrow(tract_spatialdf@data))
+        prev.col.tract <- findColours(prev.int.tract, prev.pal)
+      }
+      
+      
+      
+      jpeg(paste0("../household_size/Tract/Prevalence/", 
+                  "Households_Size",
+                  size, "_",
+                  tenure.type, "_Prevalence_", year, ".jpeg"),
+           height = 480, width = 480)
+      {
+        par(lend = 1,
+            mar = c(0,0,2,0),
+            oma = c(1,1,1,1))
+        plot(tract_spatialdf,
+             col = prev.col.tract,
+             border = 'grey48', lwd = .25,
+             main = "")
+        legend('bottomleft',
+               title = 'Prevalence',
+               title.adj = 0,
+               ncol = 2,
+               bty = 'n',
+               cex = 0.75,
+               border = FALSE,
+               fill = prev.pal,
+               legend = names(attr(prev.col.tract, 'table')))
+        title(paste0("Prevalence of ",
+                     tenure.type,
+                     " Households of Size ", size, "\n",
+                     ""),
+              font.main = 2, outer = FALSE,
+              adj = 0, cex.main = 1)
+        
+        title(paste0("\n",
+                     title_string,
+                     " (Estimated from ", legend_string, ")"),
+              font.main = 1, outer = FALSE,
+              adj = 0, cex.main = 1)
+      }
+      dev.off()
+      
+      ### Add CoV ####
+      
+      jpeg(paste0("../household_size/Tract/Prevalence/", 
+                  "Households_Size",
+                  size, "_",
+                  tenure.type, 
+                  "_Prevalence_CoV_", year, ".jpeg"),
+           height = 480, width = 480)
+      {
+        par(lend = 1,
+            mar = c(0,0,2,0),
+            oma = c(1,1,1,1))
+        plot(tract_spatialdf,
+             col = prev.col.tract,
+             border = 'grey48', lwd = .25,
+             main = "")
+        
+        hatch.idx <- which(tract_spatialdf@data$Density > 0)
+        for(poly in hatch.idx){
+          points <- tract_spatialdf@polygons[[poly]]@Polygons[[1]]@coords
+          polygon(points[,1], points[,2],
+                  border = FALSE,
+                  density = tract_spatialdf@data$Density[poly])
+        }
+        legend('bottomleft',
+               title = 'Prevalence',
+               title.adj = 0,
+               ncol = 2,
+               bty = 'n',
+               cex = 0.75,
+               border = FALSE,
+               fill = prev.pal,
+               legend = names(attr(prev.col.tract, 'table')))
+        legend('bottomright',
+               title = 'Significance',
+               title.adj = 0,
+               ncol = 1,
+               bty = 'n',
+               cex= 0.75,
+               border = 'black',
+               fill = 'black',
+               density = c(0,25,50),
+               legend = c(">= 95%",
+                          "80% to 90%",
+                          "< 80%"))
+        title(paste0("Prevalence of ",
+                     tenure.type, 
+                     " Households of Size ", size, "\n",
+                     ""),
+              font.main = 2, outer = FALSE,
+              adj = 0, cex.main = 1)
+        
+        title(paste0("\n",
+                     title_string,
+                     " (Estimated from ",
+                     legend_string, ")"),
+              font.main = 1, outer = FALSE,
+              adj = 0, cex.main = 1)
+      }
+      dev.off()
+      # End tenure loop
+    }
+    # End size loop
+  }
+  
+  ### Distribution ####
+  
+  breaks <- c(0, .0005, .001,
+              .0025, .005, .0075,
+              .01, .0125, .015, .2)
+  
+  for(size in unique(hh_year_tmp$hh_size)){
+    for(tenure.type in c("Renter", "Owner")){
+      
+      hh_size_tmp <- hh_year_tmp %>% 
+        filter(hh_size == size &
+                 tenure == tenure.type) %>% 
+        mutate(Dist = estimate/sum(estimate))
+      hh_size_tmp$Dist %>% summary() %>% print()
+      tract_spatialdf@data$Density <-
+        tract_spatialdf@data$Dist <- 0
+      
+      
+      if(nrow(hh_size_tmp) != 0){
+        poly_order.idx <- match(hh_size_tmp$GEOID,
+                                tract_spatialdf@data$GEOID)
+        tract_spatialdf@data$Dist[poly_order.idx] <-
+          hh_size_tmp$Dist
+        tract_spatialdf@data$Density[poly_order.idx] <-
+          hh_size_tmp$Density
+        prev.int.tract <- classIntervals(tract_spatialdf@data$Dist,
+                                         style = "fixed",
+                                         fixedBreaks = breaks,
+                                         n = 9)
+        prev.col.tract <- findColours(prev.int.tract, prev.pal)
+      }else{
+        prev.int.tract$var <- rep(0, nrow(tract_spatialdf@data))
+        prev.col.tract <- findColours(prev.int.tract, prev.pal)
+      }
+      
+      jpeg(paste0("../household_size/Tract/Distribution/", 
+                  "Households_Size",
+                  size, "_",
+                  tenure.type, "_Distribution_", year, ".jpeg"),
+           height = 480, width = 480)
+      {
+        par(lend = 1,
+            mar = c(0,0,2,0),
+            oma = c(1,1,1,1))
+        plot(tract_spatialdf,
+             col = prev.col.tract,
+             border = 'grey48', lwd = .25,
+             main = "")
+        
+        legend('bottomleft',
+               title = 'Distribution',
+               title.adj = 0,
+               ncol = 2,
+               bty = 'n',
+               cex = 0.75,
+               border = FALSE,
+               fill = prev.pal,
+               legend = names(attr(prev.col.tract, 'table')))
+        title(paste0("Distribution of ",
+                     tenure.type, 
+                     " Households of Size ", size, "\n",
+                     ""),
+              font.main = 2, outer = FALSE,
+              adj = 0, cex.main = 1)
+        
+        title(paste0("\n",
+                     title_string, " (Estimated from ", legend_string, ")"),
+              font.main = 1, outer = FALSE,
+              adj = 0, cex.main = 1)
+      }
+      dev.off()
+      
+      ### Add CoV ####
+      jpeg(paste0("../household_size/Tract/Distribution/", 
+                  "Households_Size",
+                  size, "_",
+                  tenure.type,"_Distribution_CoV_", year, ".jpeg"),
+           height = 480, width = 480)
+      {
+        par(lend = 1,
+            mar = c(0,0,2,0),
+            oma = c(1,1,1,1))
+        plot(tract_spatialdf,
+             col = prev.col.tract,
+             border = 'grey48', lwd = .25,
+             main = "")
+        hatch.idx <- which(tract_spatialdf@data$Density > 0)
+        for(poly in hatch.idx){
+          points <- tract_spatialdf@polygons[[poly]]@Polygons[[1]]@coords
+          polygon(points[,1], points[,2],
+                  border = FALSE,
+                  density = tract_spatialdf@data$Density[poly])
+        }
+        legend('bottomleft',
+               title = 'Distribution',
+               title.adj = 0,
+               ncol = 2,
+               bty = 'n',
+               cex = 0.75,
+               border = FALSE,
+               fill = prev.pal,
+               legend = names(attr(prev.col.tract, 'table')))
+        legend('bottomright',
+               title = 'Significance',
+               title.adj = 0,
+               ncol = 1,
+               bty = 'n',
+               cex= 0.75,
+               border = 'black',
+               fill = 'black',
+               density = c(0,25,50),
+               legend = c(">= 95%",
+                          "80% to 90%",
+                          "< 80%"))
+        title(paste0("Distribution of ",
+                     tenure.type, 
+                     " Households of Size ", size, "\n",
+                     ""),
+              font.main = 2, outer = FALSE,
+              adj = 0, cex.main = 1)
+        
+        title(paste0("\n",
+                     title_string,
+                     " (Estimated from ",
+                     legend_string, ")"),
+              font.main = 1, outer = FALSE,
+              adj = 0, cex.main = 1)
+      }
+      dev.off()
+      # End tenure loop
+    }
+    # End size dist loop
+  }
+  # End year loop 
+}

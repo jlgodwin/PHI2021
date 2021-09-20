@@ -1,1 +1,2 @@
 load("/Users/j_godwin/Dropbox/PHI2021/Github/PHI-2021/household_size/Report_estimates/housing_indicators_kc_preds.rds")
+load("/Users/j_godwin/Dropbox/PHI2021/Github/PHI-2021/household_size/Report_estimates/average_hh_size_renters_hra.RDS")
