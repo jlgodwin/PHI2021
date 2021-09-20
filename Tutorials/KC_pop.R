@@ -2391,6 +2391,10 @@ for(year in c(2010, 2014, 2019)){
                                   legend = c("ACS 2015-2019", "Census 2010"),
                                   LRcolnames = c("Owner", "Renter"),
                                   LRmain = c("Owner", "Renter"))
+      hra.name.file <- gsub("\\.","",
+                            hra.name)
+      hra.name.file <- gsub("/","",
+                            hra.name.file)
       jpeg(paste0("../household_size/Pyramid/HRA/Pyramid_",
                   "20102019_hhsize_by_tenure_HRA_",
                   hra.name.file, ".jpeg"),
