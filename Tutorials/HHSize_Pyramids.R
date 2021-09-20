@@ -531,7 +531,7 @@ for(year in c(2000, 2009)){
                 hra.name.file, ".jpeg"),
          height = 480, width = 480)
     {
-
+      
       pop.pyramid.bayesPop.pyramid(pyr.obj, pyr1.par = list(col = pop.cols[3] , 
                                                             border = pop.cols[3]),
                                    legend_pos = "topright",
@@ -1188,7 +1188,15 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
                 SE = sum(SE)) %>% 
       ungroup() %>% 
       arrange(FID_HRA_20, hh_size) %>% 
-      mutate(CoV = SE/estimate)
+      mutate(CoV = SE/estimate) %>% 
+      mutate(Density = 0) 
+    
+    # less than 80% significance
+    hh_year_tmp$Density[hh_year_tmp$CoV >= 1/qnorm(.9)] <- 50
+    
+    # between 80 and 90%
+    hh_year_tmp$Density[hh_year_tmp$CoV < 1/qnorm(.9) &
+                          hh_year_tmp$CoV >= 1/qnorm(.95)] <- 25
     
     hh_year_total <- hh_year_tmp %>% 
       group_by(FID_HRA_20, HRA2010v2_) %>% 
@@ -1207,7 +1215,15 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
                 SE = sum(SE)) %>% 
       ungroup() %>% 
       arrange(FID_HRA_20, hh_size) %>% 
-      mutate(CoV = SE/estimate)
+      mutate(CoV = SE/estimate) %>% 
+      mutate(Density = 0) 
+    
+    # less than 80% significance
+    hh_year_tmp$Density[hh_year_tmp$CoV >= 1/qnorm(.9)] <- 50
+    
+    # between 80 and 90%
+    hh_year_tmp$Density[hh_year_tmp$CoV < 1/qnorm(.9) &
+                          hh_year_tmp$CoV >= 1/qnorm(.95)] <- 25
     
     hh_year_total <- hh_year_tmp %>% 
       group_by(FID_HRA_20, HRA2010v2_) %>% 
@@ -1227,7 +1243,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
     title_string <- year
   }
   
-  #### Households ####
+  ### Households ####
   hh.int.hra <- classIntervals(hh_year_tmp$estimate,
                                style = 'jenks',
                                n = 9)
@@ -1246,11 +1262,14 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
     
     hh_size_tmp <- hh_year_tmp %>% 
       filter(hh_size == size)
-    hra@data$Est <- 0
+    hra@data$Density <- 
+      hra@data$Est <- 0
     
     if(nrow(hh_size_tmp) != 0){
       hra@data$Est[match(hh_size_tmp$FID_HRA_20,
                          hra@data$FID_HRA_20)] <- hh_size_tmp$estimate
+      hra@data$Density[match(hh_size_tmp$FID_HRA_20,
+                             hra@data$FID_HRA_20)] <- hh_size_tmp$Density
     }
     
     
@@ -1259,7 +1278,6 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
                                  fixedBreaks = breaks,
                                  n = 9)
     hh.col.hra <- findColours(hh.int.hra, hh.pal)
-    
     
     
     jpeg(paste0("../household_size/HRA/Population/", 
@@ -1294,10 +1312,63 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
             adj = 0, cex.main = 1)
     }
     dev.off()
+    
+    ### Add CoV ####
+    jpeg(paste0("../household_size/HRA/Population/", 
+                "Households_Size",
+                size, "_CoV_", year, ".jpeg"),
+         height = 480, width = 480)
+    {
+      par(lend = 1,
+          mar = c(0,0,2,0),
+          oma = c(1,1,1,1))
+      plot(hra,
+           col = hh.col.hra,
+           border = 'grey48', lwd = .25,
+           main = "")
+      
+      hatch.idx <- which(hra@data$Density > 0)
+      for(poly in hatch.idx){
+        points <- hra@polygons[[poly]]@Polygons[[1]]@coords
+        polygon(points[,1], points[,2],
+                border = FALSE,
+                density = hra@data$Density[poly])
+      }
+      legend('bottomleft',
+             title = 'Households',
+             title.adj = 0,
+             ncol = 2,
+             bty = 'n',
+             cex = 0.75,
+             border = FALSE,
+             fill = hh.pal,
+             legend = names(attr(hh.col.hra, 'table')))
+      legend('bottomright',
+             title = 'Significance',
+             title.adj = 0,
+             ncol = 1,
+             bty = 'n',
+             cex= 0.75,
+             border = 'black',
+             fill = 'black',
+             density = c(0,25,50),
+             legend = c(">= 95%",
+                        "80% to 90%",
+                        "< 80%"))
+      title(paste0("Households of Size ", size, "\n",
+                   ""),
+            font.main = 2, outer = FALSE,
+            adj = 0, cex.main = 1)
+      
+      title(paste0("\n",
+                   title_string, " (Modeled from Census, ACS)"),
+            font.main = 1, outer = FALSE,
+            adj = 0, cex.main = 1)
+    }
+    dev.off()
   }
   
-  
-  #### Prevalence ####
+  ### Prevalence ####
   prev.pal <- brewer.pal(n = 9, name = "YlGnBu")
   
   hh_year_tmp <- hh_year_tmp %>% 
@@ -1323,12 +1394,14 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
     
     hh_size_tmp <- hh_year_tmp %>% 
       filter(hh_size == size)
-    
-    hra@data$Prev <- 0
+    hra@data$Density <- 
+      hra@data$Prev <- 0
     
     if(nrow(hh_size_tmp) != 0){
       hra@data$Prev[match(hh_size_tmp$FID_HRA_20,
                           hra@data$FID_HRA_20)] <- hh_size_tmp$Prev
+      hra@data$Density[match(hh_size_tmp$FID_HRA_20,
+                             hra@data$FID_HRA_20)] <- hh_size_tmp$Density
     }
     
     
@@ -1337,8 +1410,6 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
                                    fixedBreaks = breaks,
                                    n = 9)
     prev.col.hra <- findColours(prev.int.hra, prev.pal)
-    
-    
     
     
     jpeg(paste0("../household_size/HRA/Prevalence/", 
@@ -1360,8 +1431,63 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
              bty = 'n',
              cex = 0.75,
              border = FALSE,
-             fill = hh.pal,
-             legend = names(attr(hh.col.hra, 'table')))
+             fill = prev.pal,
+             legend = names(attr(prev.col.hra, 'table')))
+      title(paste0("Prevalence of Households of Size ", size, "\n",
+                   ""),
+            font.main = 2, outer = FALSE,
+            adj = 0, cex.main = 1)
+      
+      title(paste0("\n",
+                   title_string, " (Modeled from Census, ACS)"),
+            font.main = 1, outer = FALSE,
+            adj = 0, cex.main = 1)
+    }
+    dev.off()
+    
+    ### Add CoV ####
+    
+    jpeg(paste0("../household_size/HRA/Prevalence/", 
+                "Households_Size",
+                size, "_Prevalence_CoV_", year, ".jpeg"),
+         height = 480, width = 480)
+    {
+      par(lend = 1,
+          mar = c(0,0,2,0),
+          oma = c(1,1,1,1))
+      plot(hra,
+           col = prev.col.hra,
+           border = 'grey48', lwd = .25,
+           main = "")
+      
+      hatch.idx <- which(hra@data$Density > 0)
+      for(poly in hatch.idx){
+        points <- hra@polygons[[poly]]@Polygons[[1]]@coords
+        polygon(points[,1], points[,2],
+                border = FALSE,
+                density = hra@data$Density[poly])
+      }
+      legend('bottomleft',
+             title = 'Prevalence',
+             title.adj = 0,
+             ncol = 2,
+             bty = 'n',
+             cex = 0.75,
+             border = FALSE,
+             fill = prev.pal,
+             legend = names(attr(prev.col.hra, 'table')))
+      legend('bottomright',
+             title = 'Significance',
+             title.adj = 0,
+             ncol = 1,
+             bty = 'n',
+             cex= 0.75,
+             border = 'black',
+             fill = 'black',
+             density = c(0,25,50),
+             legend = c(">= 95%",
+                        "80% to 90%",
+                        "< 80%"))
       title(paste0("Prevalence of Households of Size ", size, "\n",
                    ""),
             font.main = 2, outer = FALSE,
@@ -1375,7 +1501,8 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
     dev.off()
   }
   
-  #### Distribution ####
+  ### Distribution ####
+  
   breaks <- c(0, .005, .01,
               .02, .025, .03,
               .045, .06, .075, .1)
@@ -1386,12 +1513,14 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
       filter(hh_size == size) %>% 
       mutate(Dist = estimate/sum(estimate))
     hh_size_tmp$Dist %>% summary() %>% print()
-    
-    hra@data$Dist <- 0
+    hra@data$Density <-
+      hra@data$Dist <- 0
     
     if(nrow(hh_size_tmp) != 0){
       hra@data$Dist[match(hh_size_tmp$FID_HRA_20,
                           hra@data$FID_HRA_20)] <- hh_size_tmp$Dist
+      hra@data$Density[match(hh_size_tmp$FID_HRA_20,
+                             hra@data$FID_HRA_20)] <- hh_size_tmp$Density
     }
     prev.int.hra <- classIntervals(hra@data$Dist,
                                    style = "fixed",
@@ -1413,6 +1542,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
            col = prev.col.hra,
            border = 'grey48', lwd = .25,
            main = "")
+      
       legend('bottomleft',
              title = 'Distribution',
              title.adj = 0,
@@ -1433,8 +1563,63 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
             adj = 0, cex.main = 1)
     }
     dev.off()
+    
+    ### Add CoV ####
+    jpeg(paste0("../household_size/HRA/Distribution/", 
+                "Households_Size",
+                size, "_Distribution_CoV_", year, ".jpeg"),
+         height = 480, width = 480)
+    {
+      par(lend = 1,
+          mar = c(0,0,2,0),
+          oma = c(1,1,1,1))
+      plot(hra,
+           col = prev.col.hra,
+           border = 'grey48', lwd = .25,
+           main = "")
+      hatch.idx <- which(hra@data$Density > 0)
+      for(poly in hatch.idx){
+        points <- hra@polygons[[poly]]@Polygons[[1]]@coords
+        polygon(points[,1], points[,2],
+                border = FALSE,
+                density = hra@data$Density[poly])
+      }
+      legend('bottomleft',
+             title = 'Distribution',
+             title.adj = 0,
+             ncol = 2,
+             bty = 'n',
+             cex = 0.75,
+             border = FALSE,
+             fill = prev.pal,
+             legend = names(attr(prev.col.hra, 'table')))
+      legend('bottomright',
+             title = 'Significance',
+             title.adj = 0,
+             ncol = 1,
+             bty = 'n',
+             cex= 0.75,
+             border = 'black',
+             fill = 'black',
+             density = c(0,25,50),
+             legend = c(">= 95%",
+                        "80% to 90%",
+                        "< 80%"))
+      title(paste0("Distribution of Households of Size ", size, "\n",
+                   ""),
+            font.main = 2, outer = FALSE,
+            adj = 0, cex.main = 1)
+      
+      title(paste0("\n",
+                   title_string, " (Modeled from Census, ACS)"),
+            font.main = 1, outer = FALSE,
+            adj = 0, cex.main = 1)
+    }
+    dev.off()
+    
+    # End size dist loop
   }
-  
+  # End year loop
 }
 
 ### Household Size by Tenure ####
@@ -1452,7 +1637,15 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
                 SE = sum(SE)) %>% 
       ungroup() %>% 
       arrange(FID_HRA_20, hh_size) %>% 
-      mutate(CoV = SE/estimate)
+      mutate(CoV = SE/estimate) %>% 
+      mutate(Density = 0) 
+    
+    # less than 80% significance
+    hh_year_tmp$Density[hh_year_tmp$CoV >= 1/qnorm(.9)] <- 50
+    
+    # between 80 and 90%
+    hh_year_tmp$Density[hh_year_tmp$CoV < 1/qnorm(.9) &
+                          hh_year_tmp$CoV >= 1/qnorm(.95)] <- 25
     
     hh_year_total <- hh_year_tmp %>% 
       group_by(FID_HRA_20, HRA2010v2_) %>% 
@@ -1472,7 +1665,15 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
                 SE = sum(SE)) %>% 
       ungroup() %>% 
       arrange(FID_HRA_20, hh_size) %>% 
-      mutate(CoV = SE/estimate)
+      mutate(CoV = SE/estimate) %>% 
+      mutate(Density = 0) 
+    
+    # less than 80% significance
+    hh_year_tmp$Density[hh_year_tmp$CoV >= 1/qnorm(.9)] <- 50
+    
+    # between 80 and 90%
+    hh_year_tmp$Density[hh_year_tmp$CoV < 1/qnorm(.9) &
+                          hh_year_tmp$CoV >= 1/qnorm(.95)] <- 25
     
     hh_year_total <- hh_year_tmp %>% 
       group_by(FID_HRA_20, HRA2010v2_) %>% 
@@ -1491,7 +1692,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
   }else{
     title_string <- year
   }
- 
+  
   
   ### Households ####
   hh.int.hra <- classIntervals(hh_year_tmp$estimate,
@@ -1514,13 +1715,15 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
       hh_size_tmp <- hh_year_tmp %>% 
         filter(hh_size == size &
                  tenure == tenure.type)
-      hra@data$Est <- 0
+      hra@data$Density <- 
+        hra@data$Est <- 0
       
       if(nrow(hh_size_tmp) != 0){
         hra@data$Est[match(hh_size_tmp$FID_HRA_20,
                            hra@data$FID_HRA_20)] <- hh_size_tmp$estimate
         
-        
+        hra@data$Density[match(hh_size_tmp$FID_HRA_20,
+                               hra@data$FID_HRA_20)] <- hh_size_tmp$Density
         
         hh.int.hra <- classIntervals(hra@data$Est,
                                      style = "fixed",
@@ -1566,11 +1769,67 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
               adj = 0, cex.main = 1)
       }
       dev.off()
+      
+      ### Add CoV ####
+      jpeg(paste0("../household_size/HRA/Population/", 
+                  "Households_Size",
+                  size, "_CoV_", tenure.type, 
+                  "_", year, ".jpeg"),
+           height = 480, width = 480)
+      {
+        par(lend = 1,
+            mar = c(0,0,2,0),
+            oma = c(1,1,1,1))
+        plot(hra,
+             col = hh.col.hra,
+             border = 'grey48', lwd = .25,
+             main = "")
+        
+        hatch.idx <- which(hra@data$Density > 0)
+        for(poly in hatch.idx){
+          points <- hra@polygons[[poly]]@Polygons[[1]]@coords
+          polygon(points[,1], points[,2],
+                  border = FALSE,
+                  density = hra@data$Density[poly])
+        }
+        legend('bottomleft',
+               title = 'Households',
+               title.adj = 0,
+               ncol = 2,
+               bty = 'n',
+               cex = 0.75,
+               border = FALSE,
+               fill = hh.pal,
+               legend = names(attr(hh.col.hra, 'table')))
+        legend('bottomright',
+               title = 'Significance',
+               title.adj = 0,
+               ncol = 1,
+               bty = 'n',
+               cex= 0.75,
+               border = 'black',
+               fill = 'black',
+               density = c(0,25,50),
+               legend = c(">= 95%",
+                          "80% to 90%",
+                          "< 80%"))
+        title(paste0(tenure.type,
+                     " Households of Size ", size, "\n",
+                     ""),
+              font.main = 2, outer = FALSE,
+              adj = 0, cex.main = 1)
+        
+        title(paste0("\n",
+                     title_string, " (Modeled from Census, ACS)"),
+              font.main = 1, outer = FALSE,
+              adj = 0, cex.main = 1)
+      }
+      dev.off()
     }
   }
   
   
-  #### Prevalence ####
+  ### Prevalence ####
   prev.pal <- brewer.pal(n = 9, name = "YlGnBu")
   
   hh_year_tmp <- hh_year_tmp %>% 
@@ -1587,7 +1846,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
   breaks <- prev.int.hra$brks
   breaks <- c(0, .05, .1,
               .15, .2, .25,
-              .4, .5, .6, .7)
+              .4, .5, .6, .75)
   ## Get color based on RColorBrwere palette for 
   ## each area
   
@@ -1597,14 +1856,15 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
       hh_size_tmp <- hh_year_tmp %>% 
         filter(hh_size == size &
                  tenure == tenure.type)
-      
-      hra@data$Prev <- 0
+      hra@data$Density <- 
+        hra@data$Prev <- 0
       
       if(nrow(hh_size_tmp) != 0){
         hra@data$Prev[match(hh_size_tmp$FID_HRA_20,
                             hra@data$FID_HRA_20)] <- hh_size_tmp$Prev
         
-        
+        hra@data$Density[match(hh_size_tmp$FID_HRA_20,
+                               hra@data$FID_HRA_20)] <- hh_size_tmp$Density
         prev.int.hra <- classIntervals(hra@data$Prev,
                                        style = "fixed",
                                        fixedBreaks = breaks,
@@ -1650,10 +1910,67 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
               adj = 0, cex.main = 1)
       }
       dev.off()
+      
+      ### Add CoV ####
+      jpeg(paste0("../household_size/HRA/Prevalence/", 
+                  "Households_Size",
+                  size, "_", tenure.type,
+                  "_Prevalence_CoV_", year, ".jpeg"),
+           height = 480, width = 480)
+      {
+        par(lend = 1,
+            mar = c(0,0,2,0),
+            oma = c(1,1,1,1))
+        plot(hra,
+             col = prev.col.hra,
+             border = 'grey48', lwd = .25,
+             main = "")
+        
+        hatch.idx <- which(hra@data$Density > 0)
+        for(poly in hatch.idx){
+          points <- hra@polygons[[poly]]@Polygons[[1]]@coords
+          polygon(points[,1], points[,2],
+                  border = FALSE,
+                  density = hra@data$Density[poly])
+        }
+        legend('bottomleft',
+               title = 'Prevalence',
+               title.adj = 0,
+               ncol = 2,
+               bty = 'n',
+               cex = 0.75,
+               border = FALSE,
+               fill = prev.pal,
+               legend = names(attr(prev.col.hra, 'table')))
+        legend('bottomright',
+               title = 'Significance',
+               title.adj = 0,
+               ncol = 1,
+               bty = 'n',
+               cex= 0.75,
+               border = 'black',
+               fill = 'black',
+               density = c(0,25,50),
+               legend = c(">= 95%",
+                          "80% to 90%",
+                          "< 80%"))
+        title(paste0("Prevalence of ",
+                     tenure.type,
+                     " Households of Size ", size, "\n",
+                     ""),
+              font.main = 2, outer = FALSE,
+              adj = 0, cex.main = 1)
+        
+        title(paste0("\n",
+                     title_string, " (Modeled from Census, ACS)"),
+              font.main = 1, outer = FALSE,
+              adj = 0, cex.main = 1)
+      }
+      dev.off()
     }
   }
   
-  #### Distribution ####
+  ### Distribution ####
   breaks <- c(0, .005, .01,
               .02, .03,
               .04, .05, .075, .1, .15)
@@ -1666,12 +1983,14 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
                  tenure == tenure.type) %>% 
         mutate(Dist = estimate/sum(estimate))
       hh_size_tmp$Dist %>% summary() %>% print()
-      
-      hra@data$Dist <- 0
+      hra@data$Density <-
+        hra@data$Dist <- 0
       
       if(nrow(hh_size_tmp) != 0){
         hra@data$Dist[match(hh_size_tmp$FID_HRA_20,
                             hra@data$FID_HRA_20)] <- hh_size_tmp$Dist
+        hra@data$Density[match(hh_size_tmp$FID_HRA_20,
+                               hra@data$FID_HRA_20)] <- hh_size_tmp$Density
         
         prev.int.hra <- classIntervals(hra@data$Dist,
                                        style = "fixed",
@@ -1718,7 +2037,65 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
               adj = 0, cex.main = 1)
       }
       dev.off()
+      
+      ### Add CoV ####
+      jpeg(paste0("../household_size/HRA/Distribution/", 
+                  "Households_Size",
+                  size,"_", tenure.type,
+                  "_Distribution_CoV_", year, ".jpeg"),
+           height = 480, width = 480)
+      {
+        par(lend = 1,
+            mar = c(0,0,2,0),
+            oma = c(1,1,1,1))
+        plot(hra,
+             col = prev.col.hra,
+             border = 'grey48', lwd = .25,
+             main = "")
+        
+        hatch.idx <- which(hra@data$Density > 0)
+        for(poly in hatch.idx){
+          points <- hra@polygons[[poly]]@Polygons[[1]]@coords
+          polygon(points[,1], points[,2],
+                  border = FALSE,
+                  density = hra@data$Density[poly])
+        }
+        legend('bottomleft',
+               title = 'Distribution',
+               title.adj = 0,
+               ncol = 2,
+               bty = 'n',
+               cex = 0.75,
+               border = FALSE,
+               fill = prev.pal,
+               legend = names(attr(prev.col.hra, 'table')))
+
+        legend('bottomright',
+               title = 'Significance',
+               title.adj = 0,
+               ncol = 1,
+               bty = 'n',
+               cex= 0.75,
+               border = 'black',
+               fill = 'black',
+               density = c(0,25,50),
+               legend = c(">= 95%",
+                          "80% to 90%",
+                          "< 80%"))
+    
+        title(paste0("Distribution of ",
+                     tenure.type, " Households of Size ", size, "\n",
+                     ""),
+              font.main = 2, outer = FALSE,
+              adj = 0, cex.main = 1)
+        title(paste0("\n",
+                     title_string, " (Modeled from Census, ACS)"),
+              font.main = 1, outer = FALSE,
+              adj = 0, cex.main = 1)
+      }
+      dev.off()
     }
   }
-  
+  # End year loop
 }
+ 
