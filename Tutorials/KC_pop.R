@@ -3572,13 +3572,13 @@ for(year in c(2010, 2014, 2019)){
       if(nrow(hh_size_tmp) != 0){
         hra@data$Prev[match(hh_size_tmp$FID_HRA_20,
                             hra@data$FID_HRA_20)] <- hh_size_tmp$Prev
-      
-      
-      prev.int.hra <- classIntervals(hra@data$Prev,
-                                     style = "fixed",
-                                     fixedBreaks = breaks,
-                                     n = 9)
-      prev.col.hra <- findColours(prev.int.hra, prev.pal)
+        
+        
+        prev.int.hra <- classIntervals(hra@data$Prev,
+                                       style = "fixed",
+                                       fixedBreaks = breaks,
+                                       n = 9)
+        prev.col.hra <- findColours(prev.int.hra, prev.pal)
       }else{
         prev.int.hra$var <- rep(0, nrow(hra@data))
         prev.col.hra <- findColours(prev.int.hra, prev.pal)
@@ -3641,12 +3641,12 @@ for(year in c(2010, 2014, 2019)){
       if(nrow(hh_size_tmp) != 0){
         hra@data$Dist[match(hh_size_tmp$FID_HRA_20,
                             hra@data$FID_HRA_20)] <- hh_size_tmp$Dist
-      
-      prev.int.hra <- classIntervals(hra@data$Dist,
-                                     style = "fixed",
-                                     fixedBreaks = breaks,
-                                     n = 9)
-      prev.col.hra <- findColours(prev.int.hra, prev.pal)
+        
+        prev.int.hra <- classIntervals(hra@data$Dist,
+                                       style = "fixed",
+                                       fixedBreaks = breaks,
+                                       n = 9)
+        prev.col.hra <- findColours(prev.int.hra, prev.pal)
       }else{
         prev.int.hra$var <- rep(0, nrow(hra@data))
         prev.col.hra <- findColours(prev.int.hra, prev.pal)
@@ -3890,9 +3890,11 @@ cases.int.hra <- classIntervals(covid_hra_tmp$Confirmed_Cases,
 cases.col.hra <- findColours(cases.int.hra, cases.pal)
 
 
-pdf(paste0("../COVIDPlots/Map_HRA_Cases.pdf"),
-    height = 5, width = 5)
-
+jpeg(paste0("../COVIDPlots/Map_HRA_Cases.jpeg"),
+     height = 480, width = 480)
+par(lend = 1,
+    mar = c(0,0,2,0),
+    oma = c(1,1,1,1))
 plot(hra,
      col = cases.col.hra,
      border = 'grey48', lwd = .25,
@@ -3938,8 +3940,11 @@ prev.int.hra <- classIntervals(covid_hra_tmp$CasesPrev,
 prev.col.hra <- findColours(prev.int.hra, prev.pal)
 
 
-pdf(paste0("../COVIDPlots/Map_HRA_CasesPrev.pdf"),
-    height = 5, width = 5)
+jpeg(paste0("../COVIDPlots/Map_HRA_CasesPrev.jpeg"),
+     height = 480, width = 480)
+par(lend = 1,
+    mar = c(0,0,2,0),
+    oma = c(1,1,1,1))
 plot(hra,
      col = prev.col.hra,
      border = 'grey48', lwd = .25,
@@ -3949,7 +3954,7 @@ legend('bottomleft',
        title.adj = 0,
        ncol = 2,
        bty = 'n',
-       cex 0.75,
+       cex = 0.75,
        border = FALSE,
        fill = prev.pal,
        legend = names(attr(prev.col.hra, 'table')))
@@ -3986,8 +3991,11 @@ dist.int.hra <- classIntervals(covid_hra_tmp$CasesDist,
 dist.col.hra <- findColours(dist.int.hra, dist.pal)
 
 
-pdf(paste0("../COVIDPlots/Map_HRA_CasesDist.pdf"),
-    height = 5, width = 5)
+jpeg(paste0("../COVIDPlots/Map_HRA_CasesDist.jpeg"),
+     height = 480, width = 480)
+par(lend = 1,
+    mar = c(0,0,2,0),
+    oma = c(1,1,1,1))
 plot(hra,
      col = dist.col.hra,
      border = 'grey48', lwd = .25,
@@ -3997,7 +4005,7 @@ legend('bottomleft',
        title.adj = 0,
        ncol = 2,
        bty = 'n',
-       cex 0.75,
+       cex = 0.75,
        border = FALSE,
        fill = dist.pal,
        legend = names(attr(dist.col.hra, 'table')))
@@ -4045,8 +4053,11 @@ hosp.int.hra <- classIntervals(covid_hra_tmp$Hospitalizations,
 hosp.col.hra <- findColours(hosp.int.hra, hosp.pal)
 
 
-pdf(paste0("../COVIDPlots/Map_HRA_Hospitalizations.pdf"),
-    height = 5, width = 5)
+jpeg(paste0("../COVIDPlots/Map_HRA_Hospitalizations.jpeg"),
+     height = 480, width = 480)
+par(lend = 1,
+    mar = c(0,0,2,0),
+    oma = c(1,1,1,1))
 plot(hra,
      col = hosp.col.hra,
      border = 'grey48', lwd = .25,
@@ -4056,7 +4067,7 @@ legend('bottomleft',
        title.adj = 0,
        ncol = 2,
        bty = 'n',
-       cex 0.75,
+       cex = 0.75,
        border = FALSE,
        fill = hosp.pal,
        legend = names(attr(hosp.col.hra, 'table')))
@@ -4092,8 +4103,11 @@ prev.int.hra <- classIntervals(covid_hra_tmp$HospPrev,
 prev.col.hra <- findColours(prev.int.hra, prev.pal)
 
 
-pdf(paste0("../COVIDPlots/Map_HRA_HospPrev.pdf"),
-    height = 5, width = 5)
+jpeg(paste0("../COVIDPlots/Map_HRA_HospPrev.jpeg"),
+     height = 480, width = 480)
+par(lend = 1,
+    mar = c(0,0,2,0),
+    oma = c(1,1,1,1))
 plot(hra,
      col = prev.col.hra,
      border = 'grey48', lwd = .25,
@@ -4103,7 +4117,7 @@ legend('bottomleft',
        title.adj = 0,
        ncol = 2,
        bty = 'n',
-       cex 0.75,
+       cex = 0.75,
        border = FALSE,
        fill = prev.pal,
        legend = names(attr(prev.col.hra, 'table')))
@@ -4126,8 +4140,8 @@ dist.int.hra <- classIntervals(covid_hra_tmp$HospDist,
 
 breaks <- dist.int.hra$brks
 breaks <- c(0, .01, .015, .02,
-            .025, .03, .035,
-            .04, .045, .055)
+            .025, .03, 
+            .04, .05, .055)
 
 dist.pal <- brewer.pal(n = 9,  name = "YlGnBu")
 
@@ -4141,8 +4155,11 @@ dist.int.hra <- classIntervals(covid_hra_tmp$CasesDist,
 dist.col.hra <- findColours(dist.int.hra, dist.pal)
 
 
-pdf(paste0("../COVIDPlots/Map_HRA_HospDist.pdf"),
-    height = 5, width = 5)
+jpeg(paste0("../COVIDPlots/Map_HRA_HospDist.jpeg"),
+     height = 480, width = 480)
+par(lend = 1,
+    mar = c(0,0,2,0),
+    oma = c(1,1,1,1))
 plot(hra,
      col = dist.col.hra,
      border = 'grey48', lwd = .25,
@@ -4152,7 +4169,7 @@ legend('bottomleft',
        title.adj = 0,
        ncol = 2,
        bty = 'n',
-       cex 0.75,
+       cex = 0.75,
        border = FALSE,
        fill = dist.pal,
        legend = names(attr(dist.col.hra, 'table')))
@@ -4182,7 +4199,7 @@ death.int.hra <- classIntervals(covid_hra_tmp$Deaths,
 breaks <- death.int.hra$brks
 breaks <- c(0, 5, 15,
             30,
-            45, 60, 75, 90,
+            40, 50, 60, 75, 90,
             100)
 ## Get color based on RColorBrwere palette for 
 ## each area
@@ -4199,8 +4216,11 @@ death.int.hra <- classIntervals(covid_hra_tmp$Deaths,
 death.col.hra <- findColours(death.int.hra, death.pal)
 
 
-pdf(paste0("../COVIDPlots/Map_HRA_Deaths.pdf"),
-    height = 5, width = 5)
+jpeg(paste0("../COVIDPlots/Map_HRA_Deaths.jpeg"),
+     height = 480, width = 480)
+par(lend = 1,
+    mar = c(0,0,2,0),
+    oma = c(1,1,1,1))
 plot(hra,
      col = death.col.hra,
      border = 'grey48', lwd = .25,
@@ -4210,7 +4230,7 @@ legend('bottomleft',
        title.adj = 0,
        ncol = 2,
        bty = 'n',
-       cex 0.75,
+       cex = 0.75,
        border = FALSE,
        fill = death.pal,
        legend = names(attr(death.col.hra, 'table')))
@@ -4235,8 +4255,8 @@ prev.int.hra <- classIntervals(covid_hra_tmp$DeathPrev,
 
 breaks <- prev.int.hra$brks
 breaks <- c(0, .00025, .0005,
-            .0007, .0008, .0009, .001,
-            .00125, .0015, .002, .0085)
+            .00075, .001,
+            .00125, .0015, .002, .005, .0085)
 prev.pal <- brewer.pal(n = 9,  name = "YlGnBu")
 
 covid_hra_tmp <- covid_hra_tmp[match(covid_hra_tmp$Location_Name,
@@ -4249,8 +4269,11 @@ prev.int.hra <- classIntervals(covid_hra_tmp$DeathPrev,
 prev.col.hra <- findColours(prev.int.hra, prev.pal)
 
 
-pdf(paste0("../COVIDPlots/Map_HRA_DeathPrev.pdf"),
-    height = 5, width = 5)
+jpeg(paste0("../COVIDPlots/Map_HRA_DeathPrev.jpeg"),
+     height = 480, width = 480)
+par(lend = 1,
+    mar = c(0,0,2,0),
+    oma = c(1,1,1,1))
 plot(hra,
      col = prev.col.hra,
      border = 'grey48', lwd = .25,
@@ -4260,7 +4283,7 @@ legend('bottomleft',
        title.adj = 0,
        ncol = 2,
        bty = 'n',
-       cex 0.75,
+       cex = 0.75,
        border = FALSE,
        fill = prev.pal,
        legend = names(attr(prev.col.hra, 'table')))
@@ -4282,8 +4305,8 @@ dist.int.hra <- classIntervals(covid_hra_tmp$DeathDist,
 
 breaks <- dist.int.hra$brks
 breaks <- c(0, .0025, .005, .0075,
-            .01, .015, .02, .025,
-            .035, .045, .06)
+            .01, .015, .02,
+            .03, .045, .06)
 
 dist.pal <- brewer.pal(n = 9,  name = "YlGnBu")
 
@@ -4297,8 +4320,11 @@ dist.int.hra <- classIntervals(covid_hra_tmp$DeathDist,
 dist.col.hra <- findColours(dist.int.hra, dist.pal)
 
 
-pdf(paste0("../COVIDPlots/Map_HRA_DeathDist.pdf"),
-    height = 5, width = 5)
+jpeg(paste0("../COVIDPlots/Map_HRA_DeathDist.jpeg"),
+     height = 480, width = 480)
+par(lend = 1,
+    mar = c(0,0,2,0),
+    oma = c(1,1,1,1))
 plot(hra,
      col = dist.col.hra,
      border = 'grey48', lwd = .25,
@@ -4308,7 +4334,7 @@ legend('bottomleft',
        title.adj = 0,
        ncol = 2,
        bty = 'n',
-       cex 0.75,
+       cex = 0.75,
        border = FALSE,
        fill = dist.pal,
        legend = names(attr(dist.col.hra, 'table')))
@@ -4324,6 +4350,756 @@ title(paste0("\n",
 dev.off()
 
 
+## 65+ / < 14 ####
+
+for(year in c(2010, 2012, 2015,
+              2017, 2020)){
+  
+  load(paste0('../Data/pop_', 
+              year, '_OFM.rda'))  
+  hra_pop <- pop %>% 
+    mutate(GEOID = as.character(Geoid)) %>% 
+    left_join(tracts_to_hra$acs5_2019) %>% 
+    group_by(FID_HRA_20, Sex_Lbl, Age, Age_Lbl) %>% 
+    summarise(HRA = unique(HRA2010v2_),
+              Pop = sum(Pop*prop.area)) %>% 
+    filter(!is.na(HRA))
+  
+  hra_age_pop <- hra_pop %>% 
+    mutate(Over65 = ifelse(Age %in% 14:18,
+                           1, 0),
+           Under14 = ifelse(Age %in% 1:3,
+                            1, 0)) %>% 
+    filter(Over65 == 1 | Under14 == 1) %>% 
+    group_by(HRA) %>% 
+    summarise(PopOver65 = sum(Pop*Over65),
+              PopUnder14 = sum(Pop*Under14)) %>% 
+    ungroup() 
+  
+  
+  ### Population  ####
+  
+  pop.pal <- brewer.pal(n = 9, name = "Blues")
+  
+  ## Use this to get an idea
+  pop.int.hra <- classIntervals(hra_age_pop$PopOver65,
+                                style = 'jenks',
+                                n = 9)
+  
+  breaks <- pop.int.hra$brks
+  breaks
+  
+  ## fix the breaks 
+  breaks <- c(0, 750, 1000,
+              2500,  4000,
+              5000, 7500, 10000,
+              15000, 21000)
+  
+  #### Over 65 ####
+  jpeg(paste0("../PopPlots/", 
+              year, "/OFM_Ages/OFM_",
+              year, "_ageOver65",
+              ".jpeg"),
+       height = 480, width = 480)
+  {
+    par(lend = 1,
+        mar = c(0,0,2,0),
+        oma = c(0,0,1,0))
+    plot(hra,
+         col = pop.col.hra,
+         border = 'grey48', lwd = .25,
+         main = "")
+    legend('bottomleft',
+           title = 'Population',
+           title.adj = 0,
+           ncol = 2,
+           bty = 'n',
+           cex = 0.75,
+           border = FALSE,
+           fill = pop.pal,
+           legend = names(attr(pop.col.hra, 'table')))
+    title(paste0("Population Over 65", "\n",
+                 ""),
+          font.main = 2, outer = FALSE,
+          adj = 0, cex.main = 1)
+    
+    title(paste0("\n",
+                 paste0("King County (WA OFM, ", year,")")),
+          font.main = 1, outer = FALSE,
+          adj = 0, cex.main = 1)
+  }
+  dev.off()
+  
+  ## make sure order correct for hra@data
+  hra_age_tmp <- hra_age_pop[match(hra_age_pop$HRA,
+                                   hra@data$HRA2010v2_), ]
+  
+  ## assign to bins 
+  pop.int.hra <- classIntervals(hra_age_tmp$PopOver65,
+                                style = "fixed",
+                                fixedBreaks = breaks,
+                                n = 9)
+  ## assign colors
+  pop.col.hra <- findColours(pop.int.hra, pop.pal)
+  
+  jpeg(paste0("../PopPlots/", 
+              year, "/OFM_Ages/OFM_",
+              year, "_ageOver65",
+              ".jpeg"),
+       height = 480, width = 480)
+  {
+    par(lend = 1,
+        mar = c(0,0,2,0),
+        oma = c(0,0,1,0))
+    plot(hra,
+         col = pop.col.hra,
+         border = 'grey48', lwd = .25,
+         main = "")
+    legend('bottomleft',
+           title = 'Population',
+           title.adj = 0,
+           ncol = 2,
+           bty = 'n',
+           cex = 0.75,
+           border = FALSE,
+           fill = pop.pal,
+           legend = names(attr(pop.col.hra, 'table')))
+    title(paste0("Population Over 65", "\n",
+                 ""),
+          font.main = 2, outer = FALSE,
+          adj = 0, cex.main = 1)
+    
+    title(paste0("\n",
+                 paste0("King County (WA OFM, ", year,")")),
+          font.main = 1, outer = FALSE,
+          adj = 0, cex.main = 1)
+  }
+  dev.off()
+  
+  
+  #### Under 14 ####
+  
+  ## assign to bins 
+  pop.int.hra <- classIntervals(hra_age_tmp$PopUnder14,
+                                style = "fixed",
+                                fixedBreaks = breaks,
+                                n = 9)
+  ## assign colors
+  pop.col.hra <- findColours(pop.int.hra, pop.pal)
+  
+  
+  jpeg(paste0("../PopPlots/", 
+              year, "/OFM_Ages/OFM_",
+              year, "_ageUnder14",
+              ".jpeg"),
+       height = 480, width = 480)
+  {
+    par(lend = 1,
+        mar = c(0,0,2,0),
+        oma = c(0,0,1,0))
+    plot(hra,
+         col = pop.col.hra,
+         border = 'grey48', lwd = .25,
+         main = "")
+    legend('bottomleft',
+           title = 'Population',
+           title.adj = 0,
+           ncol = 2,
+           bty = 'n',
+           cex = 0.75,
+           border = FALSE,
+           fill = pop.pal,
+           legend = names(attr(pop.col.hra, 'table')))
+    title(paste0("Population Under 14", "\n",
+                 ""),
+          font.main = 2, outer = FALSE,
+          adj = 0, cex.main = 1)
+    
+    title(paste0("\n",
+                 paste0("King County (WA OFM, ", year,")")),
+          font.main = 1, outer = FALSE,
+          adj = 0, cex.main = 1)
+  }
+  dev.off()
+  
+  ### Prevalence  ####
+  
+  prev.pal <- brewer.pal(n = 9, name = "YlGnBu")
+  
+  hra_total_pop <- hra_pop %>% 
+    group_by(HRA) %>% 
+    summarise(Pop = sum(Pop))
+  
+  hra_age_pop <- hra_age_pop %>% 
+    left_join(hra_total_pop,
+              by = c("HRA" = "HRA")) %>% 
+    mutate(PrevOver65 = PopOver65/Pop,
+           PrevUnder14 = PopUnder14/Pop)
+  
+  ## Use this to get an idea
+  prev.int.hra <- classIntervals(hra_age_pop$PrevOver65,
+                                 style = 'jenks',
+                                 n = 9)
+  
+  breaks <- prev.int.hra$brks
+  breaks
+  
+  ## fix the breaks 
+  breaks <- c(0, 0.025, 0.05,
+              0.075, 0.10, 0.125,
+              0.15, 0.175, 0.2,
+              0.26)
+  
+  #### Over 65 ####
+  prev.int.hra <- classIntervals(hra_age_pop$PrevOver65,
+                                 style = "fixed",
+                                 fixedBreaks = breaks,
+                                 n = 9)
+  ## assign colors
+  prev.col.hra <- findColours(prev.int.hra, prev.pal)
+  
+  jpeg(paste0("../PopPlots/", 
+              year, "/OFM_Ages/OFM_",
+              year, "_agePrevOver65",
+              ".jpeg"),
+       height = 480, width = 480)
+  {
+    par(lend = 1,
+        mar = c(0,0,2,0),
+        oma = c(0,0,1,0))
+    plot(hra,
+         col = prev.col.hra,
+         border = 'grey48', lwd = .25,
+         main = "")
+    legend('bottomleft',
+           title = 'Prevalence',
+           title.adj = 0,
+           ncol = 2,
+           bty = 'n',
+           cex = 0.75,
+           border = FALSE,
+           fill = prev.pal,
+           legend = names(attr(prev.col.hra, 'table')))
+    title(paste0("Prevalence of Population Over 65", "\n",
+                 ""),
+          font.main = 2, outer = FALSE,
+          adj = 0, cex.main = 1)
+    
+    title(paste0("\n",
+                 paste0("King County (WA OFM, ", year,")")),
+          font.main = 1, outer = FALSE,
+          adj = 0, cex.main = 1)
+  }
+  dev.off()
+  
+  #### Under 14 ####
+  prev.int.hra <- classIntervals(hra_age_pop$PrevUnder14,
+                                 style = "fixed",
+                                 fixedBreaks = breaks,
+                                 n = 9)
+  ## assign colors
+  prev.col.hra <- findColours(prev.int.hra, prev.pal)
+  
+  jpeg(paste0("../PopPlots/", 
+              year, "/OFM_Ages/OFM_",
+              year, "_agePrevUnder14",
+              ".jpeg"),
+       height = 480, width = 480)
+  {
+    par(lend = 1,
+        mar = c(0,0,2,0),
+        oma = c(0,0,1,0))
+    plot(hra,
+         col = prev.col.hra,
+         border = 'grey48', lwd = .25,
+         main = "")
+    legend('bottomleft',
+           title = 'Prevalence',
+           title.adj = 0,
+           ncol = 2,
+           bty = 'n',
+           cex = 0.75,
+           border = FALSE,
+           fill = prev.pal,
+           legend = names(attr(prev.col.hra, 'table')))
+    title(paste0("Prevalence of Population Under 14", "\n",
+                 ""),
+          font.main = 2, outer = FALSE,
+          adj = 0, cex.main = 1)
+    
+    title(paste0("\n",
+                 paste0("King County (WA OFM, ", year,")")),
+          font.main = 1, outer = FALSE,
+          adj = 0, cex.main = 1)
+  }
+  dev.off()
+  
+  ### Distribution ####
+  hra_age_pop <- hra_age_pop %>% 
+    left_join(hra_total_pop,
+              by = c("HRA" = "HRA")) %>% 
+    mutate(DistOver65 = PopOver65/sum(PopOver65),
+           DistUnder14 = PopUnder14/sum(PopUnder14))
+  
+  ## Use this to get an idea
+  prev.int.hra <- classIntervals(hra_age_pop$DistOver65,
+                                 style = 'jenks',
+                                 n = 9)
+  
+  breaks <- prev.int.hra$brks
+  breaks
+  
+  ## fix the breaks 
+  breaks <- c(0, 0.005,.01,
+              0.015, 0.02, 0.025,
+              0.03, 0.035, 0.045,
+              0.055)
+  
+  #### Over 65 ####
+  prev.int.hra <- classIntervals(hra_age_pop$DistOver65,
+                                 style = "fixed",
+                                 fixedBreaks = breaks,
+                                 n = 9)
+  ## assign colors
+  prev.col.hra <- findColours(prev.int.hra, prev.pal)
+  
+  jpeg(paste0("../PopPlots/", 
+              year, "/OFM_Ages/OFM_",
+              year, "_ageDistOver65",
+              ".jpeg"),
+       height = 480, width = 480)
+  {
+    par(lend = 1,
+        mar = c(0,0,2,0),
+        oma = c(0,0,1,0))
+    plot(hra,
+         col = prev.col.hra,
+         border = 'grey48', lwd = .25,
+         main = "")
+    legend('bottomleft',
+           title = 'Distribution',
+           title.adj = 0,
+           ncol = 2,
+           bty = 'n',
+           cex = 0.75,
+           border = FALSE,
+           fill = prev.pal,
+           legend = names(attr(prev.col.hra, 'table')))
+    title(paste0("Distribution of Population Over 65", "\n",
+                 ""),
+          font.main = 2, outer = FALSE,
+          adj = 0, cex.main = 1)
+    
+    title(paste0("\n",
+                 paste0("King County (WA OFM, ", year,")")),
+          font.main = 1, outer = FALSE,
+          adj = 0, cex.main = 1)
+  }
+  dev.off()
+  
+  #### Under 14 ####
+  prev.int.hra <- classIntervals(hra_age_pop$DistUnder14,
+                                 style = "fixed",
+                                 fixedBreaks = breaks,
+                                 n = 9)
+  ## assign colors
+  prev.col.hra <- findColours(prev.int.hra, prev.pal)
+  
+  jpeg(paste0("../PopPlots/", 
+              year, "/OFM_Ages/OFM_",
+              year, "_ageDistUnder14",
+              ".jpeg"),
+       height = 480, width = 480)
+  {
+    par(lend = 1,
+        mar = c(0,0,2,0),
+        oma = c(0,0,1,0))
+    plot(hra,
+         col = prev.col.hra,
+         border = 'grey48', lwd = .25,
+         main = "")
+    legend('bottomleft',
+           title = 'Distribution',
+           title.adj = 0,
+           ncol = 2,
+           bty = 'n',
+           cex = 0.75,
+           border = FALSE,
+           fill = prev.pal,
+           legend = names(attr(prev.col.hra, 'table')))
+    title(paste0("Distribution of Population Under 14", "\n",
+                 ""),
+          font.main = 2, outer = FALSE,
+          adj = 0, cex.main = 1)
+    
+    title(paste0("\n",
+                 paste0("King County (WA OFM, ", year,")")),
+          font.main = 1, outer = FALSE,
+          adj = 0, cex.main = 1)
+  }
+  dev.off()
+  
+}
+
+## By race ####
+
+for(year in c(2010, 2012, 2015,
+              2017, 2020)){
+  for(race in unique(hra_pop$Race_Lbl)){
+    race.clean <- gsub(" and ", "/",
+                       race)
+    race.clean <- gsub(" or ", "/",
+                       race.clean)
+    
+    
+    load(paste0('../Data/pop_', 
+                year, '_OFM.rda'))  
+    hra_pop <- pop %>% 
+      mutate(GEOID = as.character(Geoid)) %>% 
+      left_join(tracts_to_hra$acs5_2019) %>% 
+      group_by(FID_HRA_20, Race, Race_Lbl, Sex_Lbl, Age, Age_Lbl) %>% 
+      summarise(HRA = unique(HRA2010v2_),
+                Pop = sum(Pop*prop.area)) %>% 
+      filter(!is.na(HRA)) %>% 
+      arrange(Race,Age)
+    pop.cols <- brewer.pal(n = 5,
+                           name = 'Blues')
+    
+    hra_age_pop <- hra_pop %>% 
+      filter(Race_Lbl == race) %>% 
+      mutate(Over65 = ifelse(Age %in% 14:18,
+                             1, 0),
+             Under14 = ifelse(Age %in% 1:3,
+                              1, 0)) %>% 
+      filter(Over65 == 1 | Under14 == 1) %>% 
+      group_by(HRA) %>% 
+      summarise(PopOver65 = sum(Pop*Over65),
+                PopUnder14 = sum(Pop*Under14)) %>% 
+      ungroup() 
+    
+    ### Population  ####
+    
+    pop.pal <- brewer.pal(n = 9, name = "Blues")
+    
+    ## Use this to get an idea
+    pop.int.hra <- classIntervals(hra_age_pop$PopOver65,
+                                  style = 'jenks',
+                                  n = 9)
+    
+    breaks <- pop.int.hra$brks
+    breaks
+    
+    ## fix the breaks 
+    breaks <- c(0, 250, 500, 750, 1000,
+                2500, 
+                5000, 7500, 10000,
+                15000)
+    
+    #### Over 65 ####
+    jpeg(paste0("../PopPlots/", 
+                year, "/OFM_Ages/OFM_",
+                year, "_ageOver65_",
+                race,
+                ".jpeg"),
+         height = 480, width = 480)
+    {
+      par(lend = 1,
+          mar = c(0,0,2,0),
+          oma = c(0,0,1,0))
+      plot(hra,
+           col = pop.col.hra,
+           border = 'grey48', lwd = .25,
+           main = "")
+      legend('bottomleft',
+             title = 'Population',
+             title.adj = 0,
+             ncol = 2,
+             bty = 'n',
+             cex = 0.75,
+             border = FALSE,
+             fill = pop.pal,
+             legend = names(attr(pop.col.hra, 'table')))
+      title(paste0(race.clean, " Population Over 65", "\n",
+                   ""),
+            font.main = 2, outer = FALSE,
+            adj = 0, cex.main = 1)
+      
+      title(paste0("\n",
+                   paste0("King County (WA OFM, ", year,")")),
+            font.main = 1, outer = FALSE,
+            adj = 0, cex.main = 1)
+    }
+    dev.off()
+    
+    #### Under 14 ####
+    
+    ## assign to bins 
+    pop.int.hra <- classIntervals(hra_age_pop$PopUnder14,
+                                  style = "fixed",
+                                  fixedBreaks = breaks,
+                                  n = 9)
+    ## assign colors
+    pop.col.hra <- findColours(pop.int.hra, pop.pal)
+    
+    
+    jpeg(paste0("../PopPlots/", 
+                year, "/OFM_Ages/OFM_",
+                year, "_ageUnder14_",
+                race,
+                ".jpeg"),
+         height = 480, width = 480)
+    {
+      par(lend = 1,
+          mar = c(0,0,2,0),
+          oma = c(0,0,1,0))
+      plot(hra,
+           col = pop.col.hra,
+           border = 'grey48', lwd = .25,
+           main = "")
+      legend('bottomleft',
+             title = 'Population',
+             title.adj = 0,
+             ncol = 2,
+             bty = 'n',
+             cex = 0.75,
+             border = FALSE,
+             fill = pop.pal,
+             legend = names(attr(pop.col.hra, 'table')))
+      title(paste0(race.clean, " Population Under 14", "\n",
+                   ""),
+            font.main = 2, outer = FALSE,
+            adj = 0, cex.main = 1)
+      
+      title(paste0("\n",
+                   paste0("King County (WA OFM, ", year,")")),
+            font.main = 1, outer = FALSE,
+            adj = 0, cex.main = 1)
+    }
+    dev.off()
+    
+    ### Prevalence  ####
+    
+    prev.pal <- brewer.pal(n = 9, name = "YlGnBu")
+    
+    hra_total_pop <- hra_pop %>% 
+      group_by(HRA) %>% 
+      summarise(Pop = sum(Pop))
+    
+    hra_age_pop <- hra_age_pop %>% 
+      left_join(hra_total_pop,
+                by = c("HRA" = "HRA")) %>% 
+      mutate(PrevOver65 = PopOver65/Pop,
+             PrevUnder14 = PopUnder14/Pop)
+    
+    ## Use this to get an idea
+    prev.int.hra <- classIntervals(hra_age_pop$PrevOver65,
+                                   style = 'jenks',
+                                   n = 9)
+    
+    breaks <- prev.int.hra$brks
+    breaks
+    
+    ## fix the breaks 
+    breaks <- c(0, 0.01, 0.025, 0.05,
+                0.075, 0.10, 0.125,
+                0.15, 0.175, 0.21)
+    
+    #### Over 65 ####
+    prev.int.hra <- classIntervals(hra_age_pop$PrevOver65,
+                                   style = "fixed",
+                                   fixedBreaks = breaks,
+                                   n = 9)
+    ## assign colors
+    prev.col.hra <- findColours(prev.int.hra, prev.pal)
+    
+    jpeg(paste0("../PopPlots/", 
+                year, "/OFM_Ages/OFM_",
+                year, "_agePrevOver65_",
+                race,
+                ".jpeg"),
+         height = 480, width = 480)
+    {
+      par(lend = 1,
+          mar = c(0,0,2,0),
+          oma = c(0,0,1,0))
+      plot(hra,
+           col = prev.col.hra,
+           border = 'grey48', lwd = .25,
+           main = "")
+      legend('bottomleft',
+             title = 'Prevalence',
+             title.adj = 0,
+             ncol = 2,
+             bty = 'n',
+             cex = 0.75,
+             border = FALSE,
+             fill = prev.pal,
+             legend = names(attr(prev.col.hra, 'table')))
+      title(paste0("Prevalence of Population Over 65", "\n",
+                   ""),
+            font.main = 2, outer = FALSE,
+            adj = 0, cex.main = 1)
+      
+      title(paste0("\n",
+                   paste0("King County, ",
+                   race.clean , " (WA OFM, ", year,")")),
+            font.main = 1, outer = FALSE,
+            adj = 0, cex.main = 1)
+    }
+    dev.off()
+    
+    #### Under 14 ####
+    prev.int.hra <- classIntervals(hra_age_pop$PrevUnder14,
+                                   style = "fixed",
+                                   fixedBreaks = breaks,
+                                   n = 9)
+    ## assign colors
+    prev.col.hra <- findColours(prev.int.hra, prev.pal)
+    
+    jpeg(paste0("../PopPlots/", 
+                year, "/OFM_Ages/OFM_",
+                year, "_agePrevUnder14_",
+                race,
+                ".jpeg"),
+         height = 480, width = 480)
+    {
+      par(lend = 1,
+          mar = c(0,0,2,0),
+          oma = c(0,0,1,0))
+      plot(hra,
+           col = prev.col.hra,
+           border = 'grey48', lwd = .25,
+           main = "")
+      legend('bottomleft',
+             title = 'Prevalence',
+             title.adj = 0,
+             ncol = 2,
+             bty = 'n',
+             cex = 0.75,
+             border = FALSE,
+             fill = prev.pal,
+             legend = names(attr(prev.col.hra, 'table')))
+      title(paste0("Prevalence of Population Under 14", "\n",
+                   ""),
+            font.main = 2, outer = FALSE,
+            adj = 0, cex.main = 1)
+      
+      title(paste0("\n",
+                   paste0("King County, ",
+                   race.clean , " (WA OFM, ", year,")")),
+            font.main = 1, outer = FALSE,
+            adj = 0, cex.main = 1)
+    }
+    dev.off()
+    
+    ### Distribution ####
+    hra_age_pop <- hra_age_pop %>% 
+      mutate(DistOver65 = PopOver65/sum(PopOver65),
+             DistUnder14 = PopUnder14/sum(PopUnder14))
+    
+    ## Use this to get an idea
+    prev.int.hra <- classIntervals(hra_age_pop$DistOver65,
+                                   style = 'jenks',
+                                   n = 9)
+    
+    breaks <- prev.int.hra$brks
+    breaks
+    
+    ## fix the breaks 
+    breaks <- c(0, 0.005,.01,
+                0.025, .05, .075,
+                0.1, 0.125, 0.15,
+                0.175)
+    
+    #### Over 65 ####
+    prev.int.hra <- classIntervals(hra_age_pop$DistOver65,
+                                   style = "fixed",
+                                   fixedBreaks = breaks,
+                                   n = 9)
+    ## assign colors
+    prev.col.hra <- findColours(prev.int.hra, prev.pal)
+    
+    jpeg(paste0("../PopPlots/", 
+                year, "/OFM_Ages/OFM_",
+                year, "_ageDistOver65_",
+                race,
+                ".jpeg"),
+         height = 480, width = 480)
+    {
+      par(lend = 1,
+          mar = c(0,0,2,0),
+          oma = c(0,0,1,0))
+      plot(hra,
+           col = prev.col.hra,
+           border = 'grey48', lwd = .25,
+           main = "")
+      legend('bottomleft',
+             title = 'Distribution',
+             title.adj = 0,
+             ncol = 2,
+             bty = 'n',
+             cex = 0.75,
+             border = FALSE,
+             fill = prev.pal,
+             legend = names(attr(prev.col.hra, 'table')))
+      title(paste0("Distribution of Population Over 65", "\n",
+                   ""),
+            font.main = 2, outer = FALSE,
+            adj = 0, cex.main = 1)
+      
+      title(paste0("\n",
+                   paste0("King County, ",
+                   race.clean, " (WA OFM, ", year,")")),
+            font.main = 1, outer = FALSE,
+            adj = 0, cex.main = 1)
+    }
+    dev.off()
+    
+    #### Under 14 ####
+    prev.int.hra <- classIntervals(hra_age_pop$DistUnder14,
+                                   style = "fixed",
+                                   fixedBreaks = breaks,
+                                   n = 9)
+    ## assign colors
+    prev.col.hra <- findColours(prev.int.hra, prev.pal)
+    
+    jpeg(paste0("../PopPlots/", 
+                year, "/OFM_Ages/OFM_",
+                year, "_ageDistUnder14_",
+                race,
+                ".jpeg"),
+         height = 480, width = 480)
+    {
+      par(lend = 1,
+          mar = c(0,0,2,0),
+          oma = c(0,0,1,0))
+      plot(hra,
+           col = prev.col.hra,
+           border = 'grey48', lwd = .25,
+           main = "")
+      legend('bottomleft',
+             title = 'Distribution',
+             title.adj = 0,
+             ncol = 2,
+             bty = 'n',
+             cex = 0.75,
+             border = FALSE,
+             fill = prev.pal,
+             legend = names(attr(prev.col.hra, 'table')))
+      title(paste0("Distribution of Population Under 14", "\n",
+                   ""),
+            font.main = 2, outer = FALSE,
+            adj = 0, cex.main = 1)
+      
+      title(paste0("\n",
+                   paste0("King County, ",
+                   race.clean, " (WA OFM, ", year,")")),
+            font.main = 1, outer = FALSE,
+            adj = 0, cex.main = 1)
+    }
+    dev.off()
+  }
+}
 
 for(race in covid_KC_race$Race_Ethnicity){
   cases.tmp <- covid_KC_race %>% 
@@ -4351,9 +5127,9 @@ for(race in covid_KC_race$Race_Ethnicity){
                               LRcolnames = c("Hospitalizations", "Deaths"),
                               LRmain = c("Hospitalizations", "Deaths"))
   
-  pdf("../COVIDPlots/Pyramid_",
-      race, "_CasesHospDeath.pdf",
-      height = 5, width = 5)
+  jpeg("../COVIDPlots/Pyramid_",
+       race, "_CasesHospDeath.jpeg",
+       height = 5, width = 5)
   par(lend = 1)
   plot(pyr.obj,
        pyr1.par = list(col = pop.cols[4], 
