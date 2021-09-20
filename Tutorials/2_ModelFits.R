@@ -135,4 +135,4 @@ for(j in 1:nrow(results)){
   out.pred <- rbind(out.pred, pred)
   save(mod,mod_dat,All,file=paste0(out_dir,"ModelFits/",loc,"_model.RDATA"))
 }
-saveRDS(out.pred,file=paste0(out_dir,"Preds/_preds.rds"))
+saveRDS(out.pred,file=paste0(code_dir,"Report_estimates/housing_indicators_kc_preds.rds"))

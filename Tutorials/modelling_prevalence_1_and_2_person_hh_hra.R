@@ -218,81 +218,187 @@ All$mean<-expit(mod$summary.fitted.values$`mean`)
 All$up<-expit(mod$summary.fitted.values$`0.975quant`)
 All$low<-expit(mod$summary.fitted.values$`0.025quant`)
 
-write_csv(as.data.frame(All %>%
-                          arrange(Year) %>%
-                          mutate(variable = "Prevalence of 1-person household") %>%
-                          rename(GEOID=HRA2010v2_) %>%
-                          dplyr::select(GEOID, Year, variable, mean, up, low)),
-          file = paste0(code_dir,"Report_estimates/prevalence_1_person_hh_hra.csv"))
+# write_csv(as.data.frame(All %>%
+#                           arrange(Year) %>%
+#                           mutate(variable = "Prevalence of 1-person household") %>%
+#                           rename(GEOID=HRA2010v2_) %>%
+#                           dplyr::select(GEOID, Year, variable, mean, up, low)),
+#           file = paste0(code_dir,"Report_estimates/prevalence_1_person_hh_hra.csv"))
+# 
+# All <- read_csv(paste0(code_dir,"Report_estimates/prevalence_1_person_hh_hra.csv")) %>%
+#   rename(HRA2010v2_=GEOID) 
 
 ####################################################
 ## Maps of prevalence 1 - person hh over time ##
-####################################################
+#####
+get_legend<-function(myggplot){
+  tmp <- ggplot_gtable(ggplot_build(myggplot))
+  leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
+  legend <- tmp$grobs[[leg]]
+  return(legend)
+}
 
-plot.df <- st_as_sf(hra) %>%
-  full_join(All %>%
-              filter(Year %in% c(2000,2010,2020)))
-p1 <- ggplot(plot.df) + 
-  geom_sf(aes(fill=mean)) +
-  ggtitle("Proportion of 1-person households by HRA") +
-  labs(fill = "Proportion", x = "", y = "") +
-  # scale_x_discrete(expand = c(0, 0)) +
-  # scale_y_discrete(expand = c(0, 0)) +
-  map_theme_main + 
-  scale_fill_distiller(palette = "YlGnBu") +
-  facet_wrap(~ Year, nrow = 2)
 
-ggsave(p1, filename = paste0(code_dir, "Report_plots/1-person_hh_prev_2000-2019.png"),
+post<-inla.posterior.sample(1000,mod)
+names(post)
+
+sampsDiff<-matrix(nrow=48,ncol=1000)
+samps<-matrix(nrow=48,ncol=1000)
+for(jj in 1:1000){
+  # jj<-1
+  sampsDiff[,jj]<-100*(expit(post[[jj]]$latent[1:nrow(All)][All$Year==2020])-expit(post[[jj]]$latent[1:nrow(All)][All$Year==2000]))
+}
+
+
+changeDF <- data.frame(HRA2010v2_ = All$HRA2010v2_[All$Year==2020],
+                       mdn = apply(sampsDiff, 1, median), 
+                       lo = apply(sampsDiff, 1, quantile, probs = c(.025)),
+                       hi = apply(sampsDiff, 1, quantile, probs = c(.975)))
+pchange <- st_as_sf(hra) %>%
+  full_join(changeDF) %>%
+  ggplot() +
+  geom_sf(aes(fill=mdn)) +
+  geom_sf(data = st_as_sf(hra), color = "black", fill = "transparent", size = 1) +
+  ggtitle("D. Change (2000-2020)") +
+  scale_x_discrete(expand = c(0, 0)) +
+  scale_y_discrete(expand = c(0, 0)) +
+  labs(fill= "") +
+  map_theme_main+
+  scale_fill_gradient2()+
+  theme(legend.title = element_text(size = 12, face = "bold"))
+
+legend2 <- get_legend(pchange)  
+
+assign("p_change", pchange + theme(legend.position = 'none'))
+
+for (t in c(2000,2010,2020)) {
+  
+  tmp <- All %>%
+    filter(Year == t) %>%
+    mutate_at(c("mean","low","up"), function(x) x*100)
+  plot.df <- st_as_sf(hra) %>%
+    full_join(tmp) #%>%
+  # mutate_at(c("mean","low","up"), function(x) x*100)
+  
+  colors <- c("#fde725ff",#"#73d055ff",
+              "#3cbb75ff",#"#4eb3d3",
+              "#1f968bff",#"#2d708eff",#"#084081",
+              "#404788ff","#440154ff")
+  
+  bins <- seq(0,50,10)
+  y <- '%.1f'
+  val <- as.numeric(gsub("\\$|,", "", plot.df$mean))
+  lo <- as.numeric(gsub("\\$|,", "", plot.df$low))
+  hi <- as.numeric(gsub("\\$|,", "", plot.df$up))
+  bkpt <- as.numeric(bins)
+  labels <- gsub("(?<!^)(\\d{3})$", ",\\1", bkpt, perl=T)
+  lab_break1 <- c(#paste0(paste0('<',sprintf(y,bkpt[2]))),
+    paste0(sprintf(y,bkpt[1]),'-', '<', sprintf(y,bkpt[2])),
+    paste0(sprintf(y,bkpt[2]),'-', '<', sprintf(y,bkpt[3])),
+    paste0(sprintf(y,bkpt[3]),'-', '<', sprintf(y,bkpt[4])),
+    paste0(sprintf(y,bkpt[4]),'-', '<', sprintf(y,bkpt[5])),
+    paste0(sprintf(y,bkpt[5]),'-', '<', sprintf(y,bkpt[6])))#,
+    # paste0(sprintf(y,bkpt[6]),'-', '<', sprintf(y,bkpt[7])))
+  plot.df$mdn <- cut(x = val, breaks = bkpt, labels = lab_break1)
+  plot.df$lo <- cut(lo, bkpt, lab_break1)
+  plot.df$hi <- cut(hi, bkpt, lab_break1)
+  pbest <- ggplot(plot.df) + 
+    geom_sf(aes(fill=mdn)) +
+    geom_sf(data = st_as_sf(hra), color = "black", fill = "transparent", size = 1) +
+    ggtitle(paste0(c("A","B","C")[which(t==c(2000,2010,2020))],". ",
+                   c("Prevalence")," in ", t)) +
+    scale_fill_manual("",values = colors, drop =FALSE) +
+    scale_x_discrete(expand = c(0, 0)) +
+    scale_y_discrete(expand = c(0, 0)) +
+    labs(fill = "") +
+    # color = "black") +
+    map_theme_main + theme(legend.position = 'right') +
+    theme(legend.title = element_text(size = 12, face = "bold"))
+  if(t == 2020) {legend1 <- get_legend(pbest)}
+  
+  assign(paste0("p_",t), pbest + theme(legend.position = 'none'))
+  
+}
+
+ggsave(grid.arrange(p_2000, p_2010, legend1, p_2020, p_change, legend2, 
+                    ncol=3, nrow = 2, widths = c(2/5,2/5,1/5)), 
+       # layout_matrix = rbind(c(1,2), c(3,3)),
+       # widths = c(2.7, 2.7), heights = c(2.5, 0.5)),
+       filename= paste0(code_dir, "Report_plots/1-person_hh_prev_2000-2020.png"),
        width = 9, height = 6)
 
-## Difference in 2-person hh prevalence over time
-plot.df <- st_as_sf(hra) %>%
-  full_join(All %>%
-              filter(Year == 2000) %>%
-              rename(prev2000=mean) %>%
-              dplyr::select(`HRA2010v2_`, prev2000) %>%
-              merge(All %>%
-                      filter(Year == 2020)%>%
-                      dplyr::select(-Year), by = "HRA2010v2_") %>%
-              mutate(
-                diff_prev = mean - prev2000
-              ))
 
-p2 <- ggplot(plot.df) + 
-  geom_sf(aes(fill=diff_prev)) +
-  ggtitle("Difference in proportion of 1-person households by HRA 2000-2020") +
-  labs(fill = "Difference in proportion", x = "", y = "") +
-  # scale_x_discrete(expand = c(0, 0)) +
-  # scale_y_discrete(expand = c(0, 0)) +
-  map_theme_main + 
-  scale_fill_distiller(palette = "RdBu")
 
-ggsave(p2, filename = paste0(code_dir, "Report_plots/Difference_in_1-person_hh_prev_2000-2019.png"),
-       width = 9, height = 6)
-
-plot.df <- st_as_sf(hra) %>%
-  full_join(All %>%
-              filter(Year == 2010) %>%
-              rename(prev2010=mean) %>%
-              dplyr::select(`HRA2010v2_`, prev2010) %>%
-              merge(All %>%
-                      filter(Year == 2020)%>%
-                      dplyr::select(-Year), by = "HRA2010v2_") %>%
-              mutate(
-                diff_prev = mean - prev2010
-              ))
-
-p3 <- ggplot(plot.df) + 
-  geom_sf(aes(fill=diff_prev)) +
-  ggtitle("Difference in proportion of 1-person households by HRA 2010-2020") +
-  labs(fill = "Difference in proportion", x = "", y = "") +
-  # scale_x_discrete(expand = c(0, 0)) +
-  # scale_y_discrete(expand = c(0, 0)) +
-  map_theme_main + 
-  scale_fill_distiller(palette = "RdBu")
-
-ggsave(p3, filename = paste0(code_dir, "Report_plots/Difference_in_1-person_hh_prev_2010-2019.png"),
-       width = 9, height = 6)
+# plot.df <- st_as_sf(hra) %>%
+#   full_join(All %>%
+#               filter(Year == 2000) %>%
+#               rename(prev2000=mean) %>%
+#               dplyr::select(`HRA2010v2_`, prev2000) %>%
+#               merge(All %>%
+#                       filter(Year == 2020)%>%
+#                       dplyr::select(-Year), by = "HRA2010v2_") %>%
+#               mutate(
+#                 diff_prev = mean - prev2000
+#               ))
+# 
+# p2 <- ggplot(plot.df) + 
+#   geom_sf(aes(fill=diff_prev)) +
+#   ggtitle("Difference in proportion of 1-person households by HRA 2000-2020") +
+#   labs(fill = "Difference in proportion", x = "", y = "") +
+#   # scale_x_discrete(expand = c(0, 0)) +
+#   # scale_y_discrete(expand = c(0, 0)) +
+#   map_theme_main + 
+#   scale_fill_distiller(palette = "RdBu")
+# 
+# ggsave(p2, filename = paste0(code_dir, "Report_plots/Difference_in_1-person_hh_prev_2000-2019.png"),
+#        width = 9, height = 6)
+# 
+# p1 <- ggplot(plot.df) + 
+#   geom_sf(aes(fill=mean)) +
+#   ggtitle("") +
+#   labs(fill = "Proportion", x = "", y = "") +
+#   # scale_x_discrete(expand = c(0, 0)) +
+#   # scale_y_discrete(expand = c(0, 0)) +
+#   map_theme_main + 
+#   scale_fill_distiller(palette = "YlGnBu") +
+#   facet_wrap(~ Year, nrow = 2) + 
+#   theme(legend.position = 'top')
+# 
+# p2 <- ggplot(plot.df) + 
+#   geom_sf(aes(fill=diff_prev)) +
+#   ggtitle("") +
+#   labs(fill = "Difference in proportion", x = "", y = "") +
+#   # scale_x_discrete(expand = c(0, 0)) +
+#   # scale_y_discrete(expand = c(0, 0)) +
+#   map_theme_main + 
+#   scale_fill_distiller(palette = "RdBu") +
+#   theme(legend.position = 'right')
+# 
+# grid.arrange(p1,p2,nrow = 1)
+# 
+# plot.df <- st_as_sf(hra) %>%
+#   full_join(All %>%
+#               filter(Year == 2010) %>%
+#               rename(prev2010=mean) %>%
+#               dplyr::select(`HRA2010v2_`, prev2010) %>%
+#               merge(All %>%
+#                       filter(Year == 2020)%>%
+#                       dplyr::select(-Year), by = "HRA2010v2_") %>%
+#               mutate(
+#                 diff_prev = mean - prev2010
+#               ))
+# 
+# p3 <- ggplot(plot.df) + 
+#   geom_sf(aes(fill=diff_prev)) +
+#   ggtitle("Difference in proportion of 1-person households by HRA 2010-2020") +
+#   labs(fill = "Difference in proportion", x = "", y = "") +
+#   # scale_x_discrete(expand = c(0, 0)) +
+#   # scale_y_discrete(expand = c(0, 0)) +
+#   map_theme_main + 
+#   scale_fill_distiller(palette = "RdBu")
+# 
+# ggsave(p3, filename = paste0(code_dir, "Report_plots/Difference_in_1-person_hh_prev_2010-2019.png"),
+#        width = 9, height = 6)
 
 #########################
 ## 2-person households ##
@@ -369,71 +475,158 @@ write_csv(as.data.frame(All %>%
 ####################################################
 ## Maps of prevalence 2 - person hh over time ##
 ####################################################
+post<-inla.posterior.sample(1000,mod)
+names(post)
 
-plot.df <- st_as_sf(hra) %>%
-  full_join(All %>%
-               filter(Year %in% c(2000,2010,2020)))
-p1 <- ggplot(plot.df) + 
-  geom_sf(aes(fill=mean)) +
-  ggtitle("Proportion of 2-person households by HRA") +
-  labs(fill = "Proportion", x = "", y = "") +
-  # scale_x_discrete(expand = c(0, 0)) +
-  # scale_y_discrete(expand = c(0, 0)) +
-  map_theme_main + 
-  scale_fill_distiller(palette = "YlGnBu") +
-  facet_wrap(~ Year, nrow = 2)
+sampsDiff<-matrix(nrow=48,ncol=1000)
+samps<-matrix(nrow=48,ncol=1000)
+for(jj in 1:1000){
+  # jj<-1
+  sampsDiff[,jj]<-100*(expit(post[[jj]]$latent[1:nrow(All)][All$Year==2020])-expit(post[[jj]]$latent[1:nrow(All)][All$Year==2000]))
+}
 
-ggsave(p1, filename = paste0(code_dir, "Report_plots/2-person_hh_prev_2000-2019.png"),
+
+changeDF <- data.frame(HRA2010v2_ = All$HRA2010v2_[All$Year==2020],
+                       mdn = apply(sampsDiff, 1, median), 
+                       lo = apply(sampsDiff, 1, quantile, probs = c(.025)),
+                       hi = apply(sampsDiff, 1, quantile, probs = c(.975)))
+pchange <- st_as_sf(hra) %>%
+  full_join(changeDF) %>%
+  ggplot() +
+  geom_sf(aes(fill=mdn)) +
+  geom_sf(data = st_as_sf(hra), color = "black", fill = "transparent", size = 1) +
+  ggtitle("D. Change (2000-2020)") +
+  scale_x_discrete(expand = c(0, 0)) +
+  scale_y_discrete(expand = c(0, 0)) +
+  labs(fill= "") +
+  map_theme_main+
+  scale_fill_gradient2()+
+  theme(legend.title = element_text(size = 12, face = "bold"))
+
+legend2 <- get_legend(pchange)  
+
+assign("p_change", pchange + theme(legend.position = 'none'))
+
+for (t in c(2000,2010,2020)) {
+  
+  tmp <- All %>%
+    filter(Year == t) %>%
+    mutate_at(c("mean","low","up"), function(x) x*100)
+  plot.df <- st_as_sf(hra) %>%
+    full_join(tmp) #%>%
+  # mutate_at(c("mean","low","up"), function(x) x*100)
+  
+  colors <- c("#fde725ff",#"#73d055ff",
+              "#3cbb75ff",#"#4eb3d3",
+              "#1f968bff",#"#2d708eff",#"#084081",
+              "#404788ff","#440154ff")
+  
+  bins <- seq(0,50,10)
+  y <- '%.1f'
+  val <- as.numeric(gsub("\\$|,", "", plot.df$mean))
+  lo <- as.numeric(gsub("\\$|,", "", plot.df$low))
+  hi <- as.numeric(gsub("\\$|,", "", plot.df$up))
+  bkpt <- as.numeric(bins)
+  labels <- gsub("(?<!^)(\\d{3})$", ",\\1", bkpt, perl=T)
+  lab_break1 <- c(#paste0(paste0('<',sprintf(y,bkpt[2]))),
+    paste0(sprintf(y,bkpt[1]),'-', '<', sprintf(y,bkpt[2])),
+    paste0(sprintf(y,bkpt[2]),'-', '<', sprintf(y,bkpt[3])),
+    paste0(sprintf(y,bkpt[3]),'-', '<', sprintf(y,bkpt[4])),
+    paste0(sprintf(y,bkpt[4]),'-', '<', sprintf(y,bkpt[5])),
+    paste0(sprintf(y,bkpt[5]),'-', '<', sprintf(y,bkpt[6])))#,
+  # paste0(sprintf(y,bkpt[6]),'-', '<', sprintf(y,bkpt[7])))
+  plot.df$mdn <- cut(x = val, breaks = bkpt, labels = lab_break1)
+  plot.df$lo <- cut(lo, bkpt, lab_break1)
+  plot.df$hi <- cut(hi, bkpt, lab_break1)
+  pbest <- ggplot(plot.df) + 
+    geom_sf(aes(fill=mdn)) +
+    geom_sf(data = st_as_sf(hra), color = "black", fill = "transparent", size = 1) +
+    ggtitle(paste0(c("A","B","C")[which(t==c(2000,2010,2020))],". ",
+                   c("Prevalence")," in ", t)) +
+    scale_fill_manual("",values = colors, drop =FALSE) +
+    scale_x_discrete(expand = c(0, 0)) +
+    scale_y_discrete(expand = c(0, 0)) +
+    labs(fill = "") +
+    # color = "black") +
+    map_theme_main + theme(legend.position = 'right') +
+    theme(legend.title = element_text(size = 12, face = "bold"))
+  if(t == 2020) {legend1 <- get_legend(pbest)}
+  
+  assign(paste0("p_",t), pbest + theme(legend.position = 'none'))
+  
+}
+
+ggsave(grid.arrange(p_2000, p_2010, legend1, p_2020, p_change, legend2, 
+                    ncol=3, nrow = 2, widths = c(2/5,2/5,1/5)), 
+       # layout_matrix = rbind(c(1,2), c(3,3)),
+       # widths = c(2.7, 2.7), heights = c(2.5, 0.5)),
+       filename= paste0(code_dir, "Report_plots/2-person_hh_prev_2000-2020.png"),
        width = 9, height = 6)
 
-## Difference in 2-person hh prevalence over time
-plot.df <- st_as_sf(hra) %>%
-  full_join(All %>%
-              filter(Year == 2000) %>%
-              rename(prev2000=mean) %>%
-              dplyr::select(`HRA2010v2_`, prev2000) %>%
-              merge(All %>%
-                          filter(Year == 2020)%>%
-                          dplyr::select(-Year), by = "HRA2010v2_") %>%
-              mutate(
-                diff_prev = mean - prev2000
-              ))
+# plot.df <- st_as_sf(hra) %>%
+#   full_join(All %>%
+#                filter(Year %in% c(2000,2010,2020)))
+# p1 <- ggplot(plot.df) + 
+#   geom_sf(aes(fill=mean)) +
+#   ggtitle("Proportion of 2-person households by HRA") +
+#   labs(fill = "Proportion", x = "", y = "") +
+#   # scale_x_discrete(expand = c(0, 0)) +
+#   # scale_y_discrete(expand = c(0, 0)) +
+#   map_theme_main + 
+#   scale_fill_distiller(palette = "YlGnBu") +
+#   facet_wrap(~ Year, nrow = 2)
+# 
+# ggsave(p1, filename = paste0(code_dir, "Report_plots/2-person_hh_prev_2000-2019.png"),
+#        width = 9, height = 6)
+# 
+# ## Difference in 2-person hh prevalence over time
+# plot.df <- st_as_sf(hra) %>%
+#   full_join(All %>%
+#               filter(Year == 2000) %>%
+#               rename(prev2000=mean) %>%
+#               dplyr::select(`HRA2010v2_`, prev2000) %>%
+#               merge(All %>%
+#                           filter(Year == 2020)%>%
+#                           dplyr::select(-Year), by = "HRA2010v2_") %>%
+#               mutate(
+#                 diff_prev = mean - prev2000
+#               ))
+# 
+# p2 <- ggplot(plot.df) + 
+#   geom_sf(aes(fill=diff_prev)) +
+#   ggtitle("Difference in proportion of 2-person households by HRA 2000-2020") +
+#   labs(fill = "Difference in proportion", x = "", y = "") +
+#   # scale_x_discrete(expand = c(0, 0)) +
+#   # scale_y_discrete(expand = c(0, 0)) +
+#   map_theme_main + 
+#   scale_fill_distiller(palette = "RdBu")
+# 
+# ggsave(p2, filename = paste0(code_dir, "Report_plots/Difference_in_2-person_hh_prev_2000-2019.png"),
+#        width = 9, height = 6)
 
-p2 <- ggplot(plot.df) + 
-  geom_sf(aes(fill=diff_prev)) +
-  ggtitle("Difference in proportion of 2-person households by HRA 2000-2020") +
-  labs(fill = "Difference in proportion", x = "", y = "") +
-  # scale_x_discrete(expand = c(0, 0)) +
-  # scale_y_discrete(expand = c(0, 0)) +
-  map_theme_main + 
-  scale_fill_distiller(palette = "RdBu")
-
-ggsave(p2, filename = paste0(code_dir, "Report_plots/Difference_in_2-person_hh_prev_2000-2019.png"),
-       width = 9, height = 6)
-
-plot.df <- st_as_sf(hra) %>%
-  full_join(All %>%
-              filter(Year == 2010) %>%
-              rename(prev2010=mean) %>%
-              dplyr::select(`HRA2010v2_`, prev2010) %>%
-              merge(All %>%
-                      filter(Year == 2020)%>%
-                      dplyr::select(-Year), by = "HRA2010v2_") %>%
-              mutate(
-                diff_prev = mean - prev2010
-              ))
-
-p3 <- ggplot(plot.df) + 
-  geom_sf(aes(fill=diff_prev)) +
-  ggtitle("Difference in proportion of 2-person households by HRA 2010-2020") +
-  labs(fill = "Difference in proportion", x = "", y = "") +
-  # scale_x_discrete(expand = c(0, 0)) +
-  # scale_y_discrete(expand = c(0, 0)) +
-  map_theme_main + 
-  scale_fill_distiller(palette = "RdBu")
-
-ggsave(p3, filename = paste0(code_dir, "Report_plots/Difference_in_2-person_hh_prev_2010-2019.png"),
-       width = 9, height = 6)
+# plot.df <- st_as_sf(hra) %>%
+#   full_join(All %>%
+#               filter(Year == 2010) %>%
+#               rename(prev2010=mean) %>%
+#               dplyr::select(`HRA2010v2_`, prev2010) %>%
+#               merge(All %>%
+#                       filter(Year == 2020)%>%
+#                       dplyr::select(-Year), by = "HRA2010v2_") %>%
+#               mutate(
+#                 diff_prev = mean - prev2010
+#               ))
+# 
+# p3 <- ggplot(plot.df) + 
+#   geom_sf(aes(fill=diff_prev)) +
+#   ggtitle("Difference in proportion of 2-person households by HRA 2010-2020") +
+#   labs(fill = "Difference in proportion", x = "", y = "") +
+#   # scale_x_discrete(expand = c(0, 0)) +
+#   # scale_y_discrete(expand = c(0, 0)) +
+#   map_theme_main + 
+#   scale_fill_distiller(palette = "RdBu")
+# 
+# ggsave(p3, filename = paste0(code_dir, "Report_plots/Difference_in_2-person_hh_prev_2010-2019.png"),
+#        width = 9, height = 6)
 
 
 
@@ -500,81 +693,169 @@ All$mean<-expit(mod$summary.fitted.values$`mean`)
 All$up<-expit(mod$summary.fitted.values$`0.975quant`)
 All$low<-expit(mod$summary.fitted.values$`0.025quant`)
 
-write_csv(as.data.frame(All %>%
-                          arrange(Year) %>%
-                          mutate(variable = "Prevalence of 3-person household") %>%
-                          rename(GEOID=HRA2010v2_) %>%
-                          dplyr::select(GEOID, Year, variable, mean, up, low)),
-          file = paste0(code_dir,"Report_estimates/prevalence_3_person_hh_hra.csv"))
+# write_csv(as.data.frame(All %>%
+#                           arrange(Year) %>%
+#                           mutate(variable = "Prevalence of 3-person household") %>%
+#                           rename(GEOID=HRA2010v2_) %>%
+#                           dplyr::select(GEOID, Year, variable, mean, up, low)),
+#           file = paste0(code_dir,"Report_estimates/prevalence_3_person_hh_hra.csv"))
 
 ####################################################
 ## Maps of prevalence 3 - person hh over time ##
 ####################################################
 
-plot.df <- st_as_sf(hra) %>%
-  full_join(All %>%
-              filter(Year %in% c(2000,2010,2020)))
-p1 <- ggplot(plot.df) + 
-  geom_sf(aes(fill=mean)) +
-  ggtitle("Proportion of 3-person households by HRA") +
-  labs(fill = "Proportion", x = "", y = "") +
-  # scale_x_discrete(expand = c(0, 0)) +
-  # scale_y_discrete(expand = c(0, 0)) +
-  map_theme_main + 
-  scale_fill_distiller(palette = "YlGnBu") +
-  facet_wrap(~ Year, nrow = 2)
+post<-inla.posterior.sample(1000,mod)
+names(post)
 
-ggsave(p1, filename = paste0(code_dir, "Report_plots/3-person_hh_prev_2000-2019.png"),
+sampsDiff<-matrix(nrow=48,ncol=1000)
+samps<-matrix(nrow=48,ncol=1000)
+for(jj in 1:1000){
+  # jj<-1
+  sampsDiff[,jj]<-100*(expit(post[[jj]]$latent[1:nrow(All)][All$Year==2020])-expit(post[[jj]]$latent[1:nrow(All)][All$Year==2000]))
+}
+
+
+changeDF <- data.frame(HRA2010v2_ = All$HRA2010v2_[All$Year==2020],
+                       mdn = apply(sampsDiff, 1, median), 
+                       lo = apply(sampsDiff, 1, quantile, probs = c(.025)),
+                       hi = apply(sampsDiff, 1, quantile, probs = c(.975)))
+pchange <- st_as_sf(hra) %>%
+  full_join(changeDF) %>%
+  ggplot() +
+  geom_sf(aes(fill=mdn)) +
+  geom_sf(data = st_as_sf(hra), color = "black", fill = "transparent", size = 1) +
+  ggtitle("D. Change (2000-2020)") +
+  scale_x_discrete(expand = c(0, 0)) +
+  scale_y_discrete(expand = c(0, 0)) +
+  labs(fill= "") +
+  map_theme_main+
+  scale_fill_gradient2()+
+  theme(legend.title = element_text(size = 12, face = "bold"))
+
+legend2 <- get_legend(pchange)  
+
+assign("p_change", pchange + theme(legend.position = 'none'))
+
+for (t in c(2000,2010,2020)) {
+  
+  tmp <- All %>%
+    filter(Year == t) %>%
+    mutate_at(c("mean","low","up"), function(x) x*100)
+  plot.df <- st_as_sf(hra) %>%
+    full_join(tmp) #%>%
+  # mutate_at(c("mean","low","up"), function(x) x*100)
+  
+  colors <- c("#fde725ff",#"#73d055ff",
+              "#3cbb75ff",#"#4eb3d3",
+              "#1f968bff",#"#2d708eff",#"#084081",
+              "#404788ff","#440154ff")
+  
+  bins <- seq(0,50,10)
+  y <- '%.1f'
+  val <- as.numeric(gsub("\\$|,", "", plot.df$mean))
+  lo <- as.numeric(gsub("\\$|,", "", plot.df$low))
+  hi <- as.numeric(gsub("\\$|,", "", plot.df$up))
+  bkpt <- as.numeric(bins)
+  labels <- gsub("(?<!^)(\\d{3})$", ",\\1", bkpt, perl=T)
+  lab_break1 <- c(#paste0(paste0('<',sprintf(y,bkpt[2]))),
+    paste0(sprintf(y,bkpt[1]),'-', '<', sprintf(y,bkpt[2])),
+    paste0(sprintf(y,bkpt[2]),'-', '<', sprintf(y,bkpt[3])),
+    paste0(sprintf(y,bkpt[3]),'-', '<', sprintf(y,bkpt[4])),
+    paste0(sprintf(y,bkpt[4]),'-', '<', sprintf(y,bkpt[5])),
+    paste0(sprintf(y,bkpt[5]),'-', '<', sprintf(y,bkpt[6])))#,
+  # paste0(sprintf(y,bkpt[6]),'-', '<', sprintf(y,bkpt[7])))
+  plot.df$mdn <- cut(x = val, breaks = bkpt, labels = lab_break1)
+  plot.df$lo <- cut(lo, bkpt, lab_break1)
+  plot.df$hi <- cut(hi, bkpt, lab_break1)
+  pbest <- ggplot(plot.df) + 
+    geom_sf(aes(fill=mdn)) +
+    geom_sf(data = st_as_sf(hra), color = "black", fill = "transparent", size = 1) +
+    ggtitle(paste0(c("A","B","C")[which(t==c(2000,2010,2020))],". ",
+                   c("Prevalence")," in ", t)) +
+    scale_fill_manual("",values = colors, drop =FALSE) +
+    scale_x_discrete(expand = c(0, 0)) +
+    scale_y_discrete(expand = c(0, 0)) +
+    labs(fill = "") +
+    # color = "black") +
+    map_theme_main + theme(legend.position = 'right') +
+    theme(legend.title = element_text(size = 12, face = "bold"))
+  if(t == 2020) {legend1 <- get_legend(pbest)}
+  
+  assign(paste0("p_",t), pbest + theme(legend.position = 'none'))
+  
+}
+
+ggsave(grid.arrange(p_2000, p_2010, legend1, p_2020, p_change, legend2, 
+                    ncol=3, nrow = 2, widths = c(2/5,2/5,1/5)), 
+       # layout_matrix = rbind(c(1,2), c(3,3)),
+       # widths = c(2.7, 2.7), heights = c(2.5, 0.5)),
+       filename= paste0(code_dir, "Report_plots/3-person_hh_prev_2000-2020.png"),
        width = 9, height = 6)
 
-## Difference in 3-person hh prevalence over time
-plot.df <- st_as_sf(hra) %>%
-  full_join(All %>%
-              filter(Year == 2000) %>%
-              rename(prev2000=mean) %>%
-              dplyr::select(`HRA2010v2_`, prev2000) %>%
-              merge(All %>%
-                      filter(Year == 2020)%>%
-                      dplyr::select(-Year), by = "HRA2010v2_") %>%
-              mutate(
-                diff_prev = mean - prev2000
-              ))
-
-p2 <- ggplot(plot.df) + 
-  geom_sf(aes(fill=diff_prev)) +
-  ggtitle("Difference in proportion of 3-person households by HRA 2000-2020") +
-  labs(fill = "Difference in proportion", x = "", y = "") +
-  # scale_x_discrete(expand = c(0, 0)) +
-  # scale_y_discrete(expand = c(0, 0)) +
-  map_theme_main + 
-  scale_fill_distiller(palette = "RdBu")
-
-ggsave(p2, filename = paste0(code_dir, "Report_plots/Difference_in_3-person_hh_prev_2000-2019.png"),
-       width = 9, height = 6)
-
-plot.df <- st_as_sf(hra) %>%
-  full_join(All %>%
-              filter(Year == 2010) %>%
-              rename(prev2010=mean) %>%
-              dplyr::select(`HRA2010v2_`, prev2010) %>%
-              merge(All %>%
-                      filter(Year == 2020)%>%
-                      dplyr::select(-Year), by = "HRA2010v2_") %>%
-              mutate(
-                diff_prev = mean - prev2010
-              ))
-
-p3 <- ggplot(plot.df) + 
-  geom_sf(aes(fill=diff_prev)) +
-  ggtitle("Difference in proportion of 3-person households by HRA 2010-2020") +
-  labs(fill = "Difference in proportion", x = "", y = "") +
-  # scale_x_discrete(expand = c(0, 0)) +
-  # scale_y_discrete(expand = c(0, 0)) +
-  map_theme_main + 
-  scale_fill_distiller(palette = "RdBu")
-
-ggsave(p3, filename = paste0(code_dir, "Report_plots/Difference_in_3-person_hh_prev_2010-2019.png"),
-       width = 9, height = 6)
+# plot.df <- st_as_sf(hra) %>%
+#   full_join(All %>%
+#               filter(Year %in% c(2000,2010,2020)))
+# p1 <- ggplot(plot.df) + 
+#   geom_sf(aes(fill=mean)) +
+#   ggtitle("Proportion of 3-person households by HRA") +
+#   labs(fill = "Proportion", x = "", y = "") +
+#   # scale_x_discrete(expand = c(0, 0)) +
+#   # scale_y_discrete(expand = c(0, 0)) +
+#   map_theme_main + 
+#   scale_fill_distiller(palette = "YlGnBu") +
+#   facet_wrap(~ Year, nrow = 2)
+# 
+# ggsave(p1, filename = paste0(code_dir, "Report_plots/3-person_hh_prev_2000-2019.png"),
+#        width = 9, height = 6)
+# 
+# ## Difference in 3-person hh prevalence over time
+# plot.df <- st_as_sf(hra) %>%
+#   full_join(All %>%
+#               filter(Year == 2000) %>%
+#               rename(prev2000=mean) %>%
+#               dplyr::select(`HRA2010v2_`, prev2000) %>%
+#               merge(All %>%
+#                       filter(Year == 2020)%>%
+#                       dplyr::select(-Year), by = "HRA2010v2_") %>%
+#               mutate(
+#                 diff_prev = mean - prev2000
+#               ))
+# 
+# p2 <- ggplot(plot.df) + 
+#   geom_sf(aes(fill=diff_prev)) +
+#   ggtitle("Difference in proportion of 3-person households by HRA 2000-2020") +
+#   labs(fill = "Difference in proportion", x = "", y = "") +
+#   # scale_x_discrete(expand = c(0, 0)) +
+#   # scale_y_discrete(expand = c(0, 0)) +
+#   map_theme_main + 
+#   scale_fill_distiller(palette = "RdBu")
+# 
+# ggsave(p2, filename = paste0(code_dir, "Report_plots/Difference_in_3-person_hh_prev_2000-2019.png"),
+#        width = 9, height = 6)
+# 
+# plot.df <- st_as_sf(hra) %>%
+#   full_join(All %>%
+#               filter(Year == 2010) %>%
+#               rename(prev2010=mean) %>%
+#               dplyr::select(`HRA2010v2_`, prev2010) %>%
+#               merge(All %>%
+#                       filter(Year == 2020)%>%
+#                       dplyr::select(-Year), by = "HRA2010v2_") %>%
+#               mutate(
+#                 diff_prev = mean - prev2010
+#               ))
+# 
+# p3 <- ggplot(plot.df) + 
+#   geom_sf(aes(fill=diff_prev)) +
+#   ggtitle("Difference in proportion of 3-person households by HRA 2010-2020") +
+#   labs(fill = "Difference in proportion", x = "", y = "") +
+#   # scale_x_discrete(expand = c(0, 0)) +
+#   # scale_y_discrete(expand = c(0, 0)) +
+#   map_theme_main + 
+#   scale_fill_distiller(palette = "RdBu")
+# 
+# ggsave(p3, filename = paste0(code_dir, "Report_plots/Difference_in_3-person_hh_prev_2010-2019.png"),
+#        width = 9, height = 6)
 
 
 
@@ -641,83 +922,171 @@ All$mean<-expit(mod$summary.fitted.values$`mean`)
 All$up<-expit(mod$summary.fitted.values$`0.975quant`)
 All$low<-expit(mod$summary.fitted.values$`0.025quant`)
 
-write_csv(as.data.frame(All %>%
-                          arrange(Year) %>%
-                          mutate(variable = "Prevalence of 4-person household") %>%
-                          rename(GEOID=HRA2010v2_) %>%
-                          dplyr::select(GEOID, Year, variable, mean, up, low)),
-          file = paste0(code_dir,"Report_estimates/prevalence_4+_person_hh_hra.csv"))
+# write_csv(as.data.frame(All %>%
+#                           arrange(Year) %>%
+#                           mutate(variable = "Prevalence of 4-person household") %>%
+#                           rename(GEOID=HRA2010v2_) %>%
+#                           dplyr::select(GEOID, Year, variable, mean, up, low)),
+#           file = paste0(code_dir,"Report_estimates/prevalence_4+_person_hh_hra.csv"))
 
 ####################################################
 ## Maps of prevalence 4+ - person hh over time ##
 ####################################################
 
-plot.df <- st_as_sf(hra) %>%
-  full_join(All %>%
-              filter(Year %in% c(2000,2010,2020)))
-p1 <- ggplot(plot.df) + 
-  geom_sf(aes(fill=mean)) +
-  ggtitle("Proportion of 4+-person households by HRA") +
-  labs(fill = "Proportion", x = "", y = "") +
-  # scale_x_discrete(expand = c(0, 0)) +
-  # scale_y_discrete(expand = c(0, 0)) +
-  map_theme_main + 
-  scale_fill_distiller(palette = "YlGnBu") +
-  facet_wrap(~ Year, nrow = 2)
+post<-inla.posterior.sample(1000,mod)
+names(post)
 
-ggsave(p1, filename = paste0(code_dir, "Report_plots/4-person_hh_prev_2000-2019.png"),
+sampsDiff<-matrix(nrow=48,ncol=1000)
+samps<-matrix(nrow=48,ncol=1000)
+for(jj in 1:1000){
+  # jj<-1
+  sampsDiff[,jj]<-100*(expit(post[[jj]]$latent[1:nrow(All)][All$Year==2020])-expit(post[[jj]]$latent[1:nrow(All)][All$Year==2000]))
+}
+
+
+changeDF <- data.frame(HRA2010v2_ = All$HRA2010v2_[All$Year==2020],
+                       mdn = apply(sampsDiff, 1, median), 
+                       lo = apply(sampsDiff, 1, quantile, probs = c(.025)),
+                       hi = apply(sampsDiff, 1, quantile, probs = c(.975)))
+pchange <- st_as_sf(hra) %>%
+  full_join(changeDF) %>%
+  ggplot() +
+  geom_sf(aes(fill=mdn)) +
+  geom_sf(data = st_as_sf(hra), color = "black", fill = "transparent", size = 1) +
+  ggtitle("D. Change (2000-2020)") +
+  scale_x_discrete(expand = c(0, 0)) +
+  scale_y_discrete(expand = c(0, 0)) +
+  labs(fill= "") +
+  map_theme_main+
+  scale_fill_gradient2()+
+  theme(legend.title = element_text(size = 12, face = "bold"))
+
+legend2 <- get_legend(pchange)  
+
+assign("p_change", pchange + theme(legend.position = 'none'))
+
+for (t in c(2000,2010,2020)) {
+  
+  tmp <- All %>%
+    filter(Year == t) %>%
+    mutate_at(c("mean","low","up"), function(x) x*100)
+  plot.df <- st_as_sf(hra) %>%
+    full_join(tmp) #%>%
+  # mutate_at(c("mean","low","up"), function(x) x*100)
+  
+  colors <- c("#fde725ff",#"#73d055ff",
+              "#3cbb75ff",#"#4eb3d3",
+              "#1f968bff",#"#2d708eff",#"#084081",
+              "#404788ff","#440154ff")
+  
+  bins <- seq(0,50,10)
+  y <- '%.1f'
+  val <- as.numeric(gsub("\\$|,", "", plot.df$mean))
+  lo <- as.numeric(gsub("\\$|,", "", plot.df$low))
+  hi <- as.numeric(gsub("\\$|,", "", plot.df$up))
+  bkpt <- as.numeric(bins)
+  labels <- gsub("(?<!^)(\\d{3})$", ",\\1", bkpt, perl=T)
+  lab_break1 <- c(#paste0(paste0('<',sprintf(y,bkpt[2]))),
+    paste0(sprintf(y,bkpt[1]),'-', '<', sprintf(y,bkpt[2])),
+    paste0(sprintf(y,bkpt[2]),'-', '<', sprintf(y,bkpt[3])),
+    paste0(sprintf(y,bkpt[3]),'-', '<', sprintf(y,bkpt[4])),
+    paste0(sprintf(y,bkpt[4]),'-', '<', sprintf(y,bkpt[5])),
+    paste0(sprintf(y,bkpt[5]),'-', '<', sprintf(y,bkpt[6])))#,
+  # paste0(sprintf(y,bkpt[6]),'-', '<', sprintf(y,bkpt[7])))
+  plot.df$mdn <- cut(x = val, breaks = bkpt, labels = lab_break1)
+  plot.df$lo <- cut(lo, bkpt, lab_break1)
+  plot.df$hi <- cut(hi, bkpt, lab_break1)
+  pbest <- ggplot(plot.df) + 
+    geom_sf(aes(fill=mdn)) +
+    geom_sf(data = st_as_sf(hra), color = "black", fill = "transparent", size = 1) +
+    ggtitle(paste0(c("A","B","C")[which(t==c(2000,2010,2020))],". ",
+                   c("Prevalence")," in ", t)) +
+    scale_fill_manual("",values = colors, drop =FALSE) +
+    scale_x_discrete(expand = c(0, 0)) +
+    scale_y_discrete(expand = c(0, 0)) +
+    labs(fill = "") +
+    # color = "black") +
+    map_theme_main + theme(legend.position = 'right') +
+    theme(legend.title = element_text(size = 12, face = "bold"))
+  if(t == 2020) {legend1 <- get_legend(pbest)}
+  
+  assign(paste0("p_",t), pbest + theme(legend.position = 'none'))
+  
+}
+
+ggsave(grid.arrange(p_2000, p_2010, legend1, p_2020, p_change, legend2, 
+                    ncol=3, nrow = 2, widths = c(2/5,2/5,1/5)), 
+       # layout_matrix = rbind(c(1,2), c(3,3)),
+       # widths = c(2.7, 2.7), heights = c(2.5, 0.5)),
+       filename= paste0(code_dir, "Report_plots/4-person_hh_prev_2000-2020.png"),
        width = 9, height = 6)
 
-## Difference in 4-person hh prevalence over time
-plot.df <- st_as_sf(hra) %>%
-  full_join(All %>%
-              filter(Year == 2000) %>%
-              rename(prev2000=mean) %>%
-              dplyr::select(`HRA2010v2_`, prev2000) %>%
-              merge(All %>%
-                      filter(Year == 2020)%>%
-                      dplyr::select(-Year), by = "HRA2010v2_") %>%
-              mutate(
-                diff_prev = mean - prev2000
-              ))
-
-p2 <- ggplot(plot.df) + 
-  geom_sf(aes(fill=diff_prev)) +
-  ggtitle("Difference in proportion of 4-person households by HRA 2000-2020") +
-  labs(fill = "Difference in proportion", x = "", y = "") +
-  # scale_x_discrete(expand = c(0, 0)) +
-  # scale_y_discrete(expand = c(0, 0)) +
-  map_theme_main + 
-  scale_fill_distiller(palette = "RdBu")
-
-ggsave(p2, filename = paste0(code_dir, "Report_plots/Difference_in_4-person_hh_prev_2000-2019.png"),
-       width = 9, height = 6)
-
-plot.df <- st_as_sf(hra) %>%
-  full_join(All %>%
-              filter(Year == 2010) %>%
-              rename(prev2010=mean) %>%
-              dplyr::select(`HRA2010v2_`, prev2010) %>%
-              merge(All %>%
-                      filter(Year == 2020)%>%
-                      dplyr::select(-Year), by = "HRA2010v2_") %>%
-              mutate(
-                diff_prev = mean - prev2010
-              ))
-
-p3 <- ggplot(plot.df) + 
-  geom_sf(aes(fill=diff_prev)) +
-  ggtitle("Difference in proportion of 4-person households by HRA 2010-2020") +
-  labs(fill = "Difference in proportion", x = "", y = "") +
-  # scale_x_discrete(expand = c(0, 0)) +
-  # scale_y_discrete(expand = c(0, 0)) +
-  map_theme_main + 
-  scale_fill_distiller(palette = "RdBu")
-
-ggsave(p3, filename = paste0(code_dir, "Report_plots/Difference_in_4-person_hh_prev_2010-2019.png"),
-       width = 9, height = 6)
-
-
+# plot.df <- st_as_sf(hra) %>%
+#   full_join(All %>%
+#               filter(Year %in% c(2000,2010,2020)))
+# p1 <- ggplot(plot.df) + 
+#   geom_sf(aes(fill=mean)) +
+#   ggtitle("Proportion of 4+-person households by HRA") +
+#   labs(fill = "Proportion", x = "", y = "") +
+#   # scale_x_discrete(expand = c(0, 0)) +
+#   # scale_y_discrete(expand = c(0, 0)) +
+#   map_theme_main + 
+#   scale_fill_distiller(palette = "YlGnBu") +
+#   facet_wrap(~ Year, nrow = 2)
+# 
+# ggsave(p1, filename = paste0(code_dir, "Report_plots/4-person_hh_prev_2000-2019.png"),
+#        width = 9, height = 6)
+# 
+# ## Difference in 4-person hh prevalence over time
+# plot.df <- st_as_sf(hra) %>%
+#   full_join(All %>%
+#               filter(Year == 2000) %>%
+#               rename(prev2000=mean) %>%
+#               dplyr::select(`HRA2010v2_`, prev2000) %>%
+#               merge(All %>%
+#                       filter(Year == 2020)%>%
+#                       dplyr::select(-Year), by = "HRA2010v2_") %>%
+#               mutate(
+#                 diff_prev = mean - prev2000
+#               ))
+# 
+# p2 <- ggplot(plot.df) + 
+#   geom_sf(aes(fill=diff_prev)) +
+#   ggtitle("Difference in proportion of 4-person households by HRA 2000-2020") +
+#   labs(fill = "Difference in proportion", x = "", y = "") +
+#   # scale_x_discrete(expand = c(0, 0)) +
+#   # scale_y_discrete(expand = c(0, 0)) +
+#   map_theme_main + 
+#   scale_fill_distiller(palette = "RdBu")
+# 
+# ggsave(p2, filename = paste0(code_dir, "Report_plots/Difference_in_4-person_hh_prev_2000-2019.png"),
+#        width = 9, height = 6)
+# 
+# plot.df <- st_as_sf(hra) %>%
+#   full_join(All %>%
+#               filter(Year == 2010) %>%
+#               rename(prev2010=mean) %>%
+#               dplyr::select(`HRA2010v2_`, prev2010) %>%
+#               merge(All %>%
+#                       filter(Year == 2020)%>%
+#                       dplyr::select(-Year), by = "HRA2010v2_") %>%
+#               mutate(
+#                 diff_prev = mean - prev2010
+#               ))
+# 
+# p3 <- ggplot(plot.df) + 
+#   geom_sf(aes(fill=diff_prev)) +
+#   ggtitle("Difference in proportion of 4-person households by HRA 2010-2020") +
+#   labs(fill = "Difference in proportion", x = "", y = "") +
+#   # scale_x_discrete(expand = c(0, 0)) +
+#   # scale_y_discrete(expand = c(0, 0)) +
+#   map_theme_main + 
+#   scale_fill_distiller(palette = "RdBu")
+# 
+# ggsave(p3, filename = paste0(code_dir, "Report_plots/Difference_in_4-person_hh_prev_2010-2019.png"),
+#        width = 9, height = 6)
+# 
+# 
 
 
 
