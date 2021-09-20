@@ -5164,8 +5164,7 @@ colnames(cov.tmp) <-
 heights <- cbind(cases.tmp[,1],
                  cov.tmp) %>% t()
 
-jpeg(paste0("../COVIDPlots/Barplot_City_",
-            race,
+jpeg(paste0("../COVIDPlots/Barplot_Race_",
             "_CasesHospDeath.jpeg"),
      height = 480, width = 480)
 {
@@ -5224,7 +5223,7 @@ for(city in cities){
   heights <- cbind(cases.tmp[,1],
                    cov.tmp) %>% t()
   
-  jpeg(paste0("../COVIDPlots/Barplot_City_",
+  jpeg(paste0("../COVIDPlots/City/Barplot_City_",
               race,  "_", gsub("/", "", city),
               "_CasesHospDeath.jpeg"),
        height = 480, width = 480)
