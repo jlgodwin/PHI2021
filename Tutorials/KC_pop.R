@@ -3793,9 +3793,9 @@ title(paste0("\n",
 
 dev.off()
 
+## By Cities ####
 cities <- unique(covid_KC$City)[-1]
-pdf("../COVIDPlots/Pyramid_City_CasesHospDeath.pdf",
-    height = 5, width = 5)
+
 for(city in cities){
   cases.tmp <- covid_KC %>% 
     filter(Age_Group != "Unknown") %>% 
@@ -3821,30 +3821,70 @@ for(city in cities){
                               LRcolnames = c("Hospitalizations", "Deaths"),
                               LRmain = c("Hospitalizations", "Deaths"))
   if(sum(cases.tmp[,1]) != 0){
-    pop.pyramid.bayesPop.pyramid(pyr.obj,
-                                 pyr1.par = list(col = pop.cols[4], 
-                                                 border = pop.cols[4]),
-                                 
-                                 pyr2.par = list(col = pop.cols[2], 
-                                                 border = pop.cols[2]),
-                                 legend_pos = "topright",
-                                 legend_text = c("Cases", "Hosp/Death"))
+    jpeg(paste0("../COVIDPlots/City/Pyramid_City_",
+                gsub("/","",city),
+                "_CasesHospDeath.jpeg"),
+         height = 480, width = 480)
+    {
+      pop.pyramid.bayesPop.pyramid(pyr.obj,
+                                   pyr1.par = list(col = pop.cols[4], 
+                                                   border = pop.cols[4]),
+                                   
+                                   pyr2.par = list(col = pop.cols[2], 
+                                                   border = pop.cols[2]),
+                                   legend_pos = "topright",
+                                   legend_text = c("Cases", "Hosp/Death"))
+      
+      title(paste0("Cumulative COVID-19 Outcomes by Age\n",
+                   ""),
+            font.main = 2, outer = FALSE,
+            adj = 0, cex.main = 1)
+      
+      title(paste0("\n", city,
+                   " (as of Aug. 30, 2021)"),
+            font.main = 1, outer = FALSE,
+            adj = 0, cex.main = 1)
+    }
+    dev.off()    
     
-    title(paste0("Cumulative COVID-19 Outcomes by Age\n",
-                 ""),
-          font.main = 2, outer = FALSE,
-          adj = 0, cex.main = 1)
+    heights <- cbind(cases.tmp[,1],
+                     cov.tmp) %>% t()
     
-    title(paste0("\n", hra.name,
-                 " (as of Aug. 30, 2021)"),
-          font.main = 1, outer = FALSE,
-          adj = 0, cex.main = 1)
-    
+    jpeg(paste0("../COVIDPlots/City/Barplot_City_",
+                gsub("/","",city),
+                "_CasesHospDeath.jpeg"),
+         height = 480, width = 480)
+    {
+      barplot(heights,
+              beside = TRUE,
+              col = pop.cols[c(5,4,2)],
+              border = FALSE,
+              xlab = "",
+              names.arg = rep("", ncol(heights)))
+      axis(1, at = seq(2.5, 4*ncol(heights), 4),
+           labels = colnames(heights),
+           cex.axis = 0.65)
+      legend('topright',
+             bty = 'n',
+             fill = pop.cols[c(5,4,2)],
+             border = pop.cols[c(5,4,2)],
+             legend = c("Cases",
+                        "Hospitalizations",
+                        "Deaths"))
+      title(paste0("COVID-19 Outcomes by Age\n",
+                   ""),
+            font.main = 2, outer = FALSE,
+            adj = 0, cex.main = 1)
+      
+      title(paste0("\n", city,
+                   " (as of Aug. 30, 2021)"),
+            font.main = 1, outer = FALSE,
+            adj = 0, cex.main = 1)
+    }
+    dev.off()    
   }
   
 }
-dev.off()
-
 
 
 ## HRA maps ####
@@ -4942,7 +4982,7 @@ for(year in c(2010, 2012, 2015,
       
       title(paste0("\n",
                    paste0("King County, ",
-                   race.clean , " (WA OFM, ", year,")")),
+                          race.clean , " (WA OFM, ", year,")")),
             font.main = 1, outer = FALSE,
             adj = 0, cex.main = 1)
     }
@@ -4986,7 +5026,7 @@ for(year in c(2010, 2012, 2015,
       
       title(paste0("\n",
                    paste0("King County, ",
-                   race.clean , " (WA OFM, ", year,")")),
+                          race.clean , " (WA OFM, ", year,")")),
             font.main = 1, outer = FALSE,
             adj = 0, cex.main = 1)
     }
@@ -5049,7 +5089,7 @@ for(year in c(2010, 2012, 2015,
       
       title(paste0("\n",
                    paste0("King County, ",
-                   race.clean, " (WA OFM, ", year,")")),
+                          race.clean, " (WA OFM, ", year,")")),
             font.main = 1, outer = FALSE,
             adj = 0, cex.main = 1)
     }
@@ -5093,7 +5133,7 @@ for(year in c(2010, 2012, 2015,
       
       title(paste0("\n",
                    paste0("King County, ",
-                   race.clean, " (WA OFM, ", year,")")),
+                          race.clean, " (WA OFM, ", year,")")),
             font.main = 1, outer = FALSE,
             adj = 0, cex.main = 1)
     }
@@ -5101,43 +5141,51 @@ for(year in c(2010, 2012, 2015,
   }
 }
 
-for(race in covid_KC_race$Race_Ethnicity){
-  cases.tmp <- covid_KC_race %>% 
-    filter(Age_Group != "Unknown") %>% 
-    filter(City == "All King County") %>% 
-    filter(Race_Ethnicity)
+## Race  ####
+
+cases.tmp <- covid_KC_race %>% 
+  filter(City == "All King County") %>% 
   dplyr::select(Confirmed_Cases) %>% 
-    mutate(Population2 = Confirmed_Cases) %>% 
-    as.matrix()
-  
-  
-  cov.tmp <- covid_KC %>% 
-    filter(Age_Group != "Unknown") %>% 
-    filter(City == "All King County") %>% 
-    dplyr::select(Hospitalizations, Deaths) %>% 
-    as.matrix()
-  
-  row.names(cov.tmp) <-
-    row.names(cases.tmp) <- unique(convert_ages$AgeCovid)
-  colnames(cov.tmp) <-
-    colnames(cases.tmp) <- c("Hospitalizations", "Deaths")
-  
-  pyr.obj <- get.bPop.pyramid(list(cases.tmp, cov.tmp),
-                              legend = c("Cases", "Hosp/Death"),
-                              LRcolnames = c("Hospitalizations", "Deaths"),
-                              LRmain = c("Hospitalizations", "Deaths"))
-  
-  jpeg("../COVIDPlots/Pyramid_",
-       race, "_CasesHospDeath.jpeg",
-       height = 5, width = 5)
-  par(lend = 1)
-  plot(pyr.obj,
-       pyr1.par = list(col = pop.cols[4], 
-                       border = pop.cols[4]),
-       
-       pyr2.par = list(col = pop.cols[2], 
-                       border = pop.cols[2]))
-  title(paste0("Cumulative COVID-19 Outcomes by Age\n",
+  mutate(Population2 = Confirmed_Cases) %>% 
+  as.matrix()
+
+
+cov.tmp <- covid_KC_race %>% 
+  filter(City == "All King County") %>% 
+  dplyr::select(Hospitalizations, Deaths) %>% 
+  as.matrix()
+
+row.names(cov.tmp) <-
+  row.names(cases.tmp) <- unique(covid_KC_race$Race_Ethnicity)
+colnames(cov.tmp) <-
+  colnames(cases.tmp) <- c("Hospitalizations", "Deaths")
+
+
+heights <- cbind(cases.tmp[,1],
+                 cov.tmp) %>% t()
+
+jpeg(paste0("../COVIDPlots/Barplot_City_",
+            race,
+            "_CasesHospDeath.jpeg"),
+     height = 480, width = 480)
+{
+  barplot(heights,
+          beside = TRUE,
+          col = pop.cols[c(5,4,2)],
+          border = FALSE,
+          xlab = "",
+          names.arg = rep("", ncol(heights)))
+  axis(1, at = seq(2.5, 4*ncol(heights), 4),
+       labels = colnames(heights),
+       cex.axis = 0.65)
+  legend('topleft',
+         bty = 'n',
+         fill = pop.cols[c(5,4,2)],
+         border = pop.cols[c(5,4,2)],
+         legend = c("Cases",
+                    "Hospitalizations",
+                    "Deaths"))
+  title(paste0("COVID-19 Outcomes by Race\n",
                ""),
         font.main = 2, outer = FALSE,
         adj = 0, cex.main = 1)
@@ -5147,6 +5195,67 @@ for(race in covid_KC_race$Race_Ethnicity){
                race, "(as of Aug. 30, 2021)"),
         font.main = 1, outer = FALSE,
         adj = 0, cex.main = 1)
-  
-  dev.off()
 }
+dev.off()    
+
+## By Cities ####
+cities <- unique(covid_KC$City)[-1]
+
+for(city in cities){
+  
+  cases.tmp <- covid_KC_race %>% 
+    filter(City == city) %>% 
+    dplyr::select(Confirmed_Cases) %>% 
+    mutate(Population2 = Confirmed_Cases) %>% 
+    as.matrix()
+  
+  
+  cov.tmp <- covid_KC_race %>% 
+    filter(City == city) %>% 
+    dplyr::select(Hospitalizations, Deaths) %>% 
+    as.matrix()
+  
+  row.names(cov.tmp) <-
+    row.names(cases.tmp) <- unique(covid_KC_race$Race_Ethnicity)
+  colnames(cov.tmp) <-
+    colnames(cases.tmp) <- c("Hospitalizations", "Deaths")
+  
+  
+  heights <- cbind(cases.tmp[,1],
+                   cov.tmp) %>% t()
+  
+  jpeg(paste0("../COVIDPlots/Barplot_City_",
+              race,  "_", gsub("/", "", city),
+              "_CasesHospDeath.jpeg"),
+       height = 480, width = 480)
+  {
+    barplot(heights,
+            beside = TRUE,
+            col = pop.cols[c(5,4,2)],
+            border = FALSE,
+            xlab = "",
+            names.arg = rep("", ncol(heights)))
+    axis(1, at = seq(2.5, 4*ncol(heights), 4),
+         labels = colnames(heights),
+         cex.axis = 0.65)
+    legend('topleft',
+           bty = 'n',
+           fill = pop.cols[c(5,4,2)],
+           border = pop.cols[c(5,4,2)],
+           legend = c("Cases",
+                      "Hospitalizations",
+                      "Deaths"))
+    title(paste0("COVID-19 Outcomes by Race\n",
+                 ""),
+          font.main = 2, outer = FALSE,
+          adj = 0, cex.main = 1)
+    
+    title(paste0("\n",
+                 city, ", ",
+                 race, "(as of Aug. 30, 2021)"),
+          font.main = 1, outer = FALSE,
+          adj = 0, cex.main = 1)
+  }
+  dev.off()   
+}
+
