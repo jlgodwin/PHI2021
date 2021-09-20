@@ -172,7 +172,7 @@ for(year in c(2010, 2014, 2019)){
             adj = 0, cex.main = 1)
       
       title(paste0("\n",
-                   hra.name, " (Estimated from ACS)"),
+                   hra.name, " (Modeled from Census, ACS)"),
             font.main = 1, outer = FALSE,
             adj = 0, cex.main = 1)
     }
@@ -232,7 +232,7 @@ for(year in c(2010, 2014, 2019)){
           adj = 0, cex.main = 1)
     
     title(paste0("\n",
-                 "King County (Estimated from ACS)"),
+                 "King County (Modeled from Census, ACS)"),
           font.main = 1, outer = FALSE,
           adj = 0, cex.main = 1)
   }
@@ -271,7 +271,7 @@ for(year in c(2010, 2014, 2019)){
             font.main = 2, outer = FALSE,
             adj = 0, cex.main = 1)
       title(paste0("\n",
-                   "King County (Estimated from Census, ACS)"),
+                   "King County (Modeled from Census, ACS)"),
             font.main = 1, outer = FALSE,
             adj = 0, cex.main = 1)
     }
@@ -312,7 +312,8 @@ for(year in c(2010, 2014, 2019)){
             adj = 0, cex.main = 1)
       
       title(paste0("\n",
-                   "King County (Estimated from Census, ACS)"),
+                   "King County, ",
+                   year, "(Modeled from Census, ACS)"),
             font.main = 1, outer = FALSE,
             adj = 0, cex.main = 1)
       
@@ -392,7 +393,7 @@ for(year in c(2010, 2014, 2019)){
               adj = 0, cex.main = 1)
         
         title(paste0("\n",
-                     hra.name, " (Estimated from Census, ACS)"),
+                     hra.name, " (Modeled from Census, ACS)"),
               font.main = 1, outer = FALSE,
               adj = 0, cex.main = 1)
       }
@@ -475,7 +476,7 @@ for(year in c(2010, 2014, 2019)){
               adj = 0, cex.main = 1)
         
         title(paste0("\n",
-                     hra.name, " (Estimated from Census, ACS)"),
+                     hra.name, " (Modeled from Census, ACS)"),
               font.main = 1, outer = FALSE,
               adj = 0, cex.main = 1)
       }
@@ -530,15 +531,7 @@ for(year in c(2000, 2009)){
                 hra.name.file, ".jpeg"),
          height = 480, width = 480)
     {
-      if(year != 2000){
-        legend_string <- paste0("ACS ", 
-                                year - 4, 
-                                "-", year)
-        title_string <- "ACS"
-      }else{
-        legend_string <- paste0("Census ", year)
-        title_string <- "Census"
-      }
+
       pop.pyramid.bayesPop.pyramid(pyr.obj, pyr1.par = list(col = pop.cols[3] , 
                                                             border = pop.cols[3]),
                                    legend_pos = "topright",
@@ -554,8 +547,7 @@ for(year in c(2000, 2009)){
             adj = 0, cex.main = 1)
       
       title(paste0("\n",
-                   hra.name, " (Estimated from ",
-                   title_string, ")"),
+                   hra.name, " (Modeled from Census, ACS)"),
             font.main = 1, outer = FALSE,
             adj = 0, cex.main = 1)
     }
@@ -601,10 +593,8 @@ for(year in c(2000, 2009)){
       legend_string <- paste0("ACS ", 
                               year - 4, 
                               "-", year)
-      title_string <- "ACS"
     }else{
       legend_string <- paste0("Census ", year)
-      title_string <- "Census"
     }
     pop.pyramid.bayesPop.pyramid(pyr.obj, pyr1.par = list(col = pop.cols[3] , 
                                                           border = pop.cols[3]),
@@ -621,8 +611,7 @@ for(year in c(2000, 2009)){
           adj = 0, cex.main = 1)
     
     title(paste0("\n",
-                 hra.name, " (Estimated from ",
-                 title_string, ")"),
+                 hra.name, " (Modeled from Census, ACS)"),
           font.main = 1, outer = FALSE,
           adj = 0, cex.main = 1)
   }
@@ -667,7 +656,7 @@ jpeg(paste0("../household_size/Pyramid/Pyramid_",
         adj = 0, cex.main = 1)
   
   title(paste0("\n",
-               "King County (Estimated from Census, ACS)"),
+               "King County (Modeled from Census, ACS)"),
         font.main = 1, outer = FALSE,
         adj = 0, cex.main = 1)
 }
@@ -711,7 +700,7 @@ jpeg(paste0("../household_size/Pyramid/Pyramid_Prevalence",
         adj = 0, cex.main = 1)
   
   title(paste0("\n",
-               "King County (Estimated from Census, ACS)"),
+               "King County (Modeled from Census, ACS)"),
         font.main = 1, outer = FALSE,
         adj = 0, cex.main = 1)
 }
@@ -797,7 +786,7 @@ for(hra.name in hra@data$HRA2010v2_){
           font.main = 2, outer = FALSE,
           adj = 0, cex.main = 1)
     title(paste0("\n",
-                 hra.name, " (Estimated from Census, ACS)"),
+                 hra.name, " (Modeled from Census, ACS)"),
           font.main = 1, outer = FALSE,
           adj = 0, cex.main = .8)
   }
@@ -892,7 +881,7 @@ for(hra.name in hra@data$HRA2010v2_){
                  ""),
           font.main = 2, outer = FALSE,
           adj = 0, cex.main = 1)
-    title(paste0("\n", hra.name, " (Estimated from Census, ACS)"),
+    title(paste0("\n", hra.name, " (Modeled from Census, ACS)"),
           font.main = 1, outer = FALSE,
           adj = 0, cex.main = .8)
   }
@@ -937,7 +926,7 @@ jpeg(paste0("../household_size/Pyramid/Pyramid_",
         adj = 0, cex.main = 1)
   
   title(paste0("\n",
-               "King County (Estimated from Census, ACS)"),
+               "King County (Modeled from Census, ACS)"),
         font.main = 1, outer = FALSE,
         adj = 0, cex.main = 1)
 }
@@ -981,7 +970,7 @@ jpeg(paste0("../household_size/Pyramid/Pyramid_Prevalence",
         adj = 0, cex.main = 1)
   
   title(paste0("\n",
-               "King County (Estimated from Census)"),
+               "King County (Modeled from Census)"),
         font.main = 1, outer = FALSE,
         adj = 0, cex.main = 1)
 }
@@ -1066,7 +1055,7 @@ for(hra.name in hra@data$HRA2010v2_){
                  ""),
           font.main = 2, outer = FALSE,
           adj = 0, cex.main = 1)
-    title(paste0("\n", hra.name, " (Estimated from Census)"),
+    title(paste0("\n", hra.name, " (Modeled from Census)"),
           font.main = 1, outer = FALSE,
           adj = 0, cex.main = .8)
   }
@@ -1177,7 +1166,7 @@ for(hra.name in hra@data$HRA2010v2_){
                  ""),
           font.main = 2, outer = FALSE,
           adj = 0, cex.main = 1)
-    title(paste0("\n", hra.name, " (Estimated from Census)"),
+    title(paste0("\n", hra.name, " (Modeled from Census)"),
           font.main = 1, outer = FALSE,
           adj = 0, cex.main = .8)
   }
@@ -1187,26 +1176,56 @@ for(hra.name in hra@data$HRA2010v2_){
 
 ## Maps ####
 ### Household Size ####
-for(year in c(2010, 2014, 2019)){
+for(year in c(2000, 2009, 2010, 2014, 2019)){
   
-  hh_year_tmp <- hh_size_hra %>% 
-    filter(Year == year) %>% 
-    filter(hh_size > 0) %>% 
-    filter(!is.na(HRA2010v2_)) %>% 
-    group_by(FID_HRA_20, HRA2010v2_, hh_size) %>% 
-    summarise(estimate = sum(estimate),
-              SE = sum(SE)) %>% 
-    ungroup() %>% 
-    arrange(FID_HRA_20, hh_size) %>% 
-    mutate(CoV = SE/estimate)
+  if(year >= 2010){
+    hh_year_tmp <- hh_size_hra %>% 
+      filter(Year == year) %>% 
+      filter(hh_size > 0) %>% 
+      filter(!is.na(HRA2010v2_)) %>% 
+      group_by(FID_HRA_20, HRA2010v2_, hh_size) %>% 
+      summarise(estimate = sum(estimate),
+                SE = sum(SE)) %>% 
+      ungroup() %>% 
+      arrange(FID_HRA_20, hh_size) %>% 
+      mutate(CoV = SE/estimate)
+    
+    hh_year_total <- hh_year_tmp %>% 
+      group_by(FID_HRA_20, HRA2010v2_) %>% 
+      summarise(estimate = sum(estimate),
+                SE = sum(SE)) %>% 
+      ungroup() %>% 
+      arrange(FID_HRA_20) %>% 
+      mutate(CoV = SE/estimate)
+  }else{
+    hh_year_tmp <- hh_size_hra_2000 %>% 
+      filter(Year == year) %>% 
+      filter(hh_size > 0) %>% 
+      filter(!is.na(HRA2010v2_)) %>% 
+      group_by(FID_HRA_20, HRA2010v2_, hh_size) %>% 
+      summarise(estimate = sum(estimate),
+                SE = sum(SE)) %>% 
+      ungroup() %>% 
+      arrange(FID_HRA_20, hh_size) %>% 
+      mutate(CoV = SE/estimate)
+    
+    hh_year_total <- hh_year_tmp %>% 
+      group_by(FID_HRA_20, HRA2010v2_) %>% 
+      summarise(estimate = sum(estimate),
+                SE = sum(SE)) %>% 
+      ungroup() %>% 
+      arrange(FID_HRA_20) %>% 
+      mutate(CoV = SE/estimate)
+  }
   
-  hh_year_total <- hh_year_tmp %>% 
-    group_by(FID_HRA_20, HRA2010v2_) %>% 
-    summarise(estimate = sum(estimate),
-              SE = sum(SE)) %>% 
-    ungroup() %>% 
-    arrange(FID_HRA_20) %>% 
-    mutate(CoV = SE/estimate)
+  if(year != 2010 &
+     year != 2000){
+    title_string <- paste0(year - 4, 
+                           "-", year)
+    
+  }else{
+    title_string <- year
+  }
   
   #### Households ####
   hh.int.hra <- classIntervals(hh_year_tmp$estimate,
@@ -1270,7 +1289,7 @@ for(year in c(2010, 2014, 2019)){
             adj = 0, cex.main = 1)
       
       title(paste0("\n",
-                   "Estimated from Census and ACS"),
+                   title_string, " (Modeled from Census, ACS)"),
             font.main = 1, outer = FALSE,
             adj = 0, cex.main = 1)
     }
@@ -1295,7 +1314,7 @@ for(year in c(2010, 2014, 2019)){
   breaks <- prev.int.hra$brks
   breaks <- c(0, .05, .1,
               .15, .2, .25,
-              .4, .5, .6, .7)
+              .4, .5, .6, .75)
   ## Get color based on RColorBrwere palette for 
   ## each area
   
@@ -1318,6 +1337,7 @@ for(year in c(2010, 2014, 2019)){
                                    fixedBreaks = breaks,
                                    n = 9)
     prev.col.hra <- findColours(prev.int.hra, prev.pal)
+    
     
     
     
@@ -1348,7 +1368,7 @@ for(year in c(2010, 2014, 2019)){
             adj = 0, cex.main = 1)
       
       title(paste0("\n",
-                   "Estimated from Census and ACS"),
+                   title_string, " (Modeled from Census, ACS)"),
             font.main = 1, outer = FALSE,
             adj = 0, cex.main = 1)
     }
@@ -1408,7 +1428,7 @@ for(year in c(2010, 2014, 2019)){
             adj = 0, cex.main = 1)
       
       title(paste0("\n",
-                   "Estimated from Census and ACS"),
+                   title_string, " (Modeled from Census, ACS)"),
             font.main = 1, outer = FALSE,
             adj = 0, cex.main = 1)
     }
@@ -1507,7 +1527,7 @@ for(year in c(2010, 2014, 2019)){
               adj = 0, cex.main = 1)
         
         title(paste0("\n",
-                     "Estimated from Census and ACS"),
+                     title_string, " (Modeled from Census, ACS)"),
               font.main = 1, outer = FALSE,
               adj = 0, cex.main = 1)
       }
@@ -1591,7 +1611,7 @@ for(year in c(2010, 2014, 2019)){
               adj = 0, cex.main = 1)
         
         title(paste0("\n",
-                     "Estimated from Census and ACS"),
+                     title_string, " (Modeled from Census, ACS)"),
               font.main = 1, outer = FALSE,
               adj = 0, cex.main = 1)
       }
@@ -1659,7 +1679,7 @@ for(year in c(2010, 2014, 2019)){
               adj = 0, cex.main = 1)
         
         title(paste0("\n",
-                     "Estimated from Census and ACS"),
+                     title_string, " (Modeled from Census, ACS)"),
               font.main = 1, outer = FALSE,
               adj = 0, cex.main = 1)
       }
