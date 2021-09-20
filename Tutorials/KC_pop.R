@@ -4789,7 +4789,7 @@ for(year in c(2010, 2012, 2015,
 
 for(year in c(2010, 2012, 2015,
               2017, 2020)){
-  for(race in unique(hra_pop$Race_Lbl)){
+  for(race in unique(pop$Race_Lbl)){
     race.clean <- gsub(" and ", "/",
                        race)
     race.clean <- gsub(" or ", "/",
@@ -4840,6 +4840,13 @@ for(year in c(2010, 2012, 2015,
                 15000)
     
     #### Over 65 ####
+    pop.int.hra <- classIntervals(hra_age_pop$PopOver65,
+                                  style = 'fixed',
+                                  fixedBreaks = breaks,
+                                  n = 9)
+    ## assign colors
+    pop.col.hra <- findColours(pop.int.hra, pop.pal)
+    
     jpeg(paste0("../PopPlots/", 
                 year, "/OFM_Ages/OFM_",
                 year, "_ageOver65_",
