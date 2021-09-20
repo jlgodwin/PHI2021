@@ -23,9 +23,9 @@ library(ggplot2)
 library(gridExtra)
 
 # constants
-main_dir <- "/Users/adrienallorant/Documents/UW/PHI2021/"
+main_dir <- "C:/Users/allorant/OneDrive - UW/Shared with Everyone/UW/4thYear/PHI2021/"
 data_dir <- paste0(main_dir, "data/")
-out_dir <- paste0(main_dir, "/Code/PHI2021/household_size/")
+out_dir <- paste0(main_dir, "output/")
 
 # set api key to access tidycensusdata
 myKey <- "98068953d7f457e6b1166ff2218f263faefa119e"
@@ -195,7 +195,7 @@ hhByhhSizeDF <- bind_rows(
         mutate(Year = x)})) %>%
       mutate(source = "ACS")) %>%
   mutate(hh_size = case_when(
-    variable == "H015001" ~ 0, # total
+    variable == "H015002" ~ 0, # total
     variable == "H015003" ~ 1,
     variable == "H015004" ~ 2,
     variable == "H015005" ~ 3,
@@ -203,6 +203,7 @@ hhByhhSizeDF <- bind_rows(
     variable == "H015007" ~ 5,
     variable == "H015008" ~ 6,
     variable == "H015009" ~ 7,
+    variable == "H015010" ~ 0,
     variable == "H015011" ~ 1,
     variable == "H015012" ~ 2,
     variable == "H015013" ~ 3,
@@ -210,7 +211,7 @@ hhByhhSizeDF <- bind_rows(
     variable == "H015015" ~ 5,
     variable == "H015016" ~ 6,
     variable == "H015017" ~ 7,
-    variable == "H016001" ~ 0, # total
+    variable == "H016002" ~ 0, # total
     variable == "H016003" ~ 1,
     variable == "H016004" ~ 2,
     variable == "H016005" ~ 3,
@@ -218,6 +219,7 @@ hhByhhSizeDF <- bind_rows(
     variable == "H016007" ~ 5,
     variable == "H016008" ~ 6,
     variable == "H016009" ~ 7,
+    variable == "H016010" ~ 0, # total
     variable == "H016011" ~ 1,
     variable == "H016012" ~ 2,
     variable == "H016013" ~ 3,
@@ -225,7 +227,7 @@ hhByhhSizeDF <- bind_rows(
     variable == "H016015" ~ 5,
     variable == "H016016" ~ 6,
     variable == "H016017" ~ 7,
-    variable == "B25009_001" ~ 0, # total
+    variable == "B25009_002" ~ 0, # total
     variable == "B25009_003" ~ 1,
     variable == "B25009_004" ~ 2,
     variable == "B25009_005" ~ 3,
@@ -233,6 +235,7 @@ hhByhhSizeDF <- bind_rows(
     variable == "B25009_007" ~ 5,
     variable == "B25009_008" ~ 6,
     variable == "B25009_009" ~ 7,
+    variable == "B25009_010" ~ 0, # total
     variable == "B25009_011" ~ 1,
     variable == "B25009_012" ~ 2,
     variable == "B25009_013" ~ 3,
@@ -242,14 +245,14 @@ hhByhhSizeDF <- bind_rows(
     variable == "B25009_017" ~ 7
   )) %>%
   mutate(
-    tenure = ifelse(variable %in% c("B25009_011","B25009_012","B25009_013",
+    tenure = ifelse(variable %in% c("B25009_010","B25009_011","B25009_012","B25009_013",
                                     "B25009_014","B25009_015","B25009_016","B25009_017",
-                                    "H016011","H016012","H016013","H016014","H016015",
-                                    "H015016","H015017",
-                                    "H015011","H015012","H015013","H015014","H015015",
+                                    "H016010","H016011","H016012","H016013","H016014","H016015",
+                                    "H016016","H016017",
+                                    "H015010","H015011","H015012","H015013","H015014","H015015",
                                     "H015016","H015017"), "Renter", "Owner")
-  )
-hhByhhSizeDF$tenure[hhByhhSizeDF$hh_size == 0] <- "Total" 
+  ) %>% filter(!is.na(hh_size))
+
 
 saveRDS(hhByhhSizeDF, file = paste0(out_dir, "hh_by_hh_size_and_tenure_ct.RDS"))
 
