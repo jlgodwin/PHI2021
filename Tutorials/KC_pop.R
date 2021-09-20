@@ -162,11 +162,15 @@ table(jurisdictions$Zone_adj)
 # parcels_data <- read.csv('../../../EXTR_Parcel.csv')
 # parcels_data_dist <- unique(parcels_data$DistrictName)
 # rm(parcels_data)
-pop.pyrs<-list()
+
+
+# Demographics ####
+pop.pyrs <- list()
+
+## By Year ####
 for(year in c(2010, 2012, 2015,
               2017, 2020)){
   
-  # Population (OFM) pyramids by HRA ####
   load(paste0('../Data/pop_', 
               year, '_OFM.rda'))  
   hra_pop <- pop %>% 
@@ -191,57 +195,127 @@ for(year in c(2010, 2012, 2015,
   }
   
   
-  pdf(paste0("../PopPlots/",
-             year, "/Pyramid/Pyramid_",
-             year, ".pdf"),
-      height = 5, width = 5)
-  pyr.tmp <- hra_pop %>% 
-    group_by(Age, Age_Lbl,Sex_Lbl) %>% 
-    summarise(Pop = sum(Pop)) %>% 
-    ungroup() %>% 
-    arrange(Age, Sex_Lbl) %>% 
-    pivot_wider(id_cols = c(Age, Age_Lbl),
-                names_from = Sex_Lbl,
-                values_from = Pop) %>% 
-    ungroup() %>% 
-    dplyr::select(Female, Male) %>% 
-    as.matrix()
+  ### County Population (OFM) pyramids by Year ####
   
-  row.names(pyr.tmp) <- hra_pop %>% 
-    arrange(Age, Age_Lbl) %>% 
-    group_by(Age) %>% 
-    summarise(Age_Lbl = unique(Age_Lbl)) %>% 
-    ungroup() %>% 
-    dplyr::select(Age_Lbl) %>% unlist()
-  pop.pyrs[[paste0("year_", year)]] <- pyr.tmp
-  x_at <- round(seq(0, max(pyr.tmp), length.out = 5),-4)
-  pyr.obj <- get.bPop.pyramid(pyr.tmp,
-                              legend = paste0("OFM, ", year),
-                              LRcolnames = c("Female", "Male"),
-                              LRmain = c("Female", "Male"))                              
+  # pdf(paste0("../PopPlots/",
+  #            year, "/Pyramid/Pyramid_",
+  #            year, ".pdf"),
+  #     height = 5, width = 5)
   
+  jpeg(paste0("../PopPlots/",
+              year, "/Pyramid/Population/Pyramid_",
+              year, ".jpeg"),
+       height = 480, width = 480)
+  {
+    pyr.tmp <- hra_pop %>% 
+      group_by(Age, Age_Lbl,Sex_Lbl) %>% 
+      summarise(Pop = sum(Pop)) %>% 
+      ungroup() %>% 
+      arrange(Age, Sex_Lbl) %>% 
+      pivot_wider(id_cols = c(Age, Age_Lbl),
+                  names_from = Sex_Lbl,
+                  values_from = Pop) %>% 
+      ungroup() %>% 
+      dplyr::select(Female, Male) %>% 
+      as.matrix()
+    
+    row.names(pyr.tmp) <- hra_pop %>% 
+      arrange(Age, Age_Lbl) %>% 
+      group_by(Age) %>% 
+      summarise(Age_Lbl = unique(Age_Lbl)) %>% 
+      ungroup() %>% 
+      dplyr::select(Age_Lbl) %>% unlist()
+    pop.pyrs[[paste0("year_", year)]] <- pyr.tmp
+    x_at <- round(seq(0, max(pyr.tmp), length.out = 5),-4)
+    pyr.obj <- get.bPop.pyramid(pyr.tmp,
+                                legend = paste0("OFM, ", year),
+                                LRcolnames = c("Female", "Male"),
+                                LRmain = c("Female", "Male"))                              
+    
+    
+    pop.pyramid.bayesPop.pyramid(pyr.obj, show.legend = TRUE,
+                                 pyr1.par = list(col = pop.cols[3] , 
+                                                 border = pop.cols[3]),
+                                 legend_pos = "topright",
+                                 legend_text = paste0("OFM, ", year),
+                                 x_at = c(rev(-x_at[-1]), x_at),
+                                 x_labels = c(rev(x_at[-1]), x_at),
+                                 cex.axis = .76,
+                                 cex.sub = .75)
+    title(paste0("Population by Age and Sex\n",
+                 ""),
+          font.main = 2, outer = FALSE,
+          adj = 0, cex.main = 1)
+    title(paste0("\n",
+                 paste0("King County")),
+          font.main = 1, outer = FALSE,
+          adj = 0, cex.main = 1)
+  }
+  dev.off()
   
-  pop.pyramid.bayesPop.pyramid(pyr.obj, show.legend = TRUE,
-                               pyr1.par = list(col = pop.cols[3] , 
-                                               border = pop.cols[3]),
-                               legend_pos = "topright",
-                               legend_text = paste0("OFM, ", year),
-                               x_at = c(rev(-x_at[-1]), x_at),
-                               x_labels = c(rev(x_at[-1]), x_at),
-                               cex.axis = .76,
-                               cex.sub = .75)
-  title(paste0("King County, ",
-               year),
-        font.main = 1, outer = FALSE,
-        adj = 0, cex.main = 1)
+  ## County Prevalence (OFM) pyramids by Year ####
+  
+  jpeg(paste0("../PopPlots/",
+              year, "/Pyramid/Prevalence/Pyramid_Prevalence_",
+              year, ".jpeg"),
+       height = 480, width = 480)
+  {
+    pyr.tmp <- hra_pop %>% 
+      group_by(Age, Age_Lbl,Sex_Lbl) %>% 
+      summarise(Pop = sum(Pop)) %>% 
+      ungroup() %>% 
+      arrange(Age, Sex_Lbl) %>% 
+      pivot_wider(id_cols = c(Age, Age_Lbl),
+                  names_from = Sex_Lbl,
+                  values_from = Pop) %>% 
+      ungroup() %>% 
+      dplyr::select(Female, Male) %>% 
+      as.matrix()
+    
+    row.names(pyr.tmp) <- hra_pop %>% 
+      arrange(Age, Age_Lbl) %>% 
+      group_by(Age) %>% 
+      summarise(Age_Lbl = unique(Age_Lbl)) %>% 
+      ungroup() %>% 
+      dplyr::select(Age_Lbl) %>% unlist()
+    pop.pyrs[[paste0("year_", year)]] <- pyr.tmp
+    # x_at <- c(-.075, -.05, -.025, -.01, 0, .01, .025, .05, .075)
+    x_at <- seq(-.05,.05, .01)
+    x_labels <- abs(x_at)
+    pyr.obj <- get.bPop.pyramid(pyr.tmp/sum(pyr.tmp),
+                                legend = paste0("OFM, ", year),
+                                LRcolnames = c("Female", "Male"),
+                                LRmain = c("Female", "Male"))                              
+    
+    
+    pop.pyramid.bayesPop.pyramid(pyr.obj, show.legend = TRUE,
+                                 pyr1.par = list(col = pop.cols[3] , 
+                                                 border = pop.cols[3]),
+                                 legend_pos = "topright",
+                                 legend_text = paste0("OFM, ", year),
+                                 x_at = x_at,
+                                 x_labels = x_labels,
+                                 cex.axis = .65,
+                                 cex.sub = .75,
+                                 x_lims = c(-.065,.065))
+    title(paste0("Prevalence of Population by Age and Sex\n",
+                 ""),
+          font.main = 2, outer = FALSE,
+          adj = 0, cex.main = 1)
+    
+    title(paste0("\n",
+                 paste0("King County")),
+          font.main = 1, outer = FALSE,
+          adj = 0, cex.main = 1)
+  }
   dev.off()
   
   
-  
-  pdf(paste0("../PopPlots/",
-             year, "/Pyramid/Pyramid_HRA_",
-             year, ".pdf"),
-      height = 5, width = 5)
+  # pdf(paste0("../PopPlots/",
+  #            year, "/Pyramid/Pyramid_HRA_",
+  #            year, ".pdf"),
+  #     height = 5, width = 5)
+  ## Begin HRA Loop 
   for(hra.name in unique(hra_pop$HRA)){
     pyr.tmp <- hra_pop %>% 
       filter(HRA == hra.name) %>% 
@@ -260,31 +334,86 @@ for(year in c(2010, 2012, 2015,
       ungroup() %>% 
       dplyr::select(Age_Lbl) %>% unlist()
     x_at <- round(seq(0, max(pyr.tmp), length.out = 5),-2)
+    
     pyr.obj <- get.bPop.pyramid(pyr.tmp,
                                 show.legend = FALSE,
                                 LRcolnames = c("Female", "Male"),
                                 LRmain = c("Female", "Male"))
+    hra.name.file <- gsub("\\.","",
+                          hra.name)
+    hra.name.file <- gsub("/","",
+                          hra.name.file)
+    ## HRA Population (OFM) pyramids by Year ####
+    jpeg(paste0("../PopPlots/",
+                year, "/Pyramid/Population/Pyramid_HRA_",
+                hra.name.file, "_",
+                year, ".jpeg"),
+         height = 480, width = 480)
+    {
+      pop.pyramid.bayesPop.pyramid(pyr.obj,
+                                   pyr1.par = list(col = pop.cols[3] , 
+                                                   border = pop.cols[3]),
+                                   legend_pos = "topright",
+                                   legend_text = paste0("OFM, ", year),
+                                   x_at = c(rev(-x_at[-1]), x_at),
+                                   x_labels = c(rev(x_at[-1]), x_at),
+                                   cex.axis = .76,
+                                   cex.sub = .75)
+      title(paste0("Population by Age and Sex\n",
+                   ""),
+            font.main = 2, outer = FALSE,
+            adj = 0, cex.main = 1)
+      
+      title(paste0("\n",
+                   hra.name),
+            font.main = 1, outer = FALSE,
+            adj = 0, cex.main = 1)
+    }
+    dev.off()
     
-    pop.pyramid.bayesPop.pyramid(pyr.obj,
-                                 pyr1.par = list(col = pop.cols[3] , 
-                                                 border = pop.cols[3]),
-                                 legend_pos = "topright",
-                                 legend_text = paste0("OFM, ", year),
-                                 x_at = c(rev(-x_at[-1]), x_at),
-                                 x_labels = c(rev(x_at[-1]), x_at),
-                                 cex.axis = .76,
-                                 cex.sub = .75)
-    title(hra.name,
-          font.main = 2, outer = FALSE,
-          adj = 0, cex.main = 1)
+    ## HRA Prevalence (OFM) pyramids by Year ####
+    jpeg(paste0("../PopPlots/",
+                year, "/Pyramid/Prevalence/Pyramid_Prevalence_HRA_",
+                hra.name.file, "_",
+                year, ".jpeg"),
+         height = 480, width = 480)
+    {
+      # x_at <- c(-.3, -.2, -.1, -.05, 0, 0.05, .1, .2, .3)
+      x_at <- seq(-.05,.05,.01)
+      pyr.obj <- get.bPop.pyramid(pyr.tmp/sum(pyr.tmp),
+                                  show.legend = FALSE,
+                                  LRcolnames = c("Female", "Male"),
+                                  LRmain = c("Female", "Male"))
+      pop.pyramid.bayesPop.pyramid(pyr.obj,
+                                   pyr1.par = list(col = pop.cols[3] , 
+                                                   border = pop.cols[3]),
+                                   legend_pos = "topright",
+                                   legend_text = paste0("OFM, ", year),
+                                   x_at = x_at,
+                                   x_labels = abs(x_at),
+                                   cex.axis = .65,
+                                   cex.sub = .75,
+                                   x_lims = c(-.065,.065))
+      title(paste0("Prevalence by Population by Age and Sex\n",
+                   ""),
+            font.main = 2, outer = FALSE,
+            adj = 0, cex.main = 1)
+      title(paste0("\n",
+                   hra.name),
+            font.main = 1, outer = FALSE,
+            adj = 0, cex.main = 1)
+    }
+    dev.off()
+    
   }
-  dev.off()
   
-  ## With County ####
-  pdf(paste0("../PopPlots/", year,
-             "/Pyramid/Pyramid_HRAandCounty_",
-             year, ".pdf"),
-      height = 5, width = 5)
+  
+  # pdf(paste0("../PopPlots/", year,
+  #            "/Pyramid/Pyramid_HRAandCounty_",
+  #            year, ".pdf"),
+  #     height = 5, width = 5)
+  
+  ## Begin HRA Loop 
   for(hra.name in unique(hra_pop$HRA)){
     pyr.tmp <- hra_pop %>%
       filter(HRA == hra.name) %>% 
@@ -323,27 +452,81 @@ for(year in c(2010, 2012, 2015,
     # county.pyr.obj <- get.bPop.pyramid(county.pyr,
     #                                    LRcolnames = c("Female", "Male"),
     #                                    LRmain = c("Female", "Male"))
+    hra.name.file <- gsub("\\.","",
+                          hra.name)
+    hra.name.file <- gsub("/","",
+                          hra.name.file)
+    ### HRA with County Population Pyramids by Year ####
+    jpeg(paste0("../PopPlots/",
+                year, "/Pyramid/Population/Pyramid_HRAandCounty_",
+                hra.name.file, "_",
+                year, ".jpeg"),
+         height = 480, width = 480)
+    {
+      pop.pyramid.bayesPop.pyramid(pyr.obj,
+                                   pyr1.par = list(col = pop.cols[4] , 
+                                                   border = pop.cols[4]),
+                                   pyr2.par = list(col = pop.cols[2],
+                                                   border = pop.cols[2]),
+                                   legend_pos = "topright",
+                                   legend_text = c("King County", "HRA"),
+                                   x_at = c(rev(-x_at[-1]), x_at),
+                                   x_labels = c(rev(x_at[-1]), x_at),
+                                   cex.axis = .65,
+                                   cex.sub = .75)
+      title(paste0("Population by Age and Sex\n",
+                   ""),
+            font.main = 2, outer = FALSE,
+            adj = 0, cex.main = 1)
+      
+      title(paste0("\n",
+                   hra.name),
+            font.main = 1, outer = FALSE,
+            adj = 0, cex.main = 1)
+    }
+    dev.off()
     
-    pop.pyramid.bayesPop.pyramid(pyr.obj,
-                                 pyr1.par = list(col = pop.cols[4] , 
-                                                 border = pop.cols[4]),
-                                 pyr2.par = list(col = pop.cols[2],
-                                                 border = pop.cols[2]),
-                                 legend_pos = "topright",
-                                 legend_text = paste0("OFM, ", year),
-                                 x_at = c(rev(-x_at[-1]), x_at),
-                                 x_labels = c(rev(x_at[-1]), x_at),
-                                 cex.axis = .76,
-                                 cex.sub = .75)
-    title(paste0(hra.name, ", ",
-                 year),
-          font.main = 1, outer = FALSE,
-          adj = 0, cex.main = 1)
+    ## HRA with County Prevalence Pyramids by Year ####
+    
+    jpeg(paste0("../PopPlots/",
+                year, "/Pyramid/Prevalence/Pyramid_Prevalence_HRAandCounty_",
+                hra.name.file, "_",
+                year, ".jpeg"),
+         height = 480, width = 480)
+    {
+      pyr.list <- list(county.pyr/sum(county.pyr),
+                       pyr.tmp/sum(pyr.tmp))
+      pyr.obj <- get.bPop.pyramid(pyr.list, show.legend = FALSE,
+                                  LRcolnames = c("Female", "Male"),
+                                  LRmain = c("Female", "Male"))
+      # x_at <- c(-.3, -.2, -.1, -.05, 0, .05, .1, .2, .3)
+      x_at <- seq(-.05,.05,.01)
+      pop.pyramid.bayesPop.pyramid(pyr.obj,
+                                   pyr1.par = list(col = pop.cols[4] , 
+                                                   border = pop.cols[4]),
+                                   pyr2.par = list(col = pop.cols[2],
+                                                   border = pop.cols[2]),
+                                   legend_pos = "topright",
+                                   legend_text = c("King County", "HRA"),
+                                   x_at = x_at,
+                                   x_labels = abs(x_at),
+                                   cex.axis = .75,
+                                   cex.sub = .75,
+                                   x_lims = c(-.065,.065))
+      title(paste0("Prevalence of Population by Age and Sex\n",
+                   ""),
+            font.main = 2, outer = FALSE,
+            adj = 0, cex.main = 1)
+      
+      title(paste0("\n",
+                   hra.name),
+            font.main = 1, outer = FALSE,
+            adj = 0, cex.main = 1)
+    }
+    dev.off()
   }
-  dev.off()
   
-  
-  # Population maps by HRA####
+  ### Population maps by HRA ####
   
   hra_age_pop <- hra_pop %>% 
     group_by(HRA, Age, Age_Lbl) %>% 
@@ -356,16 +539,16 @@ for(year in c(2010, 2012, 2015,
                                 n = 9)
   
   breaks <- pop.int.hra$brks
-  breaks <- c(0, 750, 1500,
-              2000, 3000, 4000,
+  breaks <- c(0, 750, 1000,
+              2500,  4000,
               5000, 7500, 10000,
-              12500)
+              12500, 15500)
   ## Get color based on RColorBrwere palette for 
   ## each area
   
   pop.pal <- brewer.pal(n = 9, name = "Blues")
   
-  
+  ## Begin Age Loop 
   for(age in unique(hra_age_pop$Age_Lbl)){
     
     hra_age_tmp <- hra_age_pop %>% 
@@ -379,7 +562,7 @@ for(year in c(2010, 2012, 2015,
                                   n = 9)
     pop.col.hra <- findColours(pop.int.hra, pop.pal)
     
-    
+    #### Create directories ####
     if(!dir.exists(paste0("../PopPlots/", year, "/"))){
       dir.create(paste0("../PopPlots/",
                         year, "/"))
@@ -390,6 +573,8 @@ for(year in c(2010, 2012, 2015,
                         year, "/OFM_Ages/"))
     }
     
+    
+    
     if(!dir.exists(paste0("../PopPlots/", 
                           year, "/OFM_Ages/",
                           age, "/"))){
@@ -397,38 +582,65 @@ for(year in c(2010, 2012, 2015,
                         year, "/OFM_Ages/",
                         age, "/"))
     }
-    pdf(paste0("../PopPlots/", 
-               year, "/OFM_Ages/",
-               age, "/OFM_",
-               year, "_age", age,
-               ".pdf"),
-        height = 5, width = 5)
-    par(lend = 1,
-        mar = c(0,0,1,0),
-        oma = c(0,0,1,0))
-    plot(hra,
-         col = pop.col.hra,
-         border = 'grey48', lwd = .25,
-         main = "")
-    legend('bottomleft',
-           title = 'Population',
-           title.adj = 0,
-           ncol = 2,
-           bty = 'n',
-           cex = 0.5,
-           border = FALSE,
-           fill = pop.pal,
-           legend = names(attr(pop.col.hra, 'table')))
-    title(paste0("King County, ",
-                 year, ": Ages ",
-                 age),
-          font.main = 1, outer = FALSE,
-          adj = 0, cex.main = 1)
+    
+    if(!dir.exists(paste0("../PopPlots/", 
+                          year, "/OFM_Ages/",
+                          age, "/Population/"))){
+      dir.create(paste0("../PopPlots/", 
+                        year, "/OFM_Ages/",
+                        age, "/Population/"))
+      dir.create(paste0("../PopPlots/", 
+                        year, "/OFM_Ages/",
+                        age, "/Prevalence/"))
+      dir.create(paste0("../PopPlots/", 
+                        year, "/OFM_Ages/",
+                        age, "/Distribution/"))
+    }
+    
+    ### Population by Age  ####
+    
+    # pdf(paste0("../PopPlots/", 
+    #            year, "/OFM_Ages/",
+    #            age, "/OFM_",
+    #            year, "_age", age,
+    #            ".pdf"),
+    #     height = 5, width = 5)
+    jpeg(paste0("../PopPlots/", 
+                year, "/OFM_Ages/",
+                age, "/Population/OFM_",
+                year, "_age", age,
+                ".jpeg"),
+         height = 480, width = 480)
+    {
+      par(lend = 1,
+          mar = c(0,0,2,0),
+          oma = c(0,0,1,0))
+      plot(hra,
+           col = pop.col.hra,
+           border = 'grey48', lwd = .25,
+           main = "")
+      legend('bottomleft',
+             title = 'Population',
+             title.adj = 0,
+             ncol = 2,
+             bty = 'n',
+             cex = 0.75,
+             border = FALSE,
+             fill = pop.pal,
+             legend = names(attr(pop.col.hra, 'table')))
+      title(paste0("Population Ages ", age, "\n",
+                   ""),
+            font.main = 2, outer = FALSE,
+            adj = 0, cex.main = 1)
+      
+      title(paste0("\n",
+                   paste0("King County (WA OFM, ", year,")")),
+            font.main = 1, outer = FALSE,
+            adj = 0, cex.main = 1)
+    }
     dev.off()
   }
   
-  
-  ### Prevalence of age group in HRA ####
   hra_total_pop <- hra_pop %>% 
     group_by(HRA) %>% 
     summarise(PopTotal = sum(Pop)) %>% 
@@ -451,9 +663,9 @@ for(year in c(2010, 2012, 2015,
   
   breaks <- prop.int.hra$brks
   breaks <- c(0, .005, .01,
-              .03, .05, .07,
-              .1, .125, .15, .16)
-  
+              .025, .05, .075,
+              .1, .125, .15, .21)
+  ## Begin Age Loop 
   for(age in unique(hra_age_pop$Age_Lbl)){
     
     hra_age_tmp <- hra_age_pop %>% 
@@ -467,38 +679,51 @@ for(year in c(2010, 2012, 2015,
                                    n = 9)
     prop.col.hra <- findColours(prop.int.hra, prop.pal)
     
-    pdf(paste0("../PopPlots/", 
-               year, "/OFM_Ages/",
-               age, "/OFM_",
-               year, "_agePrev_", age,
-               ".pdf"),
-        height = 5, width = 5)
-    par(lend = 1,
-        mar = c(0,0,1,0),
-        oma = c(0,0,1,0))
-    plot(hra,
-         col = prop.col.hra,
-         border = 'grey48', lwd = .25,
-         main = "")
-    legend('bottomleft',
-           title = 'Prevalence',
-           title.adj = 0,
-           ncol = 2,
-           bty = 'n',
-           cex = 0.5,
-           border = FALSE,
-           fill = prop.pal,
-           legend = names(attr(prop.col.hra, 'table')))
-    title(paste0("King County, ",
-                 year, ": Ages ",
-                 age),
-          font.main = 1, outer = FALSE,
-          adj = 0, cex.main = 1)
+    # pdf(paste0("../PopPlots/", 
+    #            year, "/OFM_Ages/",
+    #            age, "/OFM_",
+    #            year, "_agePrev_", age,
+    #            ".pdf"),
+    #     height = 5, width = 5)
+    
+    #### Population Prevalence by Age ####
+    
+    jpeg(paste0("../PopPlots/", 
+                year, "/OFM_Ages/",
+                age, "/Prevalence/OFM_",
+                year, "_agePrev_", age,
+                ".jpeg"),
+         height = 480, width = 480)
+    {
+      par(lend = 1,
+          mar = c(0,0,2,0),
+          oma = c(0,0,1,0))
+      plot(hra,
+           col = prop.col.hra,
+           border = 'grey48', lwd = .25,
+           main = "")
+      legend('bottomleft',
+             title = 'Prevalence',
+             title.adj = 0,
+             ncol = 2,
+             bty = 'n',
+             cex = 0.75,
+             border = FALSE,
+             fill = prop.pal,
+             legend = names(attr(prop.col.hra, 'table')))
+      title(paste0("Prevalence of Population Ages ", age, "\n",
+                   ""),
+            font.main = 2, outer = FALSE,
+            adj = 0, cex.main = 1)
+      
+      title(paste0("\n",
+                   paste0("King County (WA OFM, ", year, ")")),
+            font.main = 1, outer = FALSE,
+            adj = 0, cex.main = 1)
+    }
     dev.off()
   }
   
-  
-  ### Distribution of age group across HRAs ####
   age_total_pop <- hra_pop %>% 
     group_by(Age, Age_Lbl) %>% 
     summarise(PopTotal = sum(Pop)) %>% 
@@ -512,19 +737,19 @@ for(year in c(2010, 2012, 2015,
     arrange(Age) %>% 
     left_join(age_total_pop) %>% 
     group_by(HRA, Age, Age_Lbl) %>% 
-    mutate(AgePrev = Pop/PopTotal)
+    mutate(AgeDist = Pop/PopTotal)
   
   prop.pal <- brewer.pal(n = 9, name = "YlGnBu")
   
-  prop.int.hra <- classIntervals(hra_age_pop$AgePrev,
+  prop.int.hra <- classIntervals(hra_age_pop$AgeDist,
                                  style = 'jenks',
                                  n = 9)
   
   breaks <- prop.int.hra$brks
   breaks <- c(0, .005, .01,
               .02, .03, .04,
-              .05, .065, .08, .1)
-  
+              .05, .065, .08, .11)
+  ## Begin Age Loop 
   for(age in unique(hra_age_pop$Age_Lbl)){
     
     hra_age_tmp <- hra_age_pop %>% 
@@ -532,69 +757,132 @@ for(year in c(2010, 2012, 2015,
     hra_age_tmp <- hra_age_tmp[match(hra_age_tmp$HRA,
                                      hra@data$HRA2010v2_), ]
     
-    prop.int.hra <- classIntervals(hra_age_tmp$AgePrev,
+    prop.int.hra <- classIntervals(hra_age_tmp$AgeDist,
                                    style = "fixed",
                                    fixedBreaks = breaks,
                                    n = 9)
     prop.col.hra <- findColours(prop.int.hra, prop.pal)
     
-    pdf(paste0("../PopPlots/", 
-               year, "/OFM_Ages/",
-               age, "/OFM_",
-               year, "_ageDist_", age,
-               ".pdf"),
-        height = 5, width = 5)
-    par(lend = 1,
-        mar = c(0,0,1,0),
-        oma = c(0,0,1,0))
-    plot(hra,
-         col = prop.col.hra,
-         border = 'grey48', lwd = .25,
-         main = "")
-    legend('bottomleft',
-           title = 'Distribution',
-           title.adj = 0,
-           ncol = 2,
-           bty = 'n',
-           cex = 0.5,
-           border = FALSE,
-           fill = prop.pal,
-           legend = names(attr(prop.col.hra, 'table')))
-    title(paste0("King County, ",
-                 year, ": Ages ",
-                 age),
-          font.main = 1, outer = FALSE,
-          adj = 0, cex.main = 1)
+    #### Population Distribution by Age ####
+    # pdf(paste0("../PopPlots/", 
+    #            year, "/OFM_Ages/",
+    #            age, "/OFM_",
+    #            year, "_ageDist_", age,
+    #            ".pdf"),
+    #     height = 5, width = 5)
+    jpeg(paste0("../PopPlots/", 
+                year, "/OFM_Ages/",
+                age, "/Distribution/OFM_",
+                year, "_ageDist_", age,
+                ".jpeg"),
+         height = 480, width = 480)
+    {
+      par(lend = 1,
+          mar = c(0,0,2,0),
+          oma = c(0,0,1,0))
+      plot(hra,
+           col = prop.col.hra,
+           border = 'grey48', lwd = .25,
+           main = "")
+      legend('bottomleft',
+             title = 'Distribution',
+             title.adj = 0,
+             ncol = 2,
+             bty = 'n',
+             cex = 0.75,
+             border = FALSE,
+             fill = prop.pal,
+             legend = names(attr(prop.col.hra, 'table')))
+      title(paste0("Distribution of Population Ages ", age, "\n",
+                   ""),
+            font.main = 2, outer = FALSE,
+            adj = 0, cex.main = 1)
+      
+      title(paste0("\n",
+                   paste0("King County (WA OFM, ", year, ")")),
+            font.main = 1, outer = FALSE,
+            adj = 0, cex.main = 1)
+    }
     dev.off()
   }
+  
+  ## End year loop
 }
 
-pdf(paste0("../PopPlots/",
-           "Pyramid_20102020.pdf"),
-    height = 5, width = 5)
-
-x_at <- round(seq(0, max(unlist(pop.pyrs)), length.out = 5),-4)
-pyr.obj <- get.bPop.pyramid(list(pop.pyrs$year_2020, pop.pyrs$year_2010),
-                            legend = c("OFM, 2020", "OFM, 2010"),
-                            LRcolnames = c("Female", "Male"),
-                            LRmain = c("Female", "Male"))
-
-pop.pyramid.bayesPop.pyramid(pyr.obj, pyr1.par = list(col = pop.cols[5] , 
-                                                      border = pop.cols[5]),
-                             pyr2.par = list(col = pop.cols[3] , 
-                                             border = pop.cols[3]),
-                             legend_pos = "topright",
-                             legend_text = c("OFM, 2020", "OFM, 2010"),
-                             x_at = c(rev(-x_at[-1]), x_at),
-                             x_labels = c(rev(x_at[-1]), x_at),
-                             cex.axis = .8,
-                             cex.sub = .75)
-title(paste0("King County"),
-      font.main = 1, outer = FALSE,
-      adj = 0, cex.main = 1)
+## County Population (OFM) pyramids 2010, 2020 ####
+# pdf(paste0("../PopPlots/",
+#            "Pyramid_20102020.pdf"),
+#     height = 5, width = 5)
+jpeg(paste0("../PopPlots/Population/",
+            "Pyramid_20102020.jpeg"),
+     height = 480, width = 480)
+{
+  x_at <- round(seq(0, max(unlist(pop.pyrs)), length.out = 5),-4)
+  pyr.obj <- get.bPop.pyramid(list(pop.pyrs$year_2020, pop.pyrs$year_2010),
+                              legend = c("OFM, 2020", "OFM, 2010"),
+                              LRcolnames = c("Female", "Male"),
+                              LRmain = c("Female", "Male"))
+  
+  pop.pyramid.bayesPop.pyramid(pyr.obj, pyr1.par = list(col = pop.cols[5] , 
+                                                        border = pop.cols[5]),
+                               pyr2.par = list(col = pop.cols[3] , 
+                                               border = pop.cols[3]),
+                               legend_pos = "topright",
+                               legend_text = c("OFM, 2020", "OFM, 2010"),
+                               x_at = c(rev(-x_at[-1]), x_at),
+                               x_labels = c(rev(x_at[-1]), x_at),
+                               cex.axis = .65,
+                               cex.sub = .75)
+  title(paste0("Population by Age and Sex\n",
+               ""),
+        font.main = 2, outer = FALSE,
+        adj = 0, cex.main = 1)
+  
+  title(paste0("\n",
+               "King County"),
+        font.main = 1, outer = FALSE,
+        adj = 0, cex.main = 1)
+}
 dev.off()
 
-# Compare OFM & ACS ####
+## County Prevalence (OFM) pyramids 2010, 2020 ####
+jpeg(paste0("../PopPlots/Prevalence/",
+            "Pyramid_Prevalence_20102020.jpeg"),
+     height = 480, width = 480)
+{
+  # x_at <- c(-.1, -.075, -.05, -.025, 0, .025, .05, .075, .1)
+  x_at <- seq(-.05, .05, .01)
+  pyr.obj <- get.bPop.pyramid(list(pop.pyrs$year_2020/sum(pop.pyrs$year_2020),
+                                   pop.pyrs$year_2010/sum(pop.pyrs$year_2010)),
+                              legend = c("OFM, 2020", "OFM, 2010"),
+                              LRcolnames = c("Female", "Male"),
+                              LRmain = c("Female", "Male"))
+  
+  pop.pyramid.bayesPop.pyramid(pyr.obj, pyr1.par = list(col = pop.cols[5] , 
+                                                        border = pop.cols[5]),
+                               pyr2.par = list(col = pop.cols[3] , 
+                                               border = pop.cols[3]),
+                               legend_pos = "topright",
+                               legend_text = c("OFM, 2020", "OFM, 2010"),
+                               x_at = x_at,
+                               x_labels = abs(x_at),
+                               cex.axis = .75,
+                               cex.sub = .75,
+                               x_lims = c(-.065, .065))
+  title(paste0("Prevalence of Population by Age and Sex\n",
+               ""),
+        font.main = 2, outer = FALSE,
+        adj = 0, cex.main = 1)
+  
+  title(paste0("\n",
+               "King County"),
+        font.main = 1, outer = FALSE,
+        adj = 0, cex.main = 1)
+}
+dev.off()
+
+
+## Compare OFM & ACS ####
 
 hra_total_pop <- 
   hra_pop <- list()
@@ -628,76 +916,82 @@ acs_tmp <- pop_by_agegroup_hra$acs5_2019 %>%
 
 pdf('../PopPlots/2017/OFM_ACS5_Compare_2017.pdf',
     height = 5, width = 5)
-plot(hra_total_pop$OFM_2017$Pop,
-     acs_tmp$estimate,
-     pch = 19,
-     col = pop.cols[3],
-     xlim = c(0, 100000),
-     ylim = c(0, 100000),
-     xaxt = 'n',
-     yaxt = 'n',
-     xlab = "OFM, 2017",
-     ylab = "ACS 2015-2019")
-abline(0,1, lty = 2)
-axis(1, at = seq(0, 100000, 25000))
-axis(2, at = seq(0, 100000, 25000))
-segments(hra_total_pop$OFM_2017$Pop,
-         acs_tmp$estimate + 
-           qnorm(.95)*acs_tmp$SE,
-         hra_total_pop$OFM_2017$Pop,
-         acs_tmp$estimate - 
-           qnorm(.95)*acs_tmp$SE,
-         col = pop.cols[3])
+{
+  plot(hra_total_pop$OFM_2017$Pop,
+       acs_tmp$estimate,
+       pch = 19,
+       col = pop.cols[3],
+       xlim = c(0, 100000),
+       ylim = c(0, 100000),
+       xaxt = 'n',
+       yaxt = 'n',
+       xlab = "OFM, 2017",
+       ylab = "ACS 2015-2019")
+  abline(0,1, lty = 2)
+  axis(1, at = seq(0, 100000, 25000))
+  axis(2, at = seq(0, 100000, 25000))
+  segments(hra_total_pop$OFM_2017$Pop,
+           acs_tmp$estimate + 
+             qnorm(.95)*acs_tmp$SE,
+           hra_total_pop$OFM_2017$Pop,
+           acs_tmp$estimate - 
+             qnorm(.95)*acs_tmp$SE,
+           col = pop.cols[3])
+}
 dev.off()
 
 
 pdf('../PopPlots/2020/OFM_ACS5_Compare_2020.pdf',
     height = 5, width = 5)
-plot(hra_total_pop$OFM_2020$Pop,
-     acs_tmp$estimate,
-     pch = 19,
-     col = pop.cols[3],
-     xlim = c(0, 100000),
-     ylim = c(0, 100000),
-     xaxt = 'n',
-     yaxt = 'n',
-     xlab = "OFM, 2020",
-     ylab = "ACS 2015-2019")
-abline(0,1, lty = 2)
-axis(1, at = seq(0, 100000, 25000))
-axis(2, at = seq(0, 100000, 25000))
-segments(hra_total_pop$OFM_2020$Pop,
-         acs_tmp$estimate + 
-           qnorm(.95)*acs_tmp$SE,
-         hra_total_pop$OFM_2020$Pop,
-         acs_tmp$estimate - 
-           qnorm(.95)*acs_tmp$SE,
-         col = pop.cols[3])
+{
+  plot(hra_total_pop$OFM_2020$Pop,
+       acs_tmp$estimate,
+       pch = 19,
+       col = pop.cols[3],
+       xlim = c(0, 100000),
+       ylim = c(0, 100000),
+       xaxt = 'n',
+       yaxt = 'n',
+       xlab = "OFM, 2020",
+       ylab = "ACS 2015-2019")
+  abline(0,1, lty = 2)
+  axis(1, at = seq(0, 100000, 25000))
+  axis(2, at = seq(0, 100000, 25000))
+  segments(hra_total_pop$OFM_2020$Pop,
+           acs_tmp$estimate + 
+             qnorm(.95)*acs_tmp$SE,
+           hra_total_pop$OFM_2020$Pop,
+           acs_tmp$estimate - 
+             qnorm(.95)*acs_tmp$SE,
+           col = pop.cols[3])
+}
 dev.off()
 
 
 pdf('../PopPlots/2015/OFM_ACS5_Compare_2015.pdf',
     height = 5, width = 5)
-plot(hra_total_pop$OFM_2015$Pop,
-     acs_tmp$estimate,
-     pch = 19,
-     col = pop.cols[3],
-     xlim = c(0, 100000),
-     ylim = c(0, 100000),
-     xaxt = 'n',
-     yaxt = 'n',
-     xlab = "OFM, 2015",
-     ylab = "ACS 2015-2019")
-abline(0,1, lty = 2)
-axis(1, at = seq(0, 100000, 25000))
-axis(2, at = seq(0, 100000, 25000))
-segments(hra_total_pop$OFM_2015$Pop,
-         acs_tmp$estimate + 
-           qnorm(.95)*acs_tmp$SE,
-         hra_total_pop$OFM_2015$Pop,
-         acs_tmp$estimate - 
-           qnorm(.95)*acs_tmp$SE,
-         col = pop.cols[3])
+{
+  plot(hra_total_pop$OFM_2015$Pop,
+       acs_tmp$estimate,
+       pch = 19,
+       col = pop.cols[3],
+       xlim = c(0, 100000),
+       ylim = c(0, 100000),
+       xaxt = 'n',
+       yaxt = 'n',
+       xlab = "OFM, 2015",
+       ylab = "ACS 2015-2019")
+  abline(0,1, lty = 2)
+  axis(1, at = seq(0, 100000, 25000))
+  axis(2, at = seq(0, 100000, 25000))
+  segments(hra_total_pop$OFM_2015$Pop,
+           acs_tmp$estimate + 
+             qnorm(.95)*acs_tmp$SE,
+           hra_total_pop$OFM_2015$Pop,
+           acs_tmp$estimate - 
+             qnorm(.95)*acs_tmp$SE,
+           col = pop.cols[3])
+}
 dev.off()
 
 
@@ -711,103 +1005,111 @@ acs_tmp <- pop_by_agegroup_hra$acs5_2014 %>%
 
 pdf('../PopPlots/2012/OFM_ACS5_Compare_2012.pdf',
     height = 5, width = 5)
-plot(hra_total_pop$OFM_2012$Pop,
-     acs_tmp$estimate,
-     pch = 19,
-     col = pop.cols[3],
-     xlim = c(0, 100000),
-     ylim = c(0, 100000),
-     xaxt = 'n',
-     yaxt = 'n',
-     xlab = "OFM, 2012",
-     ylab = "ACS 2010-2014")
-abline(0,1, lty = 2)
-axis(1, at = seq(0, 100000, 25000))
-axis(2, at = seq(0, 100000, 25000))
-segments(hra_total_pop$OFM_2012$Pop,
-         acs_tmp$estimate + 
-           qnorm(.95)*acs_tmp$SE,
-         hra_total_pop$OFM_2012$Pop,
-         acs_tmp$estimate - 
-           qnorm(.95)*acs_tmp$SE,
-         col = pop.cols[3])
+{
+  plot(hra_total_pop$OFM_2012$Pop,
+       acs_tmp$estimate,
+       pch = 19,
+       col = pop.cols[3],
+       xlim = c(0, 100000),
+       ylim = c(0, 100000),
+       xaxt = 'n',
+       yaxt = 'n',
+       xlab = "OFM, 2012",
+       ylab = "ACS 2010-2014")
+  abline(0,1, lty = 2)
+  axis(1, at = seq(0, 100000, 25000))
+  axis(2, at = seq(0, 100000, 25000))
+  segments(hra_total_pop$OFM_2012$Pop,
+           acs_tmp$estimate + 
+             qnorm(.95)*acs_tmp$SE,
+           hra_total_pop$OFM_2012$Pop,
+           acs_tmp$estimate - 
+             qnorm(.95)*acs_tmp$SE,
+           col = pop.cols[3])
+}
 dev.off()
 
 pdf('../PopPlots/2010/OFM_ACS5_Compare_2010.pdf',
     height = 5, width = 5)
-plot(hra_total_pop$OFM_2010$Pop,
-     acs_tmp$estimate,
-     pch = 19,
-     col = pop.cols[3],
-     xlim = c(0, 100000),
-     ylim = c(0, 100000),
-     xaxt = 'n',
-     yaxt = 'n',
-     xlab = "OFM, 2010",
-     ylab = "ACS 2010-2014")
-abline(0,1, lty = 2)
-axis(1, at = seq(0, 100000, 25000))
-axis(2, at = seq(0, 100000, 25000))
-segments(hra_total_pop$OFM_2010$Pop,
-         acs_tmp$estimate + 
-           qnorm(.95)*acs_tmp$SE,
-         hra_total_pop$OFM_2010$Pop,
-         acs_tmp$estimate - 
-           qnorm(.95)*acs_tmp$SE,
-         col = pop.cols[3])
+{
+  plot(hra_total_pop$OFM_2010$Pop,
+       acs_tmp$estimate,
+       pch = 19,
+       col = pop.cols[3],
+       xlim = c(0, 100000),
+       ylim = c(0, 100000),
+       xaxt = 'n',
+       yaxt = 'n',
+       xlab = "OFM, 2010",
+       ylab = "ACS 2010-2014")
+  abline(0,1, lty = 2)
+  axis(1, at = seq(0, 100000, 25000))
+  axis(2, at = seq(0, 100000, 25000))
+  segments(hra_total_pop$OFM_2010$Pop,
+           acs_tmp$estimate + 
+             qnorm(.95)*acs_tmp$SE,
+           hra_total_pop$OFM_2010$Pop,
+           acs_tmp$estimate - 
+             qnorm(.95)*acs_tmp$SE,
+           col = pop.cols[3])
+}
 dev.off()
 
 pdf('../PopPlots/2015/OFM_ACS5_Compare2_2015.pdf',
     height = 5, width = 5)
-plot(hra_total_pop$OFM_2015$Pop,
-     acs_tmp$estimate,
-     pch = 19,
-     col = pop.cols[3],
-     xlim = c(0, 100000),
-     ylim = c(0, 100000),
-     xaxt = 'n',
-     yaxt = 'n',
-     xlab = "OFM, 2015",
-     ylab = "ACS 2010-2014")
-abline(0,1, lty = 2)
-axis(1, at = seq(0, 100000, 25000))
-axis(2, at = seq(0, 100000, 25000))
-segments(hra_total_pop$OFM_2015$Pop,
-         acs_tmp$estimate + 
-           qnorm(.95)*acs_tmp$SE,
-         hra_total_pop$OFM_2015$Pop,
-         acs_tmp$estimate - 
-           qnorm(.95)*acs_tmp$SE,
-         col = pop.cols[3])
+{
+  plot(hra_total_pop$OFM_2015$Pop,
+       acs_tmp$estimate,
+       pch = 19,
+       col = pop.cols[3],
+       xlim = c(0, 100000),
+       ylim = c(0, 100000),
+       xaxt = 'n',
+       yaxt = 'n',
+       xlab = "OFM, 2015",
+       ylab = "ACS 2010-2014")
+  abline(0,1, lty = 2)
+  axis(1, at = seq(0, 100000, 25000))
+  axis(2, at = seq(0, 100000, 25000))
+  segments(hra_total_pop$OFM_2015$Pop,
+           acs_tmp$estimate + 
+             qnorm(.95)*acs_tmp$SE,
+           hra_total_pop$OFM_2015$Pop,
+           acs_tmp$estimate - 
+             qnorm(.95)*acs_tmp$SE,
+           col = pop.cols[3])
+}
 dev.off()
 
-## By Age ####
 
+#### By Age ####
 
-pdf('../PopPlots/2020/OFM_ACS5_Compare_2020.pdf',
-    height = 5, width = 5)
-plot(hra_total_pop$OFM_2020$Pop,
-     acs_tmp$estimate,
-     pch = 19,
-     col = pop.cols[3],
-     xlim = c(0, 100000),
-     ylim = c(0, 100000),
-     xaxt = 'n',
-     yaxt = 'n',
-     xlab = "OFM, 2020",
-     ylab = "ACS 2015-2019")
-abline(0,1, lty = 2)
-axis(1, at = seq(0, 100000, 25000))
-axis(2, at = seq(0, 100000, 25000))
-segments(hra_total_pop$OFM_2020$Pop,
-         acs_tmp$estimate + 
-           qnorm(.95)*acs_tmp$SE,
-         hra_total_pop$OFM_2020$Pop,
-         acs_tmp$estimate - 
-           qnorm(.95)*acs_tmp$SE,
-         col = pop.cols[3])
-dev.off()
+## NOT DONE YET!! ##
+# pdf('../PopPlots/2020/OFM_ACS5_Compare_2020.pdf',
+#     height = 5, width = 5)
+# plot(hra_total_pop$OFM_2020$Pop,
+#      acs_tmp$estimate,
+#      pch = 19,
+#      col = pop.cols[3],
+#      xlim = c(0, 100000),
+#      ylim = c(0, 100000),
+#      xaxt = 'n',
+#      yaxt = 'n',
+#      xlab = "OFM, 2020",
+#      ylab = "ACS 2015-2019")
+# abline(0,1, lty = 2)
+# axis(1, at = seq(0, 100000, 25000))
+# axis(2, at = seq(0, 100000, 25000))
+# segments(hra_total_pop$OFM_2020$Pop,
+#          acs_tmp$estimate + 
+#            qnorm(.95)*acs_tmp$SE,
+#          hra_total_pop$OFM_2020$Pop,
+#          acs_tmp$estimate - 
+#            qnorm(.95)*acs_tmp$SE,
+#          col = pop.cols[3])
+# dev.off()
 
+# By Race  ####
 
 for(race in unique(pop$Race_Lbl)){
   race.clean <- gsub(" and ", "/",
@@ -815,11 +1117,13 @@ for(race in unique(pop$Race_Lbl)){
   race.clean <- gsub(" or ", "/",
                      race.clean)
   
+  total.pyr <- list()
   
+  ## By Year ####
   for(year in c(2010, 2012, 2015,
                 2017, 2020)){
     
-    # Population Race Sex(OFM) pyramids by HRA ####
+    
     load(paste0('../Data/pop_', 
                 year, '_OFM.rda'))  
     hra_pop <- pop %>% 
@@ -830,18 +1134,8 @@ for(race in unique(pop$Race_Lbl)){
                 Pop = sum(Pop*prop.area)) %>% 
       filter(!is.na(HRA)) %>% 
       arrange(Race,Age)
-    pop.cols <- brewer.pal(n = 5,
-                           name = 'Blues')
     
-    
-    
-    
-    pdf(paste0("../PopPlots/",
-               year, "/Pyramid/Pyramid_",
-               year, "_", race, ".pdf"),
-        height = 5, width = 5)
-    pyr.tmp <- hra_pop %>% 
-      filter(Race_Lbl == race) %>% 
+    total.pyr[[paste0("year_", year)]] <- hra_pop %>% 
       group_by(Age, Age_Lbl,Sex_Lbl) %>% 
       summarise(Pop = sum(Pop)) %>% 
       ungroup() %>% 
@@ -853,65 +1147,200 @@ for(race in unique(pop$Race_Lbl)){
       dplyr::select(Female, Male) %>% 
       as.matrix()
     
-    row.names(pyr.tmp) <- hra_pop %>% 
-      arrange(Age, Age_Lbl) %>% 
-      group_by(Age) %>% 
-      summarise(Age_Lbl = unique(Age_Lbl)) %>% 
-      ungroup() %>% 
-      dplyr::select(Age_Lbl) %>% unlist()
-    pop.pyrs[[paste0("year_", year)]] <- pyr.tmp
-    x_at <- round(seq(0, max(pyr.tmp), length.out = 5),-3)
-    pyr.obj <- get.bPop.pyramid(pyr.tmp,
-                                legend = paste0("OFM, ", year),
-                                LRcolnames = c("Female", "Male"),
-                                LRmain = c("Female", "Male"))
+    ### County Population pyramid by Age, Race, and Year ####
+    # pdf(paste0("../PopPlots/",
+    #            year, "/Pyramid/Pyramid_",
+    #            year, "_", race, ".pdf"),
+    #     height = 5, width = 5)
+    jpeg(paste0("../PopPlots/",
+                year, "/Pyramid/Population/Pyramid_",
+                year, "_", race, ".jpeg"),
+         height = 480, width = 480)
+    {
+      pyr.tmp <- hra_pop %>% 
+        filter(Race_Lbl == race) %>% 
+        group_by(Age, Age_Lbl,Sex_Lbl) %>% 
+        summarise(Pop = sum(Pop)) %>% 
+        ungroup() %>% 
+        arrange(Age, Sex_Lbl) %>% 
+        pivot_wider(id_cols = c(Age, Age_Lbl),
+                    names_from = Sex_Lbl,
+                    values_from = Pop) %>% 
+        ungroup() %>% 
+        dplyr::select(Female, Male) %>% 
+        as.matrix()
+      
+      row.names(pyr.tmp) <- hra_pop %>% 
+        arrange(Age, Age_Lbl) %>% 
+        group_by(Age) %>% 
+        summarise(Age_Lbl = unique(Age_Lbl)) %>% 
+        ungroup() %>% 
+        dplyr::select(Age_Lbl) %>% unlist()
+      pop.pyrs[[paste0("year_", year)]] <- pyr.tmp
+      x_at <- round(seq(0, max(pyr.tmp), length.out = 5),-3)
+      pyr.obj <- get.bPop.pyramid(pyr.tmp,
+                                  legend = paste0("OFM, ", year),
+                                  LRcolnames = c("Female", "Male"),
+                                  LRmain = c("Female", "Male"))
+      
+      pop.pyramid.bayesPop.pyramid(pyr.obj, pyr1.par = list(col = pop.cols[3] , 
+                                                            border = pop.cols[3]),
+                                   legend_pos = "topright",
+                                   legend_text = paste0("OFM, ", year),
+                                   x_at = c(rev(-x_at[-1]), x_at),
+                                   x_labels = c(rev(x_at[-1]), x_at),
+                                   cex.axis = .75,
+                                   cex.sub = .75)
+      title(paste0("Population by Age and Sex\n",
+                   ""),
+            font.main = 2, outer = FALSE,
+            adj = 0, cex.main = 1)
+      
+      title(paste0("\n",
+                   "King County, ",
+                   race.clean, " (WA OFM, ", year, ")"),
+            font.main = 1, outer = FALSE,
+            adj = 0, cex.main = 1)
+    }
+    dev.off()
     
-    pop.pyramid.bayesPop.pyramid(pyr.obj, pyr1.par = list(col = pop.cols[3] , 
-                                                          border = pop.cols[3]),
-                                 legend_pos = "topright",
-                                 legend_text = paste0("OFM, ", year),
-                                 x_at = c(rev(-x_at[-1]), x_at),
-                                 x_labels = c(rev(x_at[-1]), x_at),
-                                 cex.axis = .9,
-                                 cex.sub = .75)
-    title(paste0("King County: ",
-                 race.clean),
-          font.main = 1, outer = FALSE,
-          adj = 0, cex.main = 1)
+    
+    ## County Population Prevalence pyramid by Age, Race, and Year ####
+    jpeg(paste0("../PopPlots/",
+                year, "/Pyramid/Prevalence/Pyramid_Prevalence_",
+                year, "_", race, ".jpeg"),
+         height = 480, width = 480)
+    {
+      pyr.tmp <- hra_pop %>% 
+        filter(Race_Lbl == race) %>% 
+        group_by(Age, Age_Lbl,Sex_Lbl) %>% 
+        summarise(Pop = sum(Pop)) %>% 
+        ungroup() %>% 
+        arrange(Age, Sex_Lbl) %>% 
+        pivot_wider(id_cols = c(Age, Age_Lbl),
+                    names_from = Sex_Lbl,
+                    values_from = Pop) %>% 
+        ungroup() %>% 
+        dplyr::select(Female, Male) %>% 
+        as.matrix()
+      
+      row.names(pyr.tmp) <- hra_pop %>% 
+        arrange(Age, Age_Lbl) %>% 
+        group_by(Age) %>% 
+        summarise(Age_Lbl = unique(Age_Lbl)) %>% 
+        ungroup() %>% 
+        dplyr::select(Age_Lbl) %>% unlist()
+      pop.pyrs[[paste0("year_", year)]] <- pyr.tmp
+      x_at <- seq(-.03, .03, .005)
+      
+      pyr.obj <- get.bPop.pyramid(pyr.tmp/sum(total.pyr[[paste0("year_", year)]]),
+                                  legend = paste0("OFM, ", year),
+                                  LRcolnames = c("Female", "Male"),
+                                  LRmain = c("Female", "Male"))
+      
+      pop.pyramid.bayesPop.pyramid(pyr.obj, pyr1.par = list(col = pop.cols[3] , 
+                                                            border = pop.cols[3]),
+                                   legend_pos = "topright",
+                                   legend_text = paste0("OFM, ", year),
+                                   x_at = x_at,
+                                   x_labels = abs(x_at),
+                                   cex.axis = .75,
+                                   cex.sub = .75,
+                                   x_lims = c(-.035, .035))
+      title(paste0("Prevalence of Population by Age and Sex\n",
+                   ""),
+            font.main = 2, outer = FALSE,
+            adj = 0, cex.main = 1)
+      
+      title(paste0("\n",
+                   "King County, ", race.clean),
+            font.main = 1, outer = FALSE,
+            adj = 0, cex.main = 1)
+    }
     dev.off()
     
   }
   
-  pdf(paste0("../PopPlots/",
-             "Pyramid_20102020_",
-             race, ".pdf"),
-      height = 5, width = 5)
-  x_at <- round(seq(0, max(pyr.tmp), length.out = 5),-3)
-  pyr.obj <- get.bPop.pyramid(list(pop.pyrs$year_2020, pop.pyrs$year_2010),
-                              legend = c("OFM, 2020", "OFM, 2010"),
-                              LRcolnames = c("Female", "Male"),
-                              LRmain = c("Female", "Male"))
+  #### County Population Pyramid by Race 2010, 2020 ####
+  # pdf(paste0("../PopPlots/",
+  #            "Pyramid_20102020_",
+  #            race, ".pdf"),
+  #     height = 5, width = 5)
+  jpeg(paste0("../PopPlots/Population/",
+              "Pyramid_20102020_",
+              race, ".jpeg"),
+       height = 480, width = 480)
+  {
+    x_at <- round(seq(0, max(pyr.tmp), length.out = 5),-3)
+    pyr.obj <- get.bPop.pyramid(list(pop.pyrs$year_2020,
+                                     pop.pyrs$year_2010),
+                                legend = c("OFM, 2020", "OFM, 2010"),
+                                LRcolnames = c("Female", "Male"),
+                                LRmain = c("Female", "Male"))
+    
+    pop.pyramid.bayesPop.pyramid(pyr.obj, pyr1.par = list(col = pop.cols[5] , 
+                                                          border = pop.cols[5]),
+                                 pyr2.par = list(col = pop.cols[3] , 
+                                                 border = pop.cols[3]),
+                                 legend_pos = "topright",
+                                 legend_text = c("OFM, 2020", "OFM, 2010"),
+                                 x_at = c(rev(-x_at[-1]), x_at),
+                                 x_labels = c(rev(x_at[-1]), x_at),
+                                 cex.axis = .65,
+                                 cex.sub = .75)
+    title(paste0("Population by Age and Sex\n",
+                 ""),
+          font.main = 2, outer = FALSE,
+          adj = 0, cex.main = 1)
+    
+    title(paste0("\n",
+                 paste0("King County, ", race.clean)),
+          font.main = 1, outer = FALSE,
+          adj = 0, cex.main = 1)
+  }
+  dev.off()
   
-  pop.pyramid.bayesPop.pyramid(pyr.obj, pyr1.par = list(col = pop.cols[5] , 
-                                                        border = pop.cols[5]),
-                               pyr2.par = list(col = pop.cols[3] , 
-                                               border = pop.cols[3]),
-                               legend_pos = "topright",
-                               legend_text = c("OFM, 2020", "OFM, 2010"),
-                               x_at = c(rev(-x_at[-1]), x_at),
-                               x_labels = c(rev(x_at[-1]), x_at),
-                               cex.axis = .9,
-                               cex.sub = .75)
-  title(paste0("King County: ",
-               race.clean),
-        font.main = 1, outer = FALSE,
-        adj = 0, cex.main = 1)
+  #### County Prevalence Pyramid by Race 2010, 2020 ####
+  jpeg(paste0("../PopPlots/Prevalence/",
+              "Pyramid_Prevalence_20102020_",
+              race, ".jpeg"),
+       height = 480, width = 480)
+  {
+    # x_at <- c(-.1, -.075, -.05, -.025, 0, .025, .05, .075, .1)
+    x_at <- seq(-.03, .03, .005)
+    pyr.obj <- get.bPop.pyramid(list(pop.pyrs$year_2020/sum(total.pyr$year_2020),
+                                     pop.pyrs$year_2010/sum(total.pyr$year_2010)),
+                                legend = c("OFM, 2020", "OFM, 2010"),
+                                LRcolnames = c("Female", "Male"),
+                                LRmain = c("Female", "Male"))
+    
+    pop.pyramid.bayesPop.pyramid(pyr.obj, pyr1.par = list(col = pop.cols[5] , 
+                                                          border = pop.cols[5]),
+                                 pyr2.par = list(col = pop.cols[3] , 
+                                                 border = pop.cols[3]),
+                                 legend_pos = "topright",
+                                 legend_text = c("OFM, 2020",
+                                                 "OFM, 2010"),
+                                 x_at = x_at,
+                                 x_labels = abs(x_at),
+                                 cex.axis = .75,
+                                 cex.sub = .75,
+                                 x_lims = c(-.035,.035))
+    title(paste0("Prevalence of Population by Age and Sex\n",
+                 ""),
+          font.main = 2, outer = FALSE,
+          adj = 0, cex.main = 1)
+    
+    title(paste0("\n",
+                 "King County, ", race.clean),
+          font.main = 1, outer = FALSE,
+          adj = 0, cex.main = 1)
+  }
   dev.off()
 }  
 
 
-
-
+## HRA by year ####
 for(year in c(2010, 2012, 2015,
               2017, 2020)){
   for(race in unique(hra_pop$Race_Lbl)){
@@ -920,7 +1349,7 @@ for(year in c(2010, 2012, 2015,
     race.clean <- gsub(" or ", "/",
                        race.clean)
     
-    # Population Race Sex(OFM) pyramids by HRA ####
+    ### Population Race Sex(OFM) pyramids by HRA ####
     load(paste0('../Data/pop_', 
                 year, '_OFM.rda'))  
     hra_pop <- pop %>% 
@@ -936,10 +1365,10 @@ for(year in c(2010, 2012, 2015,
     
     
     
-    pdf(paste0("../PopPlots/",
-               year, "/Pyramid/Pyramid_HRA_",
-               year, "_", race, ".pdf"),
-        height = 5, width = 5)
+    # pdf(paste0("../PopPlots/",
+    #            year, "/Pyramid/Pyramid_HRA_",
+    #            year, "_", race, ".pdf"),
+    #     height = 5, width = 5)
     for(hra.name in unique(hra_pop$HRA)){
       pyr.tmp <- hra_pop %>% 
         filter(HRA == hra.name) %>% 
@@ -947,7 +1376,21 @@ for(year in c(2010, 2012, 2015,
         arrange(Age, Sex_Lbl) %>% 
         pivot_wider(id_cols = c(Age, Age_Lbl),
                     names_from = Sex_Lbl,
-                    values_from = Pop) %>% 
+                    values_from = Pop,
+                    values_fill = 0) %>% 
+        ungroup() %>% 
+        dplyr::select(Female, Male) %>% 
+        as.matrix()
+      total.tmp <- hra_pop %>% 
+        filter(HRA == hra.name) %>% 
+        group_by(Age, Age_Lbl, Sex_Lbl) %>% 
+        summarise(Pop = sum(Pop, na.rm = TRUE)) %>% 
+        ungroup() %>% 
+        arrange(Age, Sex_Lbl) %>% 
+        pivot_wider(id_cols = c(Age, Age_Lbl),
+                    names_from = Sex_Lbl,
+                    values_from = Pop,
+                    values_fill = 0) %>% 
         ungroup() %>% 
         dplyr::select(Female, Male) %>% 
         as.matrix()
@@ -964,29 +1407,84 @@ for(year in c(2010, 2012, 2015,
                                   legend = paste0("OFM, ", year),
                                   LRcolnames = c("Female", "Male"),
                                   LRmain = c("Female", "Male"))
+      hra.name.file <- gsub("\\.","",
+                            hra.name)
+      hra.name.file <- gsub("/","",
+                            hra.name.file)
+      ### Population Pyramid by Race ####
+      jpeg(paste0("../PopPlots/",
+                  year, "/Pyramid/Population/Pyramid_HRA_",
+                  hra.name.file, "_",
+                  year, "_", race, ".jpeg"),
+           height = 480, width = 480)
+      {
+        pop.pyramid.bayesPop.pyramid(pyr.obj, pyr1.par = list(col = pop.cols[3] , 
+                                                              border = pop.cols[3]),
+                                     legend_pos = "topright",
+                                     legend_text = paste0("OFM, ", year),
+                                     x_at = c(rev(-x_at[-1]), x_at),
+                                     x_labels = c(rev(x_at[-1]), x_at),
+                                     cex.axis = .75,
+                                     cex.sub = .75)
+        title(paste0("Population by Age and Sex\n",
+                     ""),
+              font.main = 2, outer = FALSE,
+              adj = 0, cex.main = 1)
+        
+        title(paste0("\n",
+                     paste0(hra.name, ", ", race.clean)),
+              font.main = 1, outer = FALSE,
+              adj = 0, cex.main = 1)
+      }
+      dev.off()
       
-      pop.pyramid.bayesPop.pyramid(pyr.obj, pyr1.par = list(col = pop.cols[3] , 
-                                                            border = pop.cols[3]),
-                                   legend_pos = "topright",
-                                   legend_text = paste0("OFM, ", year),
-                                   x_at = c(rev(-x_at[-1]), x_at),
-                                   x_labels = c(rev(x_at[-1]), x_at),
-                                   cex.axis = .9,
-                                   cex.sub = .75)
-      title(paste0(hra.name, ": ",
-                   race.clean),
-            font.main = 1, outer = FALSE,
-            adj = 0, cex.main = 1)
+      ### Prevalence Pyramid by Race ####
+      hra.name.file <- gsub("\\.","",
+                            hra.name)
+      hra.name.file <- gsub("/","",
+                            hra.name.file)
+      jpeg(paste0("../PopPlots/",
+                  year, "/Pyramid/Prevalence/Pyramid_Prevalence_HRA_",
+                  hra.name.file, "_",
+                  year, "_", race, ".jpeg"),
+           height = 480, width = 480)
+      {
+        # x_at <- c(-.1, -.075, -.05, -.025, 0, .025, .05, .075, .1)
+        x_at <- seq(-.05, .05, .01)
+        pyr.obj <- get.bPop.pyramid(pyr.tmp/sum(total.tmp),
+                                    legend = paste0("OFM, ", year),
+                                    LRcolnames = c("Female", "Male"),
+                                    LRmain = c("Female", "Male"))
+        pop.pyramid.bayesPop.pyramid(pyr.obj, 
+                                     pyr1.par = list(col = pop.cols[3] , 
+                                                     border = pop.cols[3]),
+                                     legend_pos = "topright",
+                                     legend_text = paste0("OFM, ", year),
+                                     x_at = x_at,
+                                     x_labels = abs(x_at),
+                                     cex.axis = .75,
+                                     cex.sub = .75,
+                                     x_lims = c(-.065,.065))
+        title(paste0("Prevalence of Population by Age and Sex\n",
+                     ""),
+              font.main = 2, outer = FALSE,
+              adj = 0, cex.main = 1)
+        
+        title(paste0("\n",
+                     hra.name, ", ", race.clean),
+              font.main = 1, outer = FALSE,
+              adj = 0, cex.main = 1)
+      }
+      dev.off()
     }
-    dev.off()
-    
-    ## With County ####
     
     
-    pdf(paste0("../PopPlots/", year,
-               "/Pyramid/Pyramid_HRAandCounty_",
-               year, "_", race ,".pdf"),
-        height = 5, width = 5)
+    ### With County ####
+    
+    # pdf(paste0("../PopPlots/", year,
+    #            "/Pyramid/Pyramid_HRAandCounty_",
+    #            year, "_", race ,".pdf"),
+    #     height = 5, width = 5)
     for(hra.name in unique(hra_pop$HRA)){
       pyr.tmp <- hra_pop %>%
         filter(HRA == hra.name) %>% 
@@ -994,7 +1492,21 @@ for(year in c(2010, 2012, 2015,
         arrange(Age, Sex_Lbl) %>% 
         pivot_wider(id_cols = c(Age, Age_Lbl),
                     names_from = Sex_Lbl,
-                    values_from = Pop) %>% 
+                    values_from = Pop,
+                    values_fill = 0) %>% 
+        ungroup() %>% 
+        dplyr::select(Female, Male) %>% 
+        as.matrix()
+      hra.total.tmp <- hra_pop %>%
+        filter(HRA == hra.name) %>% 
+        group_by(Age, Age_Lbl, Sex_Lbl) %>% 
+        summarise(Pop = sum(Pop, na.rm = TRUE)) %>% 
+        ungroup() %>% 
+        arrange(Age, Sex_Lbl) %>% 
+        pivot_wider(id_cols = c(Age, Age_Lbl),
+                    names_from = Sex_Lbl,
+                    values_from = Pop,
+                    values_fill = 0) %>% 
         ungroup() %>% 
         dplyr::select(Female, Male) %>% 
         as.matrix()
@@ -1005,7 +1517,19 @@ for(year in c(2010, 2012, 2015,
         arrange(Age, Sex_Lbl) %>% 
         pivot_wider(id_cols = c(Age, Age_Lbl),
                     names_from = Sex_Lbl,
-                    values_from = County_Sum) %>% 
+                    values_from = County_Sum,
+                    values_fill = 0) %>% 
+        ungroup() %>% 
+        dplyr::select(Female, Male) %>% 
+        as.matrix()
+      county.total.pyr <- hra_pop %>% 
+        group_by(Age, Age_Lbl, Sex_Lbl) %>% 
+        summarise(County_Sum = sum(Pop)) %>% 
+        arrange(Age, Sex_Lbl) %>% 
+        pivot_wider(id_cols = c(Age, Age_Lbl),
+                    names_from = Sex_Lbl,
+                    values_from = County_Sum,
+                    values_fill = 0) %>% 
         ungroup() %>% 
         dplyr::select(Female, Male) %>% 
         as.matrix()
@@ -1019,7 +1543,7 @@ for(year in c(2010, 2012, 2015,
       
       pyr.list <- list(county.pyr,
                        pyr.tmp)
-      x_at <- round(seq(0, max(county.pyr, length.out = 5),-2))
+      x_at <- round(seq(0, max(county.pyr), length.out = 5),-2)
       pyr.obj <- get.bPop.pyramid(pyr.list, 
                                   legend = c("King County", "HRA"),
                                   LRcolnames = c("Female", "Male"),
@@ -1032,26 +1556,113 @@ for(year in c(2010, 2012, 2015,
                          race)
       race.clean <- gsub(" or ", "/",
                          race.clean)
+      ### Population Pyramid by Race ####
+      hra.name.file <- gsub("\\.","",
+                            hra.name)
+      hra.name.file <- gsub("/","",
+                            hra.name.file)
+      jpeg(paste0("../PopPlots/", year,
+                  "/Pyramid/Population/Pyramid_HRAandCounty_",
+                  hra.name.file, "_", year, "_", race ,".jpeg"),
+           height = 480, width = 480)
+      {
+        pop.pyramid.bayesPop.pyramid(pyr.obj, pyr1.par = list(col = pop.cols[4] , 
+                                                              border = pop.cols[4]),
+                                     pyr2.par = list(col = pop.cols[2],
+                                                     border = pop.cols[2]),
+                                     legend_pos = "topright",
+                                     legend_text = c("King County", "HRA"),
+                                     x_at = c(rev(-x_at[-1]), x_at),
+                                     x_labels = c(rev(x_at[-1]), x_at),
+                                     cex.axis = .75,
+                                     cex.sub = .75)
+        title(paste0(race.clean, 
+                     " Population by Age and Sex\n",
+                     ""),
+              font.main = 2, outer = FALSE,
+              adj = 0, cex.main = 1)
+        
+        title(paste0("\n",
+                     paste0(hra.name,
+                            " and King County (WA OFM, ",
+                            year, ")")),
+              font.main = 1, outer = FALSE,
+              adj = 0, cex.main = 1)
+      }
+      dev.off() 
       
-      pop.pyramid.bayesPop.pyramid(pyr.obj, pyr1.par = list(col = pop.cols[4] , 
-                                                            border = pop.cols[4]),
-                                   pyr2.par = list(col = pop.cols[2],
-                                                   border = pop.cols[2]),
-                                   legend_pos = "topright",
-                                   legend_text = paste0("OFM, ", year),
-                                   x_at = c(rev(-x_at[-1]), x_at),
-                                   x_labels = c(rev(x_at[-1]), x_at),
-                                   cex.axis = .9,
-                                   cex.sub = .75)
-      title(paste0(hra.name, ": ",
-                   race.clean),
-            font.main = 1, outer = FALSE,
-            adj = 0, cex.main = 1)
-      
+      ### Prevalence Pyramid by Race ####
+      hra.name.file <- gsub("\\.","",
+                            hra.name)
+      hra.name.file <- gsub("/","",
+                            hra.name.file)
+      jpeg(paste0("../PopPlots/", year,
+                  "/Pyramid/Prevalence/Pyramid_HRAandCounty_",
+                  hra.name.file, "_", year, "_", race ,".jpeg"),
+           height = 480, width = 480)
+      {
+        pyr.list <- list(county.pyr/sum(county.total.pyr),
+                         pyr.tmp/sum(hra.total.tmp))
+        # x_at <- c(-.3, -.2, -.1, -.05, 0, .05, .1, .2 , .3)
+        x_at <- seq(-0.05, 0.05, .01)
+        pyr.obj <- get.bPop.pyramid(pyr.list, 
+                                    legend = c("King County", "HRA"),
+                                    LRcolnames = c("Female", "Male"),
+                                    LRmain = c("Female", "Male"))
+        
+        pop.pyramid.bayesPop.pyramid(pyr.obj,
+                                     pyr1.par = list(col = pop.cols[4] , 
+                                                     border = pop.cols[4]),
+                                     pyr2.par = list(col = pop.cols[2],
+                                                     border = pop.cols[2]),
+                                     legend_pos = "topright",
+                                     legend_text = c("King County", "HRA"),
+                                     x_at = x_at,
+                                     x_labels = abs(x_at),
+                                     cex.axis = .75,
+                                     cex.sub = .75,
+                                     x_lims = c(-0.065,0.065))
+        title(paste0("Prevalence of Population by Age and Sex\n",
+                     ""),
+              font.main = 2, outer = FALSE,
+              adj = 0, cex.main = 1)
+        
+        title(paste0("\n",
+                     paste0(hra.name,
+                            ", ", race.clean, " (WA OFM, ",
+                            year, ")")),
+              font.main = 1, outer = FALSE,
+              adj = 0, cex.main = 1)
+      }
+      dev.off() 
     }
-    dev.off()
+  }
+}
+
+for(year in c(2010, 2012, 2015,
+              2017, 2020)){
+  for(race in unique(hra_pop$Race_Lbl)){
+    race.clean <- gsub(" and ", "/",
+                       race)
+    race.clean <- gsub(" or ", "/",
+                       race.clean)
     
-    # Population maps by HRA####
+    
+    load(paste0('../Data/pop_', 
+                year, '_OFM.rda'))  
+    hra_pop <- pop %>% 
+      mutate(GEOID = as.character(Geoid)) %>% 
+      left_join(tracts_to_hra$acs5_2019) %>% 
+      group_by(FID_HRA_20, Race, Race_Lbl, Sex_Lbl, Age, Age_Lbl) %>% 
+      summarise(HRA = unique(HRA2010v2_),
+                Pop = sum(Pop*prop.area)) %>% 
+      filter(!is.na(HRA)) %>% 
+      arrange(Race,Age)
+    pop.cols <- brewer.pal(n = 5,
+                           name = 'Blues')
+    
+    
+    ## Population Maps ####
     
     hra_age_pop <- hra_pop %>% 
       filter(Race_Lbl == race) %>% 
@@ -1067,14 +1678,14 @@ for(year in c(2010, 2012, 2015,
     breaks <- pop.int.hra$brks
     breaks <- c(0, 250, 500,
                 750, 1000, 1500,
-                2000, 3000, 4000,
-                5750)
+                2500, 5000,
+                7500, 10000)
     ## Get color based on RColorBrwere palette for 
     ## each area
     
     pop.pal <- brewer.pal(n = 9, name = "Blues")
     
-    
+    ### by Race x Age ####
     for(age in unique(hra_age_pop$Age_Lbl)){
       
       hra_age_tmp <- hra_age_pop %>% 
@@ -1089,14 +1700,81 @@ for(year in c(2010, 2012, 2015,
       pop.col.hra <- findColours(pop.int.hra, pop.pal)
       
       
-      pdf(paste0("../PopPlots/", 
-                 year, "/OFM_Ages/",
-                 age, "/OFM_",
-                 year, "_age", age,
-                 "_", race, ".pdf"),
-          height = 5, width = 5)
+      # pdf(paste0("../PopPlots/", 
+      #            year, "/OFM_Ages/",
+      #            age, "/OFM_",
+      #            year, "_age", age,
+      #            "_", race, ".pdf"),
+      #     height = 5, width = 5)
+      jpeg(paste0("../PopPlots/", 
+                  year, "/OFM_Ages/",
+                  age, "/Population/OFM_",
+                  year, "_age", age,
+                  "_", race, ".jpeg"),
+           height = 480, width = 480)
+      {
+        par(lend = 1,
+            mar = c(0,0,2,0),
+            oma = c(1,1,1,1))
+        plot(hra,
+             col = pop.col.hra,
+             border = 'grey48', lwd = .25,
+             main = "")
+        legend('bottomleft',
+               title = 'Population',
+               title.adj = 0,
+               ncol = 2,
+               bty = 'n',
+               cex = 0.75,
+               border = FALSE,
+               fill = pop.pal,
+               legend = names(attr(pop.col.hra, 'table')))
+        title(paste0("Population Ages ", age, "\n",
+                     ""),
+              font.main = 2, outer = FALSE,
+              adj = 0, cex.main = 1)
+        
+        title(paste0("\n",
+                     "King County, ",
+                     race.clean, " (WA OFM, ", year, ")"),
+              font.main = 1, outer = FALSE,
+              adj = 0, cex.main = 1)
+      }
+      dev.off()
+    }
+    
+    
+    ### by Race only ####
+    breaks <- c(0, 250, 500,
+                1000, 
+                2500, 5000, 10000,
+                25000, 50000, 70000)
+    hra_tmp <- hra_age_pop %>% 
+      group_by(HRA) %>% 
+      summarise(Pop = sum(Pop, na.rm = TRUE))
+    hra_tmp <- hra_tmp[match(hra_tmp$HRA,
+                             hra@data$HRA2010v2_), ]
+    
+    hra_total_tmp <- hra_pop %>% 
+      group_by(HRA) %>% 
+      summarise(Pop = sum(Pop, na.rm = TRUE))
+    hra_total_tmp <- hra_total_tmp[match(hra_total_tmp$HRA,
+                                         hra@data$HRA2010v2_), ]
+    
+    pop.int.hra <- classIntervals(hra_tmp$Pop,
+                                  style = "fixed",
+                                  fixedBreaks = breaks,
+                                  n = 9)
+    pop.col.hra <- findColours(pop.int.hra, pop.pal)
+    
+    jpeg(paste0("../PopPlots/", 
+                year, "/Population/OFM_",
+                year, 
+                "_", race, ".jpeg"),
+         height = 480, width = 480)
+    {
       par(lend = 1,
-          mar = c(0,0,1,0),
+          mar = c(0,0,2,0),
           oma = c(1,1,1,1))
       plot(hra,
            col = pop.col.hra,
@@ -1107,21 +1785,24 @@ for(year in c(2010, 2012, 2015,
              title.adj = 0,
              ncol = 2,
              bty = 'n',
-             cex = 0.5,
+             cex = 0.75,
              border = FALSE,
              fill = pop.pal,
              legend = names(attr(pop.col.hra, 'table')))
-      title(paste0("King County, ",
-                   year, ": ",
-                   race, ", Ages ",
-                   age),
+      title(paste0("Total Population\n",
+                   ""),
+            font.main = 2, outer = FALSE,
+            adj = 0, cex.main = 1)
+      
+      title(paste0("\n",
+                   "King County, ",
+                   race.clean, " (WA OFM, ", year, ")"),
             font.main = 1, outer = FALSE,
             adj = 0, cex.main = 1)
-      dev.off()
     }
+    dev.off()
     
-    
-    ### Prevalence of age group in HRA ####
+    ## Prevalence Maps ####
     hra_total_pop <- hra_pop %>% 
       group_by(HRA) %>% 
       summarise(PopTotal = sum(Pop)) %>% 
@@ -1146,8 +1827,8 @@ for(year in c(2010, 2012, 2015,
     breaks <- prop.int.hra$brks
     breaks <- c(0, .005, .01,
                 .02, .03, .04,
-                .05, .075, .10, .125)
-    
+                .05, .075, .10, .15)
+    ### by Race x Age ####
     for(age in unique(hra_age_pop$Age_Lbl)){
       
       hra_age_tmp <- hra_age_pop %>% 
@@ -1161,40 +1842,114 @@ for(year in c(2010, 2012, 2015,
                                      n = 9)
       prop.col.hra <- findColours(prop.int.hra, prop.pal)
       
-      pdf(paste0("../PopPlots/", 
-                 year, "/OFM_Ages/",
-                 age, "/OFM_",
-                 year, "_agePrev_", age,
-                 "_", race, ".pdf"),
-          height = 5, width = 5)
+      # pdf(paste0("../PopPlots/", 
+      #            year, "/OFM_Ages/",
+      #            age, "/OFM_",
+      #            year, "_agePrev_", age,
+      #            "_", race, ".pdf"),
+      #     height = 5, width = 5)
+      jpeg(paste0("../PopPlots/", 
+                  year, "/OFM_Ages/",
+                  age, "/Prevalence/OFM_",
+                  year, "_agePrev_", age,
+                  "_", race, ".jpeg"),
+           height = 480, width = 480)
+      {
+        par(lend = 1,
+            mar = c(0,0,2,0),
+            oma = c(1,1,1,1))
+        plot(hra,
+             col = prop.col.hra,
+             border = 'grey48', lwd = .25,
+             main = "",
+             adj = 0)
+        legend('bottomleft',
+               title = 'Prevalence',
+               title.adj = 0,
+               ncol = 2,
+               bty = 'n',
+               cex = 0.75,
+               border = FALSE,
+               fill = prop.pal,
+               legend = names(attr(prop.col.hra, 'table')))
+        title(paste0("Prevalence of Population Ages ", age, "\n",
+                     ""),
+              font.main = 2, outer = FALSE,
+              adj = 0, cex.main = 1)
+        
+        title(paste0("\n",
+                     "King County, ", 
+                     race.clean, " (WA OFM ", year, ")"),
+              font.main = 1, outer = FALSE,
+              adj = 0, cex.main = 1)
+      }
+      dev.off()
+    }
+    
+    hra_tmp <- hra_pop %>% 
+      filter(Race_Lbl == race) %>%
+      group_by(HRA) %>% 
+      summarise(Pop = sum(Pop)) %>% 
+      left_join(hra_total_pop) %>% 
+      group_by(HRA) %>% 
+      mutate(RacePrev = Pop/PopTotal) %>% 
+      ungroup()
+    
+    prop.pal <- brewer.pal(n = 9, name = "YlGnBu")
+    
+    prop.int.hra <- classIntervals(hra_tmp$RacePrev,
+                                   style = 'jenks',
+                                   n = 9)
+    
+    breaks <- prop.int.hra$brks
+    breaks <- c(0, .005, .01,
+                .025, .05, .1,
+                .25, .5, .75, .95)
+    prop.int.hra <- classIntervals(hra_tmp$RacePrev,
+                                   style = "fixed",
+                                   fixedBreaks = breaks,
+                                   n = 9)
+    prop.col.hra <- findColours(prop.int.hra, prop.pal)
+    ### by Race only ####
+    
+    jpeg(paste0("../PopPlots/", 
+                year, "/Prevalence/OFM_",
+                year, 
+                "_", race, ".jpeg"),
+         height = 480, width = 480)
+    {
       par(lend = 1,
-          mar = c(0,0,1,0),
+          mar = c(0,0,2,0),
           oma = c(1,1,1,1))
       plot(hra,
            col = prop.col.hra,
            border = 'grey48', lwd = .25,
-           main = "",
-           adj = 0)
+           main = "")
       legend('bottomleft',
              title = 'Prevalence',
              title.adj = 0,
              ncol = 2,
              bty = 'n',
-             cex = 0.5,
+             cex = 0.75,
              border = FALSE,
              fill = prop.pal,
              legend = names(attr(prop.col.hra, 'table')))
-      title(paste0("King County, ",
-                   year, ": ",
-                   race, ", Ages ",
-                   age),
+      title(paste0("Population Prevalence\n",
+                   ""),
+            font.main = 2, outer = FALSE,
+            adj = 0, cex.main = 1)
+      
+      title(paste0("\n",
+                   "King County, ",
+                   race.clean, " (WA OFM, ", year, ")"),
             font.main = 1, outer = FALSE,
             adj = 0, cex.main = 1)
-      dev.off()
     }
+    dev.off()
     
     
-    ### Distribution of age/race group across HRAs ####
+    
+    ## Distribution Maps ####
     age_total_pop <- hra_pop %>%
       filter(Race_Lbl == race) %>% 
       group_by(Age, Age_Lbl) %>% 
@@ -1210,19 +1965,20 @@ for(year in c(2010, 2012, 2015,
       arrange(Age) %>% 
       left_join(age_total_pop) %>% 
       group_by(HRA, Age, Age_Lbl) %>% 
-      mutate(AgePrev = Pop/PopTotal)
+      mutate(AgeDist = Pop/PopTotal)
     
     prop.pal <- brewer.pal(n = 9, name = "YlGnBu")
     
-    prop.int.hra <- classIntervals(hra_age_pop$AgePrev,
+    prop.int.hra <- classIntervals(hra_age_pop$AgeDist,
                                    style = 'jenks',
                                    n = 9)
     
     breaks <- prop.int.hra$brks
     breaks <- c(0, .005, .01,
                 .02, .03, .04,
-                .05, .065, .08, .1)
+                .05, .1, .15, .3)
     
+    ### by Race x Age ####
     for(age in unique(hra_age_pop$Age_Lbl)){
       
       hra_age_tmp <- hra_age_pop %>% 
@@ -1230,20 +1986,26 @@ for(year in c(2010, 2012, 2015,
       hra_age_tmp <- hra_age_tmp[match(hra_age_tmp$HRA,
                                        hra@data$HRA2010v2_), ]
       
-      prop.int.hra <- classIntervals(hra_age_tmp$AgePrev,
+      prop.int.hra <- classIntervals(hra_age_tmp$AgeDist,
                                      style = "fixed",
                                      fixedBreaks = breaks,
                                      n = 9)
       prop.col.hra <- findColours(prop.int.hra, prop.pal)
       
-      pdf(paste0("../PopPlots/", 
-                 year, "/OFM_Ages/",
-                 age, "/OFM_",
-                 year, "_ageDist_", age,
-                 "_", race, ".pdf"),
-          height = 5, width = 5)
+      # pdf(paste0("../PopPlots/", 
+      #            year, "/OFM_Ages/",
+      #            age, "/OFM_",
+      #            year, "_ageDist_", age,
+      #            "_", race, ".pdf"),
+      #     height = 5, width = 5)
+      jpeg(paste0("../PopPlots/", 
+                  year, "/OFM_Ages/",
+                  age, "/Distribution/OFM_",
+                  year, "_ageDist_", age,
+                  "_", race, ".jpeg"),
+           height = 480, width = 480)
       par(lend = 1,
-          mar = c(0,0,1,0),
+          mar = c(0,0,2,0),
           oma = c(1,1,1,1))
       plot(hra,
            col = prop.col.hra,
@@ -1255,1093 +2017,86 @@ for(year in c(2010, 2012, 2015,
              title.adj = 0,
              ncol = 2,
              bty = 'n',
-             cex = 0.5,
+             cex =  0.75,
              border = FALSE,
              fill = prop.pal,
              legend = names(attr(prop.col.hra, 'table')))
-      title(paste0("King County, ",
-                   year, ": ",
-                   race, ", Ages ",
-                   age),
+      title(paste0("Distribution of ",
+                   " Population Ages ", age, "\n",
+                   ""),
+            font.main = 2, outer = FALSE,
+            adj = 0, cex.main = 1)
+      
+      title(paste0("\n",
+                   "King County, ",
+                   race.clean, " (WA OFM, ", year, ")"),
             font.main = 1, outer = FALSE,
             adj = 0, cex.main = 1)
       dev.off()
     }
+    
+    hra_tmp <- hra_pop %>% 
+      filter(Race_Lbl == race) %>%
+      group_by(HRA) %>% 
+      summarise(Pop = sum(Pop)) %>% 
+      mutate(Dist = Pop/sum(Pop))
+    
+    prop.pal <- brewer.pal(n = 9, name = "YlGnBu")
+    
+    prop.int.hra <- classIntervals(hra_tmp$Dist,
+                                   style = 'jenks',
+                                   n = 9)
+    
+    breaks <- prop.int.hra$brks
+    breaks <- c(0, .005, .01,
+                .02, .03, .04,
+                .05, .065, .085, .11)
+    prop.int.hra <- classIntervals(hra_tmp$Dist,
+                                   style = "fixed",
+                                   fixedBreaks = breaks,
+                                   n = 9)
+    prop.col.hra <- findColours(prop.int.hra, prop.pal)
+    
+    ### by Race only ####
+    jpeg(paste0("../PopPlots/", 
+                year, "/Distribution/OFM_",
+                year, 
+                "_", race, ".jpeg"),
+         height = 480, width = 480)
+    {
+      par(lend = 1,
+          mar = c(0,0,2,0),
+          oma = c(1,1,1,1))
+      plot(hra,
+           col = prop.col.hra,
+           border = 'grey48', lwd = .25,
+           main = "")
+      legend('bottomleft',
+             title = 'Distribution',
+             title.adj = 0,
+             ncol = 2,
+             bty = 'n',
+             cex = 0.75,
+             border = FALSE,
+             fill = prop.pal,
+             legend = names(attr(prop.col.hra, 'table')))
+      title(paste0("Population Distribution\n",
+                   ""),
+            font.main = 2, outer = FALSE,
+            adj = 0, cex.main = 1)
+      
+      title(paste0("\n",
+                   "King County, ",
+                   race.clean, " (WA OFM, ", year, ")"),
+            font.main = 1, outer = FALSE,
+            adj = 0, cex.main = 1)
+    }
+    dev.off()
+    
   }          
 }
 
 
-# Household Size ####
-
-if(!dir.exists("../household_size/Pyramid/")){
-  dir.create("../household_size/Pyramid")
-}
-
-if(!dir.exists("../household_size/HRA/")){
-  dir.create("../household_size/HRA/")
-}
-
-hh_size_hra <- hh_tract %>% 
-  filter(Year >= 2010) %>% 
-  left_join(tracts_to_hra$acs5_2019,
-            by = c("GEOID" = "GEOID")) %>% 
-  group_by(FID_HRA_20, HRA2010v2_, Year, hh_size, tenure) %>% 
-  summarise(estimate = sum(estimate*prop.area, na.rm = TRUE),
-            moe = sum(moe*prop.area, na.rm = TRUE)) %>% 
-  mutate(SE = moe/qnorm(.95),
-         CoV = SE/estimate)
-
-hh_size_hra_2000 <- hh_tract %>% 
-  filter(Year < 2010) %>% 
-  left_join(tracts_to_hra$acs5_2009,
-            by = c("GEOID" = "GEOID")) %>% 
-  group_by(FID_HRA_20, HRA2010v2_, Year, hh_size, tenure) %>% 
-  summarise(estimate = sum(estimate*prop.area, na.rm = TRUE),
-            moe = sum(moe*prop.area, na.rm = TRUE)) %>% 
-  mutate(SE = moe/qnorm(.95),
-         CoV = SE/estimate)
-
-
-pop.pyrs <- list()
-
-## Pyramids ####
-for(year in c(2010, 2014, 2019)){
-  pdf(paste0("../household_size/Pyramid/Pyramid_",
-             year, "_hhsize_by_tenure_HRA.pdf"),
-      height = 5, width = 5)
-  for(hra.name in hra@data$HRA2010v2_){
-    hh_size_kc <- hh_size_hra %>% 
-      filter(Year == year) %>%
-      filter(HRA2010v2_ == hra.name) %>% 
-      filter(!is.na(hh_size) &
-               hh_size > 0) %>% 
-      group_by(hh_size, tenure) %>% 
-      summarise(estimate = sum(estimate, na.rm = TRUE),
-                SE = sum(SE, na.rm = TRUE)) %>% 
-      mutate(CoV = SE/estimate)
-    
-    pop.pyr <- hh_size_kc %>% 
-      filter(hh_size > 0) %>% 
-      pivot_wider(id_cols = hh_size,
-                  names_from = tenure,
-                  values_from = estimate,
-                  values_fill = 0) %>% 
-      ungroup() %>% 
-      dplyr::select(Owner, Renter) %>% 
-      as.matrix()
-    row.names(pop.pyr) <- c(1:6, "7+")
-    
-    
-    # x_at <- round(seq(0, max(pop.pyr), length.out = 5),-2)
-    x_at <- c(0, 1000, 5000, 10000, 15000)
-    pyr.obj <- get.bPop.pyramid(pop.pyr,
-                                legend = paste0("ACS ", 
-                                                year-4, 
-                                                "-", year),
-                                LRcolnames = c("Owner", "Renter"),
-                                LRmain = c("Owner", "Renter"))
-    
-    pop.pyramid.bayesPop.pyramid(pyr.obj, pyr1.par = list(col = pop.cols[3] , 
-                                                          border = pop.cols[3]),
-                                 legend_pos = "topright",
-                                 legend_text = paste0("ACS ", 
-                                                      year-4, 
-                                                      "-", year),
-                                 x_at = c(rev(-x_at[-1]), x_at),
-                                 x_labels = c(rev(x_at[-1]), x_at),
-                                 cex.axis = .9,
-                                 cex.sub = .75,
-                                 x_lims = c(-17000,17000))
-    title(paste0(hra.name,
-                 ": Households"),
-          font.main = 1, outer = FALSE,
-          adj = 0, cex.main = 1)
-  }
-  dev.off()
-  
-  
-  pdf(paste0("../household_size/Pyramid/Pyramid_",
-             year, "_hhsize_by_tenure.pdf"),
-      height = 5, width = 5)
-  {
-    hh_size_kc <- hh_size_hra %>% 
-      filter(Year == year) %>%
-      filter(!is.na(hh_size) &
-               hh_size > 0) %>% 
-      group_by(hh_size, tenure) %>% 
-      summarise(estimate = sum(estimate, na.rm = TRUE),
-                SE = sum(SE, na.rm = TRUE)) %>% 
-      mutate(CoV = SE/estimate)
-    
-    pop.pyrs[[paste0("year_",year)]] <- hh_size_kc %>% 
-      filter(hh_size > 0) %>% 
-      pivot_wider(id_cols = hh_size,
-                  names_from = tenure,
-                  values_from = estimate,
-                  values_fill = 0) %>% 
-      ungroup() %>% 
-      dplyr::select(Owner, Renter) %>% 
-      as.matrix()
-    row.names(pop.pyrs[[paste0("year_", year)]]) <- c(1:6, "7+")
-    x_at <- round(seq(0, max(unlist(pop.pyrs)), length.out = 5),-2)
-    pyr.obj <- get.bPop.pyramid(pop.pyrs[[paste0("year_", year)]],
-                                legend = paste0("ACS ", 
-                                                year-4, 
-                                                "-", year),
-                                LRcolnames = c("Owner", "Renter"),
-                                LRmain = c("Owner", "Renter"))
-    
-    pop.pyramid.bayesPop.pyramid(pyr.obj, pyr1.par = list(col = pop.cols[3] , 
-                                                          border = pop.cols[3]),
-                                 legend_pos = "topright",
-                                 legend_text = paste0("ACS ", 
-                                                      year-4, 
-                                                      "-", year),
-                                 x_at = c(rev(-x_at[-1]), x_at),
-                                 x_labels = c(rev(x_at[-1]), x_at),
-                                 cex.axis = .9,
-                                 cex.sub = .75)
-    title(paste0("King County, ", year, ": Households"),
-          font.main = 1, outer = FALSE,
-          adj = 0, cex.main = 1)
-  }
-  dev.off()
-  ## Compare 2010, 2015-2019 ####
-  if(year == 2019){
-    pdf(paste0("../household_size/Pyramid/Pyramid_",
-               "20102019_hhsize_by_tenure.pdf"),
-        height = 5, width = 5)
-    {
-      x_at <- round(seq(0, max(unlist(pop.pyrs)), length.out = 5),-4)
-      pyr.obj <- get.bPop.pyramid(list(pop.pyrs$year_2019, pop.pyrs$year_2010),
-                                  legend = c("ACS 2015-2019", "Census 2010"),
-                                  LRcolnames = c("Owner", "Renter"),
-                                  LRmain = c("Owner", "Renter"))
-      
-      pop.pyramid.bayesPop.pyramid(pyr.obj,
-                                   pyr1.par = list(col = pop.cols[5] ,
-                                                   border = pop.cols[5]),
-                                   pyr2.par = list(col = pop.cols[3] , 
-                                                   border = pop.cols[3]),
-                                   legend_pos = "topright",
-                                   legend_text = c("ACS 2015-2019",
-                                                   "Census 2010"),
-                                   x_at = c(rev(-x_at[-1]), x_at),
-                                   x_labels = c(rev(x_at[-1]), x_at),
-                                   cex.axis = .65,
-                                   cex.sub = .75)
-      title(paste0("King County: Households by Tenure"),
-            font.main = 1, outer = FALSE,
-            adj = 0, cex.main = 1)
-    }
-    dev.off()
-    
-    pdf(paste0("../household_size/Pyramid/Pyramid_Prevalence_",
-               "20102019_hhsize_by_tenure.pdf"),
-        height = 5, width = 5)
-    {
-      x_at <- c(-.2, -.15, -.1, -.05, 0, .05, .1, .15, .2)
-      x_labels <- abs(x_at)
-      pyr.obj <- get.bPop.pyramid(list(pop.pyrs$year_2019/sum(pop.pyrs$year_2019),
-                                       pop.pyrs$year_2010/sum(pop.pyrs$year_2010)),
-                                  legend = c("ACS 2015-2019",
-                                             "Census 2010"),
-                                  LRcolnames = c("Owner", "Renter"),
-                                  LRmain = c("Owner", "Renter"))
-      
-      pop.pyramid.bayesPop.pyramid(pyr.obj,
-                                   pyr1.par = list(col = pop.cols[5] ,
-                                                   border = pop.cols[5]),
-                                   pyr2.par = list(col = pop.cols[3] , 
-                                                   border = pop.cols[3]),
-                                   legend_pos = "topright",
-                                   legend_text = c("ACS 2015-2019",
-                                                   "Census 2010"),
-                                   x_at = x_at,
-                                   x_labels = x_labels,
-                                   cex.axis = .65,
-                                   cex.sub = .75,
-                                   x_lims = c(-.25, .25))
-      title(paste0("King County: Prevalence of Households by Tenure"),
-            font.main = 1, outer = FALSE,
-            adj = 0, cex.main = 1)
-    }
-    dev.off()
-    
-    pdf(paste0("../household_size/Pyramid/Pyramid_",
-               "20102019_hhsize_by_tenure_HRA.pdf"),
-        height = 5, width = 5)
-    for(hra.name in hra@data$HRA2010v2_){
-      hh_size_kc <- hh_size_hra %>% 
-        filter(HRA2010v2_ == hra.name) %>% 
-        filter(!is.na(hh_size) &
-                 hh_size > 0) %>% 
-        group_by(Year, hh_size, tenure) %>% 
-        summarise(estimate = sum(estimate, na.rm = TRUE),
-                  SE = sum(SE, na.rm = TRUE)) %>% 
-        mutate(CoV = SE/estimate)
-      
-      pyr.1 <-  hh_size_kc %>% 
-        filter(Year == 2019) %>% 
-        filter(hh_size > 0) %>% 
-        pivot_wider(id_cols = hh_size,
-                    names_from = tenure,
-                    values_from = estimate,
-                    values_fill = 0) %>% 
-        ungroup() %>% 
-        dplyr::select(Owner, Renter) %>% 
-        as.matrix()
-      pyr.2 <-  hh_size_kc %>% 
-        filter(Year == 2010) %>% 
-        filter(hh_size > 0) %>% 
-        pivot_wider(id_cols = hh_size,
-                    names_from = tenure,
-                    values_from = estimate,
-                    values_fill = 0) %>% 
-        ungroup() %>% 
-        dplyr::select(Owner, Renter) %>% 
-        as.matrix()
-      
-      row.names(pyr.1) <-
-        row.names(pyr.2) <- c(1:6, "7+")
-      
-      
-      # x_at <- round(seq(0, max(pop.pyr), length.out = 5),-2)
-      x_at <- c(0, 1000, 2500, 5000, 7500)
-      pyr.obj <- get.bPop.pyramid(list(pyr.1, pyr.2),
-                                  legend = c("ACS 2015-2019", "Census 2010"),
-                                  LRcolnames = c("Owner", "Renter"),
-                                  LRmain = c("Owner", "Renter"))
-      
-      pop.pyramid.bayesPop.pyramid(pyr.obj,
-                                   pyr1.par = list(col = pop.cols[5] ,
-                                                   border = pop.cols[5]),
-                                   pyr2.par = list(col = pop.cols[3] , 
-                                                   border = pop.cols[3]),
-                                   legend_pos = "topright",
-                                   legend_text = c("ACS 2015-2019",
-                                                   "Census 2010"),
-                                   x_at = c(rev(-x_at[-1]), x_at),
-                                   x_labels = c(rev(x_at[-1]), x_at),
-                                   cex.axis = .65,
-                                   cex.sub = .75,
-                                   x_lims = c(-8750, 8750))
-      title(paste0(hra.name,
-                   ": Households by Tenure"),
-            font.main = 1, outer = FALSE,
-            adj = 0, cex.main = 1)
-    }
-    dev.off()
-    
-    pdf(paste0("../household_size/Pyramid/Pyramid_Prevalence_",
-               "20102019_hhsize_by_tenure_HRA.pdf"),
-        height = 5, width = 5)
-    for(hra.name in hra@data$HRA2010v2_){
-      hh_size_kc <- hh_size_hra %>% 
-        filter(HRA2010v2_ == hra.name) %>% 
-        filter(!is.na(hh_size) &
-                 hh_size > 0) %>% 
-        group_by(Year, hh_size, tenure) %>% 
-        summarise(estimate = sum(estimate, na.rm = TRUE),
-                  SE = sum(SE, na.rm = TRUE)) %>% 
-        mutate(CoV = SE/estimate)
-      
-      pyr.1 <-  hh_size_kc %>% 
-        filter(Year == 2019) %>% 
-        filter(hh_size > 0) %>% 
-        pivot_wider(id_cols = hh_size,
-                    names_from = tenure,
-                    values_from = estimate,
-                    values_fill = 0) %>% 
-        ungroup() %>% 
-        dplyr::select(Owner, Renter) %>% 
-        as.matrix()
-      pyr.2 <-  hh_size_kc %>% 
-        filter(Year == 2010) %>% 
-        filter(hh_size > 0) %>% 
-        pivot_wider(id_cols = hh_size,
-                    names_from = tenure,
-                    values_from = estimate,
-                    values_fill = 0) %>% 
-        ungroup() %>% 
-        dplyr::select(Owner, Renter) %>% 
-        as.matrix()
-      pyr.1 <- pyr.1/sum(pyr.1)
-      pyr.2 <- pyr.2/sum(pyr.2)
-      
-      row.names(pyr.1) <-
-        row.names(pyr.2) <- c(1:6, "7+")
-      
-      
-      x_at <- c(-.3, -.2, -.1, -.05, 0, .05, .1, .2, .3)
-      x_labels <- abs(x_at)
-      pyr.obj <- get.bPop.pyramid(list(pyr.1, pyr.2),
-                                  legend = c("ACS 2015-2019", "Census 2010"),
-                                  LRcolnames = c("Owner", "Renter"),
-                                  LRmain = c("Owner", "Renter"))
-      
-      pop.pyramid.bayesPop.pyramid(pyr.obj,
-                                   pyr1.par = list(col = pop.cols[5] ,
-                                                   border = pop.cols[5]),
-                                   pyr2.par = list(col = pop.cols[3] , 
-                                                   border = pop.cols[3]),
-                                   legend_pos = "topright",
-                                   legend_text = c("ACS 2015-2019",
-                                                   "Census 2010"),
-                                   x_at = x_at,
-                                   x_labels = x_labels,
-                                   cex.axis = .75,
-                                   cex.sub = .75,
-                                   x_lims = c(-.3, .3))
-      title(paste0(hra.name,
-                   ": Prevalence of Households by Tenure"),
-            font.main = 1, outer = FALSE,
-            adj = 0, cex.main = 1)
-    }
-    dev.off()
-    
-    
-  }
-  
-  
-}
-
-## Pyramids: pre 2010 ####
-for(year in c(2000, 2009)){
-  pdf(paste0("../household_size/Pyramid/Pyramid_",
-             year, "_hhsize_by_tenure_HRA.pdf"),
-      height = 5, width = 5)
-  for(hra.name in hra@data$HRA2010v2_){
-    hh_size_kc <- hh_size_hra_2000 %>% 
-      filter(Year == year) %>%
-      filter(HRA2010v2_ == hra.name) %>% 
-      filter(!is.na(hh_size) &
-               hh_size > 0) %>% 
-      group_by(hh_size, tenure) %>% 
-      summarise(estimate = sum(estimate, na.rm = TRUE),
-                SE = sum(SE, na.rm = TRUE)) %>% 
-      mutate(CoV = SE/estimate)
-    
-    pop.pyr <- hh_size_kc %>% 
-      filter(hh_size > 0) %>% 
-      pivot_wider(id_cols = hh_size,
-                  names_from = tenure,
-                  values_from = estimate,
-                  values_fill = 0) %>% 
-      ungroup() %>% 
-      dplyr::select(Owner, Renter) %>% 
-      as.matrix()
-    row.names(pop.pyr) <- c(1:6, "7+")
-    
-    
-    x_at <- round(seq(0, max(pop.pyr), length.out = 5),-2)
-    pyr.obj <- get.bPop.pyramid(pop.pyr,
-                                legend = paste0("ACS ", 
-                                                year-4, 
-                                                "-", year),
-                                LRcolnames = c("Owner", "Renter"),
-                                LRmain = c("Owner", "Renter"))
-    
-    pop.pyramid.bayesPop.pyramid(pyr.obj, pyr1.par = list(col = pop.cols[3] , 
-                                                          border = pop.cols[3]),
-                                 legend_pos = "topright",
-                                 legend_text = paste0("ACS ", 
-                                                      year-4, 
-                                                      "-", year),
-                                 x_at = c(rev(-x_at[-1]), x_at),
-                                 x_labels = c(rev(x_at[-1]), x_at),
-                                 cex.axis = .76,
-                                 cex.sub = .75)
-    title(paste0(hra.name,
-                 ": Households"),
-          font.main = 1, outer = FALSE,
-          adj = 0, cex.main = 1)
-  }
-  dev.off()
-  
-  pdf(paste0("../household_size/Pyramid/Pyramid_",
-             year, "_hhsize_by_tenure.pdf"),
-      height = 5, width = 5)
-  hh_size_kc <- hh_size_hra_2000 %>% 
-    filter(Year == year) %>%
-    filter(!is.na(hh_size) &
-             hh_size > 0) %>% 
-    group_by(hh_size, tenure) %>% 
-    summarise(estimate = sum(estimate, na.rm = TRUE),
-              SE = sum(SE, na.rm = TRUE)) %>% 
-    mutate(CoV = SE/estimate)
-  
-  pop.pyrs[[paste0("year_",year)]] <- hh_size_kc %>% 
-    filter(hh_size > 0) %>% 
-    pivot_wider(id_cols = hh_size,
-                names_from = tenure,
-                values_from = estimate,
-                values_fill = 0) %>% 
-    ungroup() %>% 
-    dplyr::select(Owner, Renter) %>% 
-    as.matrix()
-  row.names(pop.pyrs[[paste0("year_", year)]]) <- c(1:6, "7+")
-  x_at <- round(seq(0, max(unlist(pop.pyrs)), length.out = 5),-2)
-  pyr.obj <- get.bPop.pyramid(pop.pyrs[[paste0("year_", year)]],
-                              legend = paste0("ACS ", 
-                                              year-4, 
-                                              "-", year),
-                              LRcolnames = c("Owner", "Renter"),
-                              LRmain = c("Owner", "Renter"))
-  
-  pop.pyramid.bayesPop.pyramid(pyr.obj, pyr1.par = list(col = pop.cols[3] , 
-                                                        border = pop.cols[3]),
-                               legend_pos = "topright",
-                               legend_text = paste0("ACS ", 
-                                                    year-4, 
-                                                    "-", year),
-                               x_at = c(rev(-x_at[-1]), x_at),
-                               x_labels = c(rev(x_at[-1]), x_at),
-                               cex.axis = .76,
-                               cex.sub = .75)
-  title(paste0("King County, ", year, ": Households"),
-        font.main = 1, outer = FALSE,
-        adj = 0, cex.main = 1)
-  dev.off()
-  
-}
-
-## Compare 2000, 2015-2019 ####
-pdf(paste0("../household_size/Pyramid/Pyramid_",
-           "20002019_hhsize_by_tenure.pdf"),
-    height = 5, width = 5)
-x_at <- round(seq(0, max(unlist(pop.pyrs)),
-                  length.out = 5), -4)
-pyr.obj <- get.bPop.pyramid(list(pop.pyrs$year_2019,
-                                 pop.pyrs$year_2000),
-                            legend = c("ACS 2015-2019",
-                                       "Census 2000"),
-                            LRcolnames = c("Owner", "Renter"),
-                            LRmain = c("Owner", "Renter"))
-
-pop.pyramid.bayesPop.pyramid(pyr.obj,
-                             pyr1.par = list(col = pop.cols[5] ,
-                                             border = pop.cols[5]),
-                             pyr2.par = list(col = pop.cols[3] , 
-                                             border = pop.cols[3]),
-                             legend_pos = "topright",
-                             legend_text = c("ACS 2015-2019",
-                                             "Census 2000"),
-                             x_at = c(rev(-x_at[-1]), x_at),
-                             x_labels = c(rev(x_at[-1]), x_at),
-                             cex.axis = .65,
-                             cex.sub = .75)
-title(paste0("King County: Households"),
-      font.main = 1, outer = FALSE,
-      adj = 0, cex.main = 1)
-dev.off()
-
-pdf(paste0("../household_size/Pyramid/Pyramid_",
-           "20002019_hhsize_by_tenure_HRA.pdf"),
-    height = 5, width = 5)
-for(hra.name in hra@data$HRA2010v2_){
-  hh_size_kc <- hh_size_hra %>% 
-    filter(HRA2010v2_ == hra.name) %>% 
-    filter(!is.na(hh_size) &
-             hh_size > 0) %>% 
-    group_by(Year, hh_size, tenure) %>% 
-    summarise(estimate = sum(estimate, na.rm = TRUE),
-              SE = sum(SE, na.rm = TRUE)) %>% 
-    mutate(CoV = SE/estimate)
-  
-  pyr.1 <-  hh_size_kc %>% 
-    filter(Year == 2019) %>% 
-    filter(hh_size > 0) %>% 
-    pivot_wider(id_cols = hh_size,
-                names_from = tenure,
-                values_from = estimate,
-                values_fill = 0) %>% 
-    ungroup() %>% 
-    dplyr::select(Owner, Renter) %>% 
-    as.matrix()
-  pyr.2 <-  hh_size_hra_2000 %>% 
-    filter(HRA2010v2_ == hra.name) %>% 
-    filter(!is.na(hh_size) &
-             hh_size > 0) %>% 
-    group_by(Year, hh_size, tenure) %>% 
-    summarise(estimate = sum(estimate, na.rm = TRUE),
-              SE = sum(SE, na.rm = TRUE)) %>% 
-    mutate(CoV = SE/estimate) %>% 
-    filter(Year == 2000) %>% 
-    filter(hh_size > 0) %>% 
-    pivot_wider(id_cols = hh_size,
-                names_from = tenure,
-                values_from = estimate,
-                values_fill = 0) %>% 
-    ungroup() %>% 
-    dplyr::select(Owner, Renter) %>% 
-    as.matrix()
-  
-  row.names(pyr.1) <-
-    row.names(pyr.2) <- c(1:6, "7+")
-  
-  
-  x_at <- c(0, 1000, 2500, 5000, 7500)
-  pyr.obj <- get.bPop.pyramid(list(pyr.1, pyr.2),
-                              legend = c("ACS 2015-2019",
-                                         "Census 2000"),
-                              LRcolnames = c("Owner", "Renter"),
-                              LRmain = c("Owner", "Renter"))
-  
-  pop.pyramid.bayesPop.pyramid(pyr.obj,
-                               pyr1.par = list(col = pop.cols[5] ,
-                                               border = pop.cols[5]),
-                               pyr2.par = list(col = pop.cols[3] , 
-                                               border = pop.cols[3]),
-                               legend_pos = "topright",
-                               legend_text = c("ACS 2015-2019",
-                                               "Census 2000"),
-                               x_at = c(rev(-x_at[-1]), x_at),
-                               x_labels = c(rev(x_at[-1]), x_at),
-                               cex.axis = .6,
-                               cex.sub = .75,
-                               x_lims = c(-8750,8750))
-  title(paste0("Households by Tenure\n",
-               ""),
-        font.main = 2, outer = FALSE,
-        adj = 0, cex.main = 1)
-  title(paste0("\n",
-               hra.name),
-        font.main = 1, outer = FALSE,
-        adj = 0, cex.main = .8)
-}
-dev.off()
-
-pdf(paste0("../household_size/Pyramid/Pyramid_Prevalence_",
-           "20002019_hhsize_by_tenure_HRA.pdf"),
-    height = 5, width = 5)
-for(hra.name in hra@data$HRA2010v2_){
-  hh_size_kc <- hh_size_hra %>% 
-    filter(HRA2010v2_ == hra.name) %>% 
-    filter(!is.na(hh_size) &
-             hh_size > 0) %>% 
-    group_by(Year, hh_size, tenure) %>% 
-    summarise(estimate = sum(estimate, na.rm = TRUE),
-              SE = sum(SE, na.rm = TRUE)) %>% 
-    mutate(CoV = SE/estimate)
-  
-  pyr.1 <-  hh_size_kc %>% 
-    filter(Year == 2019) %>% 
-    filter(hh_size > 0) %>%
-    # left_join(hh_size_total,
-    #           by = c("Year" = "Year",
-    #                  "hh_size" = "hh_size",
-    #                  "tenure" = "tenure"),
-    #           suffix = c("", "_Total")) %>% 
-    # mutate(proportion = estimate/sum(estimate)) %>% 
-    pivot_wider(id_cols = hh_size,
-                names_from = tenure,
-                values_from = estimate,
-                values_fill = 0) %>% 
-    ungroup() %>% 
-    dplyr::select(Owner, Renter) %>% 
-    as.matrix()
-  pyr.2 <-  hh_size_hra_2000 %>% 
-    filter(HRA2010v2_ == hra.name) %>% 
-    filter(!is.na(hh_size) &
-             hh_size > 0) %>% 
-    group_by(Year, hh_size, tenure) %>% 
-    summarise(estimate = sum(estimate, na.rm = TRUE),
-              SE = sum(SE, na.rm = TRUE)) %>% 
-    mutate(CoV = SE/estimate) %>% 
-    filter(Year == 2000) %>% 
-    filter(hh_size > 0) %>% 
-    pivot_wider(id_cols = hh_size,
-                names_from = tenure,
-                values_from = estimate,
-                values_fill = 0) %>% 
-    ungroup() %>% 
-    dplyr::select(Owner, Renter) %>% 
-    as.matrix()
-  pyr.1 <- pyr.1/sum(pyr.1)
-  pyr.2 <- pyr.2/sum(pyr.2)
-  
-  row.names(pyr.1) <-
-    row.names(pyr.2) <- c(1:6, "7+")
-  
-  
-  x_at <- c(-.3, -.2, -.1, -.05, 0, .05, .1, .2, .3)
-  x_labels <- abs(x_at)
-  pyr.obj <- get.bPop.pyramid(list(pyr.1, pyr.2),
-                              legend = c("ACS 2015-2019",
-                                         "Census 2000"),
-                              LRcolnames = c("Owner", "Renter"),
-                              LRmain = c("Owner", "Renter"))
-  
-  pop.pyramid.bayesPop.pyramid(pyr.obj,
-                               pyr1.par = list(col = pop.cols[5] ,
-                                               border = pop.cols[5]),
-                               pyr2.par = list(col = pop.cols[2] , 
-                                               border = pop.cols[2]),
-                               legend_pos = "topright",
-                               legend_text = c("ACS 2015-2019",
-                                               "Census 2000"),
-                               x_at = x_at,
-                               x_labels = abs(x_at),
-                               cex.axis = .65,
-                               cex.sub = .75,
-                               x_lims = c(-.35,.35))
-  title(paste0("Prevalence of Households by Tenure\n",
-               ""),
-        font.main = 2, outer = FALSE,
-        adj = 0, cex.main = 1)
-  title(paste0("\n", hra.name),
-        font.main = 1, outer = FALSE,
-        adj = 0, cex.main = .8)
-}
-dev.off()
-
-
-
-
-## Compare 2000, 2010 ####
-pdf(paste0("../household_size/Pyramid/Pyramid_",
-           "20002010_hhsize_by_tenure.pdf"),
-    height = 5, width = 5)
-x_at <- round(seq(0, max(unlist(pop.pyrs)),
-                  length.out = 5), -4)
-pyr.obj <- get.bPop.pyramid(list(pop.pyrs$year_2010,
-                                 pop.pyrs$year_2000),
-                            legend = c("Census 2010",
-                                       "Census 2000"),
-                            LRcolnames = c("Owner", "Renter"),
-                            LRmain = c("Owner", "Renter"))
-
-pop.pyramid.bayesPop.pyramid(pyr.obj,
-                             pyr1.par = list(col = pop.cols[4] ,
-                                             border = pop.cols[4]),
-                             pyr2.par = list(col = pop.cols[2] , 
-                                             border = pop.cols[2]),
-                             legend_pos = "topright",
-                             legend_text = c("Census 2010",
-                                             "Census 2000"),
-                             x_at = c(rev(-x_at[-1]), x_at),
-                             x_labels = c(rev(x_at[-1]), x_at),
-                             cex.axis = .65,
-                             cex.sub = .75)
-dev.off()
-
-pdf(paste0("../household_size/Pyramid/Pyramid_",
-           "20002010_hhsize_by_tenure_HRA.pdf"),
-    height = 5, width = 5)
-for(hra.name in hra@data$HRA2010v2_){
-  hh_size_kc <- hh_size_hra %>% 
-    filter(HRA2010v2_ == hra.name) %>% 
-    filter(!is.na(hh_size) &
-             hh_size > 0) %>% 
-    group_by(Year, hh_size, tenure) %>% 
-    summarise(estimate = sum(estimate, na.rm = TRUE),
-              SE = sum(SE, na.rm = TRUE)) %>% 
-    mutate(CoV = SE/estimate)
-  
-  pyr.1 <-  hh_size_kc %>% 
-    filter(Year == 2010) %>% 
-    filter(hh_size > 0) %>% 
-    pivot_wider(id_cols = hh_size,
-                names_from = tenure,
-                values_from = estimate,
-                values_fill = 0) %>% 
-    ungroup() %>% 
-    dplyr::select(Owner, Renter) %>% 
-    as.matrix()
-  pyr.2 <-  hh_size_hra_2000 %>% 
-    filter(HRA2010v2_ == hra.name) %>% 
-    filter(!is.na(hh_size) &
-             hh_size > 0) %>% 
-    group_by(Year, hh_size, tenure) %>% 
-    summarise(estimate = sum(estimate, na.rm = TRUE),
-              SE = sum(SE, na.rm = TRUE)) %>% 
-    mutate(CoV = SE/estimate) %>% 
-    filter(Year == 2000) %>% 
-    filter(hh_size > 0) %>% 
-    pivot_wider(id_cols = hh_size,
-                names_from = tenure,
-                values_from = estimate,
-                values_fill = 0) %>% 
-    ungroup() %>% 
-    dplyr::select(Owner, Renter) %>% 
-    as.matrix()
-  
-  row.names(pyr.1) <-
-    row.names(pyr.2) <- c(1:6, "7+")
-  
-  
-  x_at <- c(0, 1000, 2500, 5000, 7500)
-  pyr.obj <- get.bPop.pyramid(list(pyr.1, pyr.2),
-                              legend = c("Census 2010",
-                                         "Census 2000"),
-                              LRcolnames = c("Owner", "Renter"),
-                              LRmain = c("Owner", "Renter"))
-  
-  pop.pyramid.bayesPop.pyramid(pyr.obj,
-                               pyr1.par = list(col = pop.cols[4] ,
-                                               border = pop.cols[4]),
-                               pyr2.par = list(col = pop.cols[2] , 
-                                               border = pop.cols[2]),
-                               legend_pos = "topright",
-                               legend_text = c("Census 2010",
-                                               "Census 2000"),
-                               x_at = c(rev(-x_at[-1]), x_at),
-                               x_labels = c(rev(x_at[-1]), x_at),
-                               cex.axis = .75,
-                               cex.sub = .75,
-                               x_lims = c(-8750, 8750))
-  title(paste0("Households by Tenure\n",
-               ""),
-        font.main = 2, outer = FALSE,
-        adj = 0, cex.main = 1)
-  title(paste0("\n", hra.name),
-        font.main = 1, outer = FALSE,
-        adj = 0, cex.main = .8)
-}
-dev.off()
-
-hh_size_total <- hh_size_hra %>% 
-  filter(!is.na(hh_size) &
-           hh_size > 0) %>% 
-  group_by(Year, hh_size, tenure) %>% 
-  summarise(estimate = sum(estimate, na.rm = TRUE),
-            SE = sum(SE, na.rm = TRUE)) %>% 
-  mutate(CoV = SE/estimate)
-
-hh_size_total_2000 <- hh_size_hra_2000 %>% 
-  filter(!is.na(hh_size) &
-           hh_size > 0) %>% 
-  group_by(Year, hh_size, tenure) %>% 
-  summarise(estimate = sum(estimate, na.rm = TRUE),
-            SE = sum(SE, na.rm = TRUE)) %>% 
-  mutate(CoV = SE/estimate)
-
-pdf(paste0("../household_size/Pyramid/Pyramid_Prevalence_",
-           "20002010_hhsize_by_tenure_HRA.pdf"),
-    height = 5, width = 5)
-for(hra.name in hra@data$HRA2010v2_){
-  hh_size_kc <- hh_size_hra %>% 
-    filter(HRA2010v2_ == hra.name) %>% 
-    filter(!is.na(hh_size) &
-             hh_size > 0) %>% 
-    group_by(Year, hh_size, tenure) %>% 
-    summarise(estimate = sum(estimate, na.rm = TRUE),
-              SE = sum(SE, na.rm = TRUE)) %>% 
-    mutate(CoV = SE/estimate)
-  
-  pyr.1 <-  hh_size_kc %>% 
-    filter(Year == 2010) %>% 
-    filter(hh_size > 0) %>%
-    # left_join(hh_size_total,
-    #           by = c("Year" = "Year",
-    #                  "hh_size" = "hh_size",
-    #                  "tenure" = "tenure"),
-    #           suffix = c("", "_Total")) %>% 
-    # mutate(proportion = estimate/sum(estimate)) %>% 
-    pivot_wider(id_cols = hh_size,
-                names_from = tenure,
-                values_from = estimate,
-                values_fill = 0) %>% 
-    ungroup() %>% 
-    dplyr::select(Owner, Renter) %>% 
-    as.matrix()
-  pyr.2 <-  hh_size_hra_2000 %>% 
-    filter(HRA2010v2_ == hra.name) %>% 
-    filter(!is.na(hh_size) &
-             hh_size > 0) %>% 
-    group_by(Year, hh_size, tenure) %>% 
-    summarise(estimate = sum(estimate, na.rm = TRUE),
-              SE = sum(SE, na.rm = TRUE)) %>% 
-    mutate(CoV = SE/estimate) %>% 
-    filter(Year == 2000) %>% 
-    filter(hh_size > 0) %>% 
-    pivot_wider(id_cols = hh_size,
-                names_from = tenure,
-                values_from = estimate,
-                values_fill = 0) %>% 
-    ungroup() %>% 
-    dplyr::select(Owner, Renter) %>% 
-    as.matrix()
-  pyr.1 <- pyr.1/sum(pyr.1)
-  pyr.2 <- pyr.2/sum(pyr.2)
-  
-  row.names(pyr.1) <-
-    row.names(pyr.2) <- c(1:6, "7+")
-  
-  
-  x_at <- c(-.3, -.2, -.1, -.05, 0, .05, .1, .2, .3)
-  x_labels <- abs(x_at)
-  pyr.obj <- get.bPop.pyramid(list(pyr.1, pyr.2),
-                              legend = c("Census 2010",
-                                         "Census 2000"),
-                              LRcolnames = c("Owner", "Renter"),
-                              LRmain = c("Owner", "Renter"))
-  
-  pop.pyramid.bayesPop.pyramid(pyr.obj,
-                               pyr1.par = list(col = pop.cols[4] ,
-                                               border = pop.cols[4]),
-                               pyr2.par = list(col = pop.cols[2] , 
-                                               border = pop.cols[2]),
-                               legend_pos = "topright",
-                               legend_text = c("Census 2010",
-                                               "Census 2000"),
-                               x_at = x_at,
-                               x_labels = abs(x_at),
-                               cex.axis = .65,
-                               cex.sub = .75,
-                               x_lims = c(-.35,.35))
-  title(paste0("Prevalence of Households by Tenure\n",
-               ""),
-        font.main = 2, outer = FALSE,
-        adj = 0, cex.main = 1)
-  title(paste0("\n", hra.name),
-        font.main = 1, outer = FALSE,
-        adj = 0, cex.main = .8)
-}
-dev.off()
-
-
-
-
-
-## Maps ####
-for(year in c(2010, 2014, 2019)){
-  pdf(paste0("../household_size/Pyramid/Pyramid_",
-             year, "_hhsize_by_tenure_HRA.pdf"),
-      height = 5, width = 5)
-  for(hra.name in hra@data$HRA2010v2_){
-    hh_size_kc <- hh_size_hra_2000 %>% 
-      filter(Year == year) %>%
-      filter(HRA2010v2_ == hra.name) %>% 
-      filter(!is.na(hh_size) &
-               hh_size > 0) %>% 
-      group_by(hh_size, tenure) %>% 
-      summarise(estimate = sum(estimate, na.rm = TRUE),
-                SE = sum(SE, na.rm = TRUE)) %>% 
-      mutate(CoV = SE/estimate)
-    
-    pop.pyr <- hh_size_kc %>% 
-      filter(hh_size > 0) %>% 
-      pivot_wider(id_cols = hh_size,
-                  names_from = tenure,
-                  values_from = estimate,
-                  values_fill = 0) %>% 
-      ungroup() %>% 
-      dplyr::select(Owner, Renter) %>% 
-      as.matrix()
-    row.names(pop.pyr) <- c(1:6, "7+")
-    
-    
-    x_at <- round(seq(0, max(pop.pyr), length.out = 5),-2)
-    pyr.obj <- get.bPop.pyramid(pop.pyr,
-                                legend = paste0("ACS ", 
-                                                year-4, 
-                                                "-", year),
-                                LRcolnames = c("Owner", "Renter"),
-                                LRmain = c("Owner", "Renter"))
-    
-    pop.pyramid.bayesPop.pyramid(pyr.obj, pyr1.par = list(col = pop.cols[3] , 
-                                                          border = pop.cols[3]),
-                                 legend_pos = "topright",
-                                 legend_text = paste0("ACS ", 
-                                                      year-4, 
-                                                      "-", year),
-                                 x_at = c(rev(-x_at[-1]), x_at),
-                                 x_labels = c(rev(x_at[-1]), x_at),
-                                 cex.axis = .76,
-                                 cex.sub = .75)
-    title(paste0(hra.name,
-                 ": Households"),
-          font.main = 1, outer = FALSE,
-          adj = 0, cex.main = 1)
-  }
-  dev.off()
-  
-  pdf(paste0("../household_size/Pyramid/Pyramid_",
-             year, "_hhsize_by_tenure.pdf"),
-      height = 5, width = 5)
-  hh_size_kc <- hh_size_hra_2000 %>% 
-    filter(Year == year) %>%
-    filter(!is.na(hh_size) &
-             hh_size > 0) %>% 
-    group_by(hh_size, tenure) %>% 
-    summarise(estimate = sum(estimate, na.rm = TRUE),
-              SE = sum(SE, na.rm = TRUE)) %>% 
-    mutate(CoV = SE/estimate)
-  
-  pop.pyrs[[paste0("year_",year)]] <- hh_size_kc %>% 
-    filter(hh_size > 0) %>% 
-    pivot_wider(id_cols = hh_size,
-                names_from = tenure,
-                values_from = estimate,
-                values_fill = 0) %>% 
-    ungroup() %>% 
-    dplyr::select(Owner, Renter) %>% 
-    as.matrix()
-  row.names(pop.pyrs[[paste0("year_", year)]]) <- c(1:6, "7+")
-  x_at <- round(seq(0, max(unlist(pop.pyrs)), length.out = 5),-2)
-  pyr.obj <- get.bPop.pyramid(pop.pyrs[[paste0("year_", year)]],
-                              legend = paste0("ACS ", 
-                                              year-4, 
-                                              "-", year),
-                              LRcolnames = c("Owner", "Renter"),
-                              LRmain = c("Owner", "Renter"))
-  
-  pop.pyramid.bayesPop.pyramid(pyr.obj, pyr1.par = list(col = pop.cols[3] , 
-                                                        border = pop.cols[3]),
-                               legend_pos = "topright",
-                               legend_text = paste0("ACS ", 
-                                                    year-4, 
-                                                    "-", year),
-                               x_at = c(rev(-x_at[-1]), x_at),
-                               x_labels = c(rev(x_at[-1]), x_at),
-                               cex.axis = .76,
-                               cex.sub = .75)
-  title(paste0("King County, ", year, ": Households"),
-        font.main = 1, outer = FALSE,
-        adj = 0, cex.main = 1)
-  dev.off()
-  if(year == 2019){
-    pdf(paste0("../household_size/Pyramid/Pyramid_",
-               "20102019_hhsize_by_tenure.pdf"),
-        height = 5, width = 5)
-    x_at <- round(seq(0, max(unlist(pop.pyrs)), length.out = 5),-4)
-    pyr.obj <- get.bPop.pyramid(list(pop.pyrs$year_2019, pop.pyrs$year_2010),
-                                legend = c("ACS 2015-2019", "Census 2010"),
-                                LRcolnames = c("Owner", "Renter"),
-                                LRmain = c("Owner", "Renter"))
-    
-    pop.pyramid.bayesPop.pyramid(pyr.obj,
-                                 pyr1.par = list(col = pop.cols[5] ,
-                                                 border = pop.cols[5]),
-                                 pyr2.par = list(col = pop.cols[3] , 
-                                                 border = pop.cols[3]),
-                                 legend_pos = "topright",
-                                 legend_text = c("ACS 2015-2019",
-                                                 "Census 2010"),
-                                 x_at = c(rev(-x_at[-1]), x_at),
-                                 x_labels = c(rev(x_at[-1]), x_at),
-                                 cex.axis = .65,
-                                 cex.sub = .75)
-    title(paste0("King County: Households"),
-          font.main = 1, outer = FALSE,
-          adj = 0, cex.main = 1)
-    dev.off()
-    
-    pdf(paste0("../household_size/Pyramid/Pyramid_",
-               "20102019_hhsize_by_tenure_HRA.pdf"),
-        height = 5, width = 5)
-    for(hra.name in hra@data$HRA2010v2_){
-      hh_size_kc <- hh_size_hra_2000 %>% 
-        filter(HRA2010v2_ == hra.name) %>% 
-        filter(!is.na(hh_size) &
-                 hh_size > 0) %>% 
-        group_by(Year, hh_size, tenure) %>% 
-        summarise(estimate = sum(estimate, na.rm = TRUE),
-                  SE = sum(SE, na.rm = TRUE)) %>% 
-        mutate(CoV = SE/estimate)
-      
-      pyr.1 <-  hh_size_kc %>% 
-        filter(Year == 2019) %>% 
-        filter(hh_size > 0) %>% 
-        pivot_wider(id_cols = hh_size,
-                    names_from = tenure,
-                    values_from = estimate,
-                    values_fill = 0) %>% 
-        ungroup() %>% 
-        dplyr::select(Owner, Renter) %>% 
-        as.matrix()
-      pyr.2 <-  hh_size_kc %>% 
-        filter(Year == 2010) %>% 
-        filter(hh_size > 0) %>% 
-        pivot_wider(id_cols = hh_size,
-                    names_from = tenure,
-                    values_from = estimate,
-                    values_fill = 0) %>% 
-        ungroup() %>% 
-        dplyr::select(Owner, Renter) %>% 
-        as.matrix()
-      
-      row.names(pyr.1) <-
-        row.names(pyr.2) <- c(1:6, "7+")
-      
-      
-      x_at <- round(seq(0, max(cbind(pyr.1, pyr.2)), length.out = 5),-2)
-      pyr.obj <- get.bPop.pyramid(list(pyr.1, pyr.2),
-                                  legend = c("ACS 2015-2019", "Census 2010"),
-                                  LRcolnames = c("Owner", "Renter"),
-                                  LRmain = c("Owner", "Renter"))
-      
-      pop.pyramid.bayesPop.pyramid(pyr.obj,
-                                   pyr1.par = list(col = pop.cols[5] ,
-                                                   border = pop.cols[5]),
-                                   pyr2.par = list(col = pop.cols[3] , 
-                                                   border = pop.cols[3]),
-                                   legend_pos = "topright",
-                                   legend_text = c("ACS 2015-2019",
-                                                   "Census 2010"),
-                                   x_at = c(rev(-x_at[-1]), x_at),
-                                   x_labels = c(rev(x_at[-1]), x_at),
-                                   cex.axis = .76,
-                                   cex.sub = .75)
-      title(paste0(hra.name,
-                   ": Households"),
-            font.main = 1, outer = FALSE,
-            adj = 0, cex.main = 1)
-    }
-    dev.off()
-    
-    
-  }
-  
-  
-}
-
-cases.int.hra <- classIntervals(covid_hra_tmp$Confirmed_Cases,
-                                style = 'jenks',
-                                n = 9)
-
-breaks <- cases.int.hra$brks
-breaks <- c(0, 250, 500,
-            1500, 2500,
-            3500, 4500, 5000, 6000,
-            6600)
-## Get color based on RColorBrwere palette for 
-## each area
-
-cases.pal <- brewer.pal(n = 9, name = "Blues")
-
-covid_hra_tmp <- covid_hra_tmp[match(covid_hra_tmp$Location_Name,
-                                     hra@data$HRA2010v2_), ]
-
-cases.int.hra <- classIntervals(covid_hra_tmp$Confirmed_Cases,
-                                style = "fixed",
-                                fixedBreaks = breaks,
-                                n = 9)
-cases.col.hra <- findColours(cases.int.hra, cases.pal)
-
-
-pdf(paste0("../COVIDPlots/Map_HRA_Cases.pdf"),
-    height = 5, width = 5)
-
-plot(hra,
-     col = cases.col.hra,
-     border = 'grey48', lwd = .25,
-     main = "")
-legend('bottomleft',
-       title = 'Cases',
-       title.adj = 0,
-       ncol = 2,
-       bty = 'n',
-       cex = 0.5,
-       border = FALSE,
-       fill = cases.pal,
-       legend = names(attr(cases.col.hra, 'table')))
-title("King County: COVID-19 Cases",
-      font.main = 1, outer = FALSE,
-      adj = 0, cex.main = 1)
-dev.off()
 # COVID ####
 
 # covid_WA <- readxl::read_xlsx('../Data/WA_COVID19_Cases_Hospitalizations_Deaths.xlsx',
@@ -2430,15 +2185,21 @@ pop.pyramid.bayesPop.pyramid(pyr.obj,
                                              border = pop.cols[2]),
                              legend_pos = "topright",
                              legend_text = c("Cases", "Hosp/Death"))
-title("King County: COVID-19",
+title(paste0("Cumulative COVID-19 Outcomes\n",
+             ""),
+      font.main = 2, outer = FALSE,
+      adj = 0, cex.main = 1)
+
+title(paste0("\n",
+             "King County (as of Aug. 30, 2021)"),
       font.main = 1, outer = FALSE,
       adj = 0, cex.main = 1)
 
 dev.off()
 
+## By Cities ####
 cities <- unique(covid_KC$City)[-1]
-pdf("../COVIDPlots/Pyramid_City_CasesHospDeath.pdf",
-    height = 5, width = 5)
+
 for(city in cities){
   cases.tmp <- covid_KC %>% 
     filter(Age_Group != "Unknown") %>% 
@@ -2464,24 +2225,70 @@ for(city in cities){
                               LRcolnames = c("Hospitalizations", "Deaths"),
                               LRmain = c("Hospitalizations", "Deaths"))
   if(sum(cases.tmp[,1]) != 0){
-    pop.pyramid.bayesPop.pyramid(pyr.obj,
-                                 pyr1.par = list(col = pop.cols[4], 
-                                                 border = pop.cols[4]),
-                                 
-                                 pyr2.par = list(col = pop.cols[2], 
-                                                 border = pop.cols[2]),
-                                 legend_pos = "topright",
-                                 legend_text = c("Cases", "Hosp/Death"))
+    jpeg(paste0("../COVIDPlots/City/Pyramid_City_",
+                gsub("/","",city),
+                "_CasesHospDeath.jpeg"),
+         height = 480, width = 480)
+    {
+      pop.pyramid.bayesPop.pyramid(pyr.obj,
+                                   pyr1.par = list(col = pop.cols[4], 
+                                                   border = pop.cols[4]),
+                                   
+                                   pyr2.par = list(col = pop.cols[2], 
+                                                   border = pop.cols[2]),
+                                   legend_pos = "topright",
+                                   legend_text = c("Cases", "Hosp/Death"))
+      
+      title(paste0("Cumulative COVID-19 Outcomes by Age\n",
+                   ""),
+            font.main = 2, outer = FALSE,
+            adj = 0, cex.main = 1)
+      
+      title(paste0("\n", city,
+                   " (as of Aug. 30, 2021)"),
+            font.main = 1, outer = FALSE,
+            adj = 0, cex.main = 1)
+    }
+    dev.off()    
     
-    title(paste0(city, ": COVID-19"),
-          font.main = 1, outer = FALSE,
-          adj = 0, cex.main = 1)
+    heights <- cbind(cases.tmp[,1],
+                     cov.tmp) %>% t()
     
+    jpeg(paste0("../COVIDPlots/City/Barplot_City_",
+                gsub("/","",city),
+                "_CasesHospDeath.jpeg"),
+         height = 480, width = 480)
+    {
+      barplot(heights,
+              beside = TRUE,
+              col = pop.cols[c(5,4,2)],
+              border = FALSE,
+              xlab = "",
+              names.arg = rep("", ncol(heights)))
+      axis(1, at = seq(2.5, 4*ncol(heights), 4),
+           labels = colnames(heights),
+           cex.axis = 0.65)
+      legend('topright',
+             bty = 'n',
+             fill = pop.cols[c(5,4,2)],
+             border = pop.cols[c(5,4,2)],
+             legend = c("Cases",
+                        "Hospitalizations",
+                        "Deaths"))
+      title(paste0("COVID-19 Outcomes by Age\n",
+                   ""),
+            font.main = 2, outer = FALSE,
+            adj = 0, cex.main = 1)
+      
+      title(paste0("\n", city,
+                   " (as of Aug. 30, 2021)"),
+            font.main = 1, outer = FALSE,
+            adj = 0, cex.main = 1)
+    }
+    dev.off()    
   }
   
 }
-dev.off()
-
 
 
 ## HRA maps ####
@@ -2527,9 +2334,11 @@ cases.int.hra <- classIntervals(covid_hra_tmp$Confirmed_Cases,
 cases.col.hra <- findColours(cases.int.hra, cases.pal)
 
 
-pdf(paste0("../COVIDPlots/Map_HRA_Cases.pdf"),
-    height = 5, width = 5)
-
+jpeg(paste0("../COVIDPlots/Map_HRA_Cases.jpeg"),
+     height = 480, width = 480)
+par(lend = 1,
+    mar = c(0,0,2,0),
+    oma = c(1,1,1,1))
 plot(hra,
      col = cases.col.hra,
      border = 'grey48', lwd = .25,
@@ -2539,11 +2348,17 @@ legend('bottomleft',
        title.adj = 0,
        ncol = 2,
        bty = 'n',
-       cex = 0.5,
+       cex= 0.75,
        border = FALSE,
        fill = cases.pal,
        legend = names(attr(cases.col.hra, 'table')))
-title("King County: COVID-19 Cases",
+title(paste0("Cumulative COVID-19 Cases\n",
+             ""),
+      font.main = 2, outer = FALSE,
+      adj = 0, cex.main = 1)
+
+title(paste0("\n",
+             "King County (as of Aug. 30, 2021)"),
       font.main = 1, outer = FALSE,
       adj = 0, cex.main = 1)
 dev.off()
@@ -2569,8 +2384,11 @@ prev.int.hra <- classIntervals(covid_hra_tmp$CasesPrev,
 prev.col.hra <- findColours(prev.int.hra, prev.pal)
 
 
-pdf(paste0("../COVIDPlots/Map_HRA_CasesPrev.pdf"),
-    height = 5, width = 5)
+jpeg(paste0("../COVIDPlots/Map_HRA_CasesPrev.jpeg"),
+     height = 480, width = 480)
+par(lend = 1,
+    mar = c(0,0,2,0),
+    oma = c(1,1,1,1))
 plot(hra,
      col = prev.col.hra,
      border = 'grey48', lwd = .25,
@@ -2580,11 +2398,17 @@ legend('bottomleft',
        title.adj = 0,
        ncol = 2,
        bty = 'n',
-       cex = 0.5,
+       cex = 0.75,
        border = FALSE,
        fill = prev.pal,
        legend = names(attr(prev.col.hra, 'table')))
-title("King County: COVID-19 Cases",
+title(paste0("Prevalence of Cumulative COVID-19 Cases\n",
+             ""),
+      font.main = 2, outer = FALSE,
+      adj = 0, cex.main = 1)
+
+title(paste0("\n",
+             "King County (as of Aug. 30, 2021)"),
       font.main = 1, outer = FALSE,
       adj = 0, cex.main = 1)
 dev.off()
@@ -2611,8 +2435,11 @@ dist.int.hra <- classIntervals(covid_hra_tmp$CasesDist,
 dist.col.hra <- findColours(dist.int.hra, dist.pal)
 
 
-pdf(paste0("../COVIDPlots/Map_HRA_CasesDist.pdf"),
-    height = 5, width = 5)
+jpeg(paste0("../COVIDPlots/Map_HRA_CasesDist.jpeg"),
+     height = 480, width = 480)
+par(lend = 1,
+    mar = c(0,0,2,0),
+    oma = c(1,1,1,1))
 plot(hra,
      col = dist.col.hra,
      border = 'grey48', lwd = .25,
@@ -2622,11 +2449,17 @@ legend('bottomleft',
        title.adj = 0,
        ncol = 2,
        bty = 'n',
-       cex = 0.5,
+       cex = 0.75,
        border = FALSE,
        fill = dist.pal,
        legend = names(attr(dist.col.hra, 'table')))
-title("King County: COVID-19 Cases",
+title(paste0("Distribution of Cumulative COVID-19 Cases\n",
+             ""),
+      font.main = 2, outer = FALSE,
+      adj = 0, cex.main = 1)
+
+title(paste0("\n",
+             "King County (as of Aug. 30, 2021)"),
       font.main = 1, outer = FALSE,
       adj = 0, cex.main = 1)
 dev.off()
@@ -2664,8 +2497,11 @@ hosp.int.hra <- classIntervals(covid_hra_tmp$Hospitalizations,
 hosp.col.hra <- findColours(hosp.int.hra, hosp.pal)
 
 
-pdf(paste0("../COVIDPlots/Map_HRA_Hospitalizations.pdf"),
-    height = 5, width = 5)
+jpeg(paste0("../COVIDPlots/Map_HRA_Hospitalizations.jpeg"),
+     height = 480, width = 480)
+par(lend = 1,
+    mar = c(0,0,2,0),
+    oma = c(1,1,1,1))
 plot(hra,
      col = hosp.col.hra,
      border = 'grey48', lwd = .25,
@@ -2675,11 +2511,17 @@ legend('bottomleft',
        title.adj = 0,
        ncol = 2,
        bty = 'n',
-       cex = 0.5,
+       cex = 0.75,
        border = FALSE,
        fill = hosp.pal,
        legend = names(attr(hosp.col.hra, 'table')))
-title("King County: COVID-19 Hospitalizations",
+title(paste0("Cumulative COVID-19 Hospitalizations\n",
+             ""),
+      font.main = 2, outer = FALSE,
+      adj = 0, cex.main = 1)
+
+title(paste0("\n",
+             "King County (as of Aug. 30, 2021)"),
       font.main = 1, outer = FALSE,
       adj = 0, cex.main = 1)
 dev.off()
@@ -2705,8 +2547,11 @@ prev.int.hra <- classIntervals(covid_hra_tmp$HospPrev,
 prev.col.hra <- findColours(prev.int.hra, prev.pal)
 
 
-pdf(paste0("../COVIDPlots/Map_HRA_HospPrev.pdf"),
-    height = 5, width = 5)
+jpeg(paste0("../COVIDPlots/Map_HRA_HospPrev.jpeg"),
+     height = 480, width = 480)
+par(lend = 1,
+    mar = c(0,0,2,0),
+    oma = c(1,1,1,1))
 plot(hra,
      col = prev.col.hra,
      border = 'grey48', lwd = .25,
@@ -2716,13 +2561,20 @@ legend('bottomleft',
        title.adj = 0,
        ncol = 2,
        bty = 'n',
-       cex = 0.5,
+       cex = 0.75,
        border = FALSE,
        fill = prev.pal,
        legend = names(attr(prev.col.hra, 'table')))
-title("King County: COVID-19 Hospitalizations",
+title(paste0("Prevalence of Cumulative COVID-19 Hospitalizations\n",
+             ""),
+      font.main = 2, outer = FALSE,
+      adj = 0, cex.main = 1)
+
+title(paste0("\n",
+             "King County (as of Aug. 30, 2021)"),
       font.main = 1, outer = FALSE,
       adj = 0, cex.main = 1)
+
 dev.off()
 
 #### Distribution ####
@@ -2732,8 +2584,8 @@ dist.int.hra <- classIntervals(covid_hra_tmp$HospDist,
 
 breaks <- dist.int.hra$brks
 breaks <- c(0, .01, .015, .02,
-            .025, .03, .035,
-            .04, .045, .055)
+            .025, .03, 
+            .04, .05, .055)
 
 dist.pal <- brewer.pal(n = 9,  name = "YlGnBu")
 
@@ -2747,8 +2599,11 @@ dist.int.hra <- classIntervals(covid_hra_tmp$CasesDist,
 dist.col.hra <- findColours(dist.int.hra, dist.pal)
 
 
-pdf(paste0("../COVIDPlots/Map_HRA_HospDist.pdf"),
-    height = 5, width = 5)
+jpeg(paste0("../COVIDPlots/Map_HRA_HospDist.jpeg"),
+     height = 480, width = 480)
+par(lend = 1,
+    mar = c(0,0,2,0),
+    oma = c(1,1,1,1))
 plot(hra,
      col = dist.col.hra,
      border = 'grey48', lwd = .25,
@@ -2758,13 +2613,20 @@ legend('bottomleft',
        title.adj = 0,
        ncol = 2,
        bty = 'n',
-       cex = 0.5,
+       cex = 0.75,
        border = FALSE,
        fill = dist.pal,
        legend = names(attr(dist.col.hra, 'table')))
-title("King County: COVID-19 Hospitalizations",
+title(paste0("Distribution of Cumulative COVID-19 Hospitalizations\n",
+             ""),
+      font.main = 2, outer = FALSE,
+      adj = 0, cex.main = 1)
+
+title(paste0("\n",
+             "King County (as of Aug. 30, 2021)"),
       font.main = 1, outer = FALSE,
       adj = 0, cex.main = 1)
+
 dev.off()
 
 
@@ -2781,7 +2643,7 @@ death.int.hra <- classIntervals(covid_hra_tmp$Deaths,
 breaks <- death.int.hra$brks
 breaks <- c(0, 5, 15,
             30,
-            45, 60, 75, 90,
+            40, 50, 60, 75, 90,
             100)
 ## Get color based on RColorBrwere palette for 
 ## each area
@@ -2798,8 +2660,11 @@ death.int.hra <- classIntervals(covid_hra_tmp$Deaths,
 death.col.hra <- findColours(death.int.hra, death.pal)
 
 
-pdf(paste0("../COVIDPlots/Map_HRA_Deaths.pdf"),
-    height = 5, width = 5)
+jpeg(paste0("../COVIDPlots/Map_HRA_Deaths.jpeg"),
+     height = 480, width = 480)
+par(lend = 1,
+    mar = c(0,0,2,0),
+    oma = c(1,1,1,1))
 plot(hra,
      col = death.col.hra,
      border = 'grey48', lwd = .25,
@@ -2809,13 +2674,20 @@ legend('bottomleft',
        title.adj = 0,
        ncol = 2,
        bty = 'n',
-       cex = 0.5,
+       cex = 0.75,
        border = FALSE,
        fill = death.pal,
        legend = names(attr(death.col.hra, 'table')))
-title("King County: COVID-19 Deaths",
+title(paste0("Cumulative COVID-19 Deaths\n",
+             ""),
+      font.main = 2, outer = FALSE,
+      adj = 0, cex.main = 1)
+
+title(paste0("\n",
+             "King County (as of Aug. 30, 2021)"),
       font.main = 1, outer = FALSE,
       adj = 0, cex.main = 1)
+
 dev.off()
 
 
@@ -2827,8 +2699,8 @@ prev.int.hra <- classIntervals(covid_hra_tmp$DeathPrev,
 
 breaks <- prev.int.hra$brks
 breaks <- c(0, .00025, .0005,
-            .0007, .0008, .0009, .001,
-            .00125, .0015, .002, .0085)
+            .00075, .001,
+            .00125, .0015, .002, .005, .0085)
 prev.pal <- brewer.pal(n = 9,  name = "YlGnBu")
 
 covid_hra_tmp <- covid_hra_tmp[match(covid_hra_tmp$Location_Name,
@@ -2841,8 +2713,11 @@ prev.int.hra <- classIntervals(covid_hra_tmp$DeathPrev,
 prev.col.hra <- findColours(prev.int.hra, prev.pal)
 
 
-pdf(paste0("../COVIDPlots/Map_HRA_DeathPrev.pdf"),
-    height = 5, width = 5)
+jpeg(paste0("../COVIDPlots/Map_HRA_DeathPrev.jpeg"),
+     height = 480, width = 480)
+par(lend = 1,
+    mar = c(0,0,2,0),
+    oma = c(1,1,1,1))
 plot(hra,
      col = prev.col.hra,
      border = 'grey48', lwd = .25,
@@ -2852,11 +2727,17 @@ legend('bottomleft',
        title.adj = 0,
        ncol = 2,
        bty = 'n',
-       cex = 0.5,
+       cex = 0.75,
        border = FALSE,
        fill = prev.pal,
        legend = names(attr(prev.col.hra, 'table')))
-title("King County: COVID-19 Deaths",
+title(paste0("Prevalence of Cumulative COVID-19 Deaths\n",
+             ""),
+      font.main = 2, outer = FALSE,
+      adj = 0, cex.main = 1)
+
+title(paste0("\n",
+             "King County (as of Aug. 30, 2021)"),
       font.main = 1, outer = FALSE,
       adj = 0, cex.main = 1)
 dev.off()
@@ -2868,8 +2749,8 @@ dist.int.hra <- classIntervals(covid_hra_tmp$DeathDist,
 
 breaks <- dist.int.hra$brks
 breaks <- c(0, .0025, .005, .0075,
-            .01, .015, .02, .025,
-            .035, .045, .06)
+            .01, .015, .02,
+            .03, .045, .06)
 
 dist.pal <- brewer.pal(n = 9,  name = "YlGnBu")
 
@@ -2883,8 +2764,11 @@ dist.int.hra <- classIntervals(covid_hra_tmp$DeathDist,
 dist.col.hra <- findColours(dist.int.hra, dist.pal)
 
 
-pdf(paste0("../COVIDPlots/Map_HRA_DeathDist.pdf"),
-    height = 5, width = 5)
+jpeg(paste0("../COVIDPlots/Map_HRA_DeathDist.jpeg"),
+     height = 480, width = 480)
+par(lend = 1,
+    mar = c(0,0,2,0),
+    oma = c(1,1,1,1))
 plot(hra,
      col = dist.col.hra,
      border = 'grey48', lwd = .25,
@@ -2894,53 +2778,894 @@ legend('bottomleft',
        title.adj = 0,
        ncol = 2,
        bty = 'n',
-       cex = 0.5,
+       cex = 0.75,
        border = FALSE,
        fill = dist.pal,
        legend = names(attr(dist.col.hra, 'table')))
-title("King County: COVID-19 Deaths",
+title(paste0("Distribution of Cumulative COVID-19 Deaths\n",
+             ""),
+      font.main = 2, outer = FALSE,
+      adj = 0, cex.main = 1)
+
+title(paste0("\n",
+             "King County (as of Aug. 30, 2021)"),
       font.main = 1, outer = FALSE,
       adj = 0, cex.main = 1)
 dev.off()
 
 
+## 65+ / < 14 ####
 
-for(race in covid_KC_race$Race_Ethnicity){
-  cases.tmp <- covid_KC_race %>% 
-    filter(Age_Group != "Unknown") %>% 
-    filter(City == "All King County") %>% 
-    filter(Race_Ethnicity)
+for(year in c(2010, 2012, 2015,
+              2017, 2020)){
+  
+  load(paste0('../Data/pop_', 
+              year, '_OFM.rda'))  
+  hra_pop <- pop %>% 
+    mutate(GEOID = as.character(Geoid)) %>% 
+    left_join(tracts_to_hra$acs5_2019) %>% 
+    group_by(FID_HRA_20, Sex_Lbl, Age, Age_Lbl) %>% 
+    summarise(HRA = unique(HRA2010v2_),
+              Pop = sum(Pop*prop.area)) %>% 
+    filter(!is.na(HRA))
+  
+  hra_age_pop <- hra_pop %>% 
+    mutate(Over65 = ifelse(Age %in% 14:18,
+                           1, 0),
+           Under14 = ifelse(Age %in% 1:3,
+                            1, 0)) %>% 
+    filter(Over65 == 1 | Under14 == 1) %>% 
+    group_by(HRA) %>% 
+    summarise(PopOver65 = sum(Pop*Over65),
+              PopUnder14 = sum(Pop*Under14)) %>% 
+    ungroup() 
+  
+  
+  ### Population  ####
+  
+  pop.pal <- brewer.pal(n = 9, name = "Blues")
+  
+  ## Use this to get an idea
+  pop.int.hra <- classIntervals(hra_age_pop$PopOver65,
+                                style = 'jenks',
+                                n = 9)
+  
+  breaks <- pop.int.hra$brks
+  breaks
+  
+  ## fix the breaks 
+  breaks <- c(0, 750, 1000,
+              2500,  4000,
+              5000, 7500, 10000,
+              15000, 21000)
+  
+  #### Over 65 ####
+  jpeg(paste0("../PopPlots/", 
+              year, "/OFM_Ages/OFM_",
+              year, "_ageOver65",
+              ".jpeg"),
+       height = 480, width = 480)
+  {
+    par(lend = 1,
+        mar = c(0,0,2,0),
+        oma = c(0,0,1,0))
+    plot(hra,
+         col = pop.col.hra,
+         border = 'grey48', lwd = .25,
+         main = "")
+    legend('bottomleft',
+           title = 'Population',
+           title.adj = 0,
+           ncol = 2,
+           bty = 'n',
+           cex = 0.75,
+           border = FALSE,
+           fill = pop.pal,
+           legend = names(attr(pop.col.hra, 'table')))
+    title(paste0("Population Over 65", "\n",
+                 ""),
+          font.main = 2, outer = FALSE,
+          adj = 0, cex.main = 1)
+    
+    title(paste0("\n",
+                 paste0("King County (WA OFM, ", year,")")),
+          font.main = 1, outer = FALSE,
+          adj = 0, cex.main = 1)
+  }
+  dev.off()
+  
+  ## make sure order correct for hra@data
+  hra_age_tmp <- hra_age_pop[match(hra_age_pop$HRA,
+                                   hra@data$HRA2010v2_), ]
+  
+  ## assign to bins 
+  pop.int.hra <- classIntervals(hra_age_tmp$PopOver65,
+                                style = "fixed",
+                                fixedBreaks = breaks,
+                                n = 9)
+  ## assign colors
+  pop.col.hra <- findColours(pop.int.hra, pop.pal)
+  
+  jpeg(paste0("../PopPlots/", 
+              year, "/OFM_Ages/OFM_",
+              year, "_ageOver65",
+              ".jpeg"),
+       height = 480, width = 480)
+  {
+    par(lend = 1,
+        mar = c(0,0,2,0),
+        oma = c(0,0,1,0))
+    plot(hra,
+         col = pop.col.hra,
+         border = 'grey48', lwd = .25,
+         main = "")
+    legend('bottomleft',
+           title = 'Population',
+           title.adj = 0,
+           ncol = 2,
+           bty = 'n',
+           cex = 0.75,
+           border = FALSE,
+           fill = pop.pal,
+           legend = names(attr(pop.col.hra, 'table')))
+    title(paste0("Population Over 65", "\n",
+                 ""),
+          font.main = 2, outer = FALSE,
+          adj = 0, cex.main = 1)
+    
+    title(paste0("\n",
+                 paste0("King County (WA OFM, ", year,")")),
+          font.main = 1, outer = FALSE,
+          adj = 0, cex.main = 1)
+  }
+  dev.off()
+  
+  
+  #### Under 14 ####
+  
+  ## assign to bins 
+  pop.int.hra <- classIntervals(hra_age_tmp$PopUnder14,
+                                style = "fixed",
+                                fixedBreaks = breaks,
+                                n = 9)
+  ## assign colors
+  pop.col.hra <- findColours(pop.int.hra, pop.pal)
+  
+  
+  jpeg(paste0("../PopPlots/", 
+              year, "/OFM_Ages/OFM_",
+              year, "_ageUnder14",
+              ".jpeg"),
+       height = 480, width = 480)
+  {
+    par(lend = 1,
+        mar = c(0,0,2,0),
+        oma = c(0,0,1,0))
+    plot(hra,
+         col = pop.col.hra,
+         border = 'grey48', lwd = .25,
+         main = "")
+    legend('bottomleft',
+           title = 'Population',
+           title.adj = 0,
+           ncol = 2,
+           bty = 'n',
+           cex = 0.75,
+           border = FALSE,
+           fill = pop.pal,
+           legend = names(attr(pop.col.hra, 'table')))
+    title(paste0("Population Under 14", "\n",
+                 ""),
+          font.main = 2, outer = FALSE,
+          adj = 0, cex.main = 1)
+    
+    title(paste0("\n",
+                 paste0("King County (WA OFM, ", year,")")),
+          font.main = 1, outer = FALSE,
+          adj = 0, cex.main = 1)
+  }
+  dev.off()
+  
+  ### Prevalence  ####
+  
+  prev.pal <- brewer.pal(n = 9, name = "YlGnBu")
+  
+  hra_total_pop <- hra_pop %>% 
+    group_by(HRA) %>% 
+    summarise(Pop = sum(Pop))
+  
+  hra_age_pop <- hra_age_pop %>% 
+    left_join(hra_total_pop,
+              by = c("HRA" = "HRA")) %>% 
+    mutate(PrevOver65 = PopOver65/Pop,
+           PrevUnder14 = PopUnder14/Pop)
+  
+  ## Use this to get an idea
+  prev.int.hra <- classIntervals(hra_age_pop$PrevOver65,
+                                 style = 'jenks',
+                                 n = 9)
+  
+  breaks <- prev.int.hra$brks
+  breaks
+  
+  ## fix the breaks 
+  breaks <- c(0, 0.025, 0.05,
+              0.075, 0.10, 0.125,
+              0.15, 0.175, 0.2,
+              0.26)
+  
+  #### Over 65 ####
+  prev.int.hra <- classIntervals(hra_age_pop$PrevOver65,
+                                 style = "fixed",
+                                 fixedBreaks = breaks,
+                                 n = 9)
+  ## assign colors
+  prev.col.hra <- findColours(prev.int.hra, prev.pal)
+  
+  jpeg(paste0("../PopPlots/", 
+              year, "/OFM_Ages/OFM_",
+              year, "_agePrevOver65",
+              ".jpeg"),
+       height = 480, width = 480)
+  {
+    par(lend = 1,
+        mar = c(0,0,2,0),
+        oma = c(0,0,1,0))
+    plot(hra,
+         col = prev.col.hra,
+         border = 'grey48', lwd = .25,
+         main = "")
+    legend('bottomleft',
+           title = 'Prevalence',
+           title.adj = 0,
+           ncol = 2,
+           bty = 'n',
+           cex = 0.75,
+           border = FALSE,
+           fill = prev.pal,
+           legend = names(attr(prev.col.hra, 'table')))
+    title(paste0("Prevalence of Population Over 65", "\n",
+                 ""),
+          font.main = 2, outer = FALSE,
+          adj = 0, cex.main = 1)
+    
+    title(paste0("\n",
+                 paste0("King County (WA OFM, ", year,")")),
+          font.main = 1, outer = FALSE,
+          adj = 0, cex.main = 1)
+  }
+  dev.off()
+  
+  #### Under 14 ####
+  prev.int.hra <- classIntervals(hra_age_pop$PrevUnder14,
+                                 style = "fixed",
+                                 fixedBreaks = breaks,
+                                 n = 9)
+  ## assign colors
+  prev.col.hra <- findColours(prev.int.hra, prev.pal)
+  
+  jpeg(paste0("../PopPlots/", 
+              year, "/OFM_Ages/OFM_",
+              year, "_agePrevUnder14",
+              ".jpeg"),
+       height = 480, width = 480)
+  {
+    par(lend = 1,
+        mar = c(0,0,2,0),
+        oma = c(0,0,1,0))
+    plot(hra,
+         col = prev.col.hra,
+         border = 'grey48', lwd = .25,
+         main = "")
+    legend('bottomleft',
+           title = 'Prevalence',
+           title.adj = 0,
+           ncol = 2,
+           bty = 'n',
+           cex = 0.75,
+           border = FALSE,
+           fill = prev.pal,
+           legend = names(attr(prev.col.hra, 'table')))
+    title(paste0("Prevalence of Population Under 14", "\n",
+                 ""),
+          font.main = 2, outer = FALSE,
+          adj = 0, cex.main = 1)
+    
+    title(paste0("\n",
+                 paste0("King County (WA OFM, ", year,")")),
+          font.main = 1, outer = FALSE,
+          adj = 0, cex.main = 1)
+  }
+  dev.off()
+  
+  ### Distribution ####
+  hra_age_pop <- hra_age_pop %>% 
+    left_join(hra_total_pop,
+              by = c("HRA" = "HRA")) %>% 
+    mutate(DistOver65 = PopOver65/sum(PopOver65),
+           DistUnder14 = PopUnder14/sum(PopUnder14))
+  
+  ## Use this to get an idea
+  prev.int.hra <- classIntervals(hra_age_pop$DistOver65,
+                                 style = 'jenks',
+                                 n = 9)
+  
+  breaks <- prev.int.hra$brks
+  breaks
+  
+  ## fix the breaks 
+  breaks <- c(0, 0.005,.01,
+              0.015, 0.02, 0.025,
+              0.03, 0.035, 0.045,
+              0.055)
+  
+  #### Over 65 ####
+  prev.int.hra <- classIntervals(hra_age_pop$DistOver65,
+                                 style = "fixed",
+                                 fixedBreaks = breaks,
+                                 n = 9)
+  ## assign colors
+  prev.col.hra <- findColours(prev.int.hra, prev.pal)
+  
+  jpeg(paste0("../PopPlots/", 
+              year, "/OFM_Ages/OFM_",
+              year, "_ageDistOver65",
+              ".jpeg"),
+       height = 480, width = 480)
+  {
+    par(lend = 1,
+        mar = c(0,0,2,0),
+        oma = c(0,0,1,0))
+    plot(hra,
+         col = prev.col.hra,
+         border = 'grey48', lwd = .25,
+         main = "")
+    legend('bottomleft',
+           title = 'Distribution',
+           title.adj = 0,
+           ncol = 2,
+           bty = 'n',
+           cex = 0.75,
+           border = FALSE,
+           fill = prev.pal,
+           legend = names(attr(prev.col.hra, 'table')))
+    title(paste0("Distribution of Population Over 65", "\n",
+                 ""),
+          font.main = 2, outer = FALSE,
+          adj = 0, cex.main = 1)
+    
+    title(paste0("\n",
+                 paste0("King County (WA OFM, ", year,")")),
+          font.main = 1, outer = FALSE,
+          adj = 0, cex.main = 1)
+  }
+  dev.off()
+  
+  #### Under 14 ####
+  prev.int.hra <- classIntervals(hra_age_pop$DistUnder14,
+                                 style = "fixed",
+                                 fixedBreaks = breaks,
+                                 n = 9)
+  ## assign colors
+  prev.col.hra <- findColours(prev.int.hra, prev.pal)
+  
+  jpeg(paste0("../PopPlots/", 
+              year, "/OFM_Ages/OFM_",
+              year, "_ageDistUnder14",
+              ".jpeg"),
+       height = 480, width = 480)
+  {
+    par(lend = 1,
+        mar = c(0,0,2,0),
+        oma = c(0,0,1,0))
+    plot(hra,
+         col = prev.col.hra,
+         border = 'grey48', lwd = .25,
+         main = "")
+    legend('bottomleft',
+           title = 'Distribution',
+           title.adj = 0,
+           ncol = 2,
+           bty = 'n',
+           cex = 0.75,
+           border = FALSE,
+           fill = prev.pal,
+           legend = names(attr(prev.col.hra, 'table')))
+    title(paste0("Distribution of Population Under 14", "\n",
+                 ""),
+          font.main = 2, outer = FALSE,
+          adj = 0, cex.main = 1)
+    
+    title(paste0("\n",
+                 paste0("King County (WA OFM, ", year,")")),
+          font.main = 1, outer = FALSE,
+          adj = 0, cex.main = 1)
+  }
+  dev.off()
+  
+}
+
+## By race ####
+
+for(year in c(2010, 2012, 2015,
+              2017, 2020)){
+  for(race in unique(pop$Race_Lbl)){
+    race.clean <- gsub(" and ", "/",
+                       race)
+    race.clean <- gsub(" or ", "/",
+                       race.clean)
+    
+    
+    load(paste0('../Data/pop_', 
+                year, '_OFM.rda'))  
+    hra_pop <- pop %>% 
+      mutate(GEOID = as.character(Geoid)) %>% 
+      left_join(tracts_to_hra$acs5_2019) %>% 
+      group_by(FID_HRA_20, Race, Race_Lbl, Sex_Lbl, Age, Age_Lbl) %>% 
+      summarise(HRA = unique(HRA2010v2_),
+                Pop = sum(Pop*prop.area)) %>% 
+      filter(!is.na(HRA)) %>% 
+      arrange(Race,Age)
+    pop.cols <- brewer.pal(n = 5,
+                           name = 'Blues')
+    
+    hra_age_pop <- hra_pop %>% 
+      filter(Race_Lbl == race) %>% 
+      mutate(Over65 = ifelse(Age %in% 14:18,
+                             1, 0),
+             Under14 = ifelse(Age %in% 1:3,
+                              1, 0)) %>% 
+      filter(Over65 == 1 | Under14 == 1) %>% 
+      group_by(HRA) %>% 
+      summarise(PopOver65 = sum(Pop*Over65),
+                PopUnder14 = sum(Pop*Under14)) %>% 
+      ungroup() 
+    
+    ### Population  ####
+    
+    pop.pal <- brewer.pal(n = 9, name = "Blues")
+    
+    ## Use this to get an idea
+    pop.int.hra <- classIntervals(hra_age_pop$PopOver65,
+                                  style = 'jenks',
+                                  n = 9)
+    
+    breaks <- pop.int.hra$brks
+    breaks
+    
+    ## fix the breaks 
+    breaks <- c(0, 250, 500, 750, 1000,
+                2500, 
+                5000, 7500, 10000,
+                15000)
+    
+    #### Over 65 ####
+    pop.int.hra <- classIntervals(hra_age_pop$PopOver65,
+                                  style = 'fixed',
+                                  fixedBreaks = breaks,
+                                  n = 9)
+    ## assign colors
+    pop.col.hra <- findColours(pop.int.hra, pop.pal)
+    
+    jpeg(paste0("../PopPlots/", 
+                year, "/OFM_Ages/OFM_",
+                year, "_ageOver65_",
+                race,
+                ".jpeg"),
+         height = 480, width = 480)
+    {
+      par(lend = 1,
+          mar = c(0,0,2,0),
+          oma = c(0,0,1,0))
+      plot(hra,
+           col = pop.col.hra,
+           border = 'grey48', lwd = .25,
+           main = "")
+      legend('bottomleft',
+             title = 'Population',
+             title.adj = 0,
+             ncol = 2,
+             bty = 'n',
+             cex = 0.75,
+             border = FALSE,
+             fill = pop.pal,
+             legend = names(attr(pop.col.hra, 'table')))
+      title(paste0(race.clean, " Population Over 65", "\n",
+                   ""),
+            font.main = 2, outer = FALSE,
+            adj = 0, cex.main = 1)
+      
+      title(paste0("\n",
+                   paste0("King County (WA OFM, ", year,")")),
+            font.main = 1, outer = FALSE,
+            adj = 0, cex.main = 1)
+    }
+    dev.off()
+    
+    #### Under 14 ####
+    
+    ## assign to bins 
+    pop.int.hra <- classIntervals(hra_age_pop$PopUnder14,
+                                  style = "fixed",
+                                  fixedBreaks = breaks,
+                                  n = 9)
+    ## assign colors
+    pop.col.hra <- findColours(pop.int.hra, pop.pal)
+    
+    
+    jpeg(paste0("../PopPlots/", 
+                year, "/OFM_Ages/OFM_",
+                year, "_ageUnder14_",
+                race,
+                ".jpeg"),
+         height = 480, width = 480)
+    {
+      par(lend = 1,
+          mar = c(0,0,2,0),
+          oma = c(0,0,1,0))
+      plot(hra,
+           col = pop.col.hra,
+           border = 'grey48', lwd = .25,
+           main = "")
+      legend('bottomleft',
+             title = 'Population',
+             title.adj = 0,
+             ncol = 2,
+             bty = 'n',
+             cex = 0.75,
+             border = FALSE,
+             fill = pop.pal,
+             legend = names(attr(pop.col.hra, 'table')))
+      title(paste0(race.clean, " Population Under 14", "\n",
+                   ""),
+            font.main = 2, outer = FALSE,
+            adj = 0, cex.main = 1)
+      
+      title(paste0("\n",
+                   paste0("King County (WA OFM, ", year,")")),
+            font.main = 1, outer = FALSE,
+            adj = 0, cex.main = 1)
+    }
+    dev.off()
+    
+    ### Prevalence  ####
+    
+    prev.pal <- brewer.pal(n = 9, name = "YlGnBu")
+    
+    hra_total_pop <- hra_pop %>% 
+      group_by(HRA) %>% 
+      summarise(Pop = sum(Pop))
+    
+    hra_age_pop <- hra_age_pop %>% 
+      left_join(hra_total_pop,
+                by = c("HRA" = "HRA")) %>% 
+      mutate(PrevOver65 = PopOver65/Pop,
+             PrevUnder14 = PopUnder14/Pop)
+    
+    ## Use this to get an idea
+    prev.int.hra <- classIntervals(hra_age_pop$PrevOver65,
+                                   style = 'jenks',
+                                   n = 9)
+    
+    breaks <- prev.int.hra$brks
+    breaks
+    
+    ## fix the breaks 
+    breaks <- c(0, 0.01, 0.025, 0.05,
+                0.075, 0.10, 0.125,
+                0.15, 0.175, 0.21)
+    
+    #### Over 65 ####
+    prev.int.hra <- classIntervals(hra_age_pop$PrevOver65,
+                                   style = "fixed",
+                                   fixedBreaks = breaks,
+                                   n = 9)
+    ## assign colors
+    prev.col.hra <- findColours(prev.int.hra, prev.pal)
+    
+    jpeg(paste0("../PopPlots/", 
+                year, "/OFM_Ages/OFM_",
+                year, "_agePrevOver65_",
+                race,
+                ".jpeg"),
+         height = 480, width = 480)
+    {
+      par(lend = 1,
+          mar = c(0,0,2,0),
+          oma = c(0,0,1,0))
+      plot(hra,
+           col = prev.col.hra,
+           border = 'grey48', lwd = .25,
+           main = "")
+      legend('bottomleft',
+             title = 'Prevalence',
+             title.adj = 0,
+             ncol = 2,
+             bty = 'n',
+             cex = 0.75,
+             border = FALSE,
+             fill = prev.pal,
+             legend = names(attr(prev.col.hra, 'table')))
+      title(paste0("Prevalence of Population Over 65", "\n",
+                   ""),
+            font.main = 2, outer = FALSE,
+            adj = 0, cex.main = 1)
+      
+      title(paste0("\n",
+                   paste0("King County, ",
+                          race.clean , " (WA OFM, ", year,")")),
+            font.main = 1, outer = FALSE,
+            adj = 0, cex.main = 1)
+    }
+    dev.off()
+    
+    #### Under 14 ####
+    prev.int.hra <- classIntervals(hra_age_pop$PrevUnder14,
+                                   style = "fixed",
+                                   fixedBreaks = breaks,
+                                   n = 9)
+    ## assign colors
+    prev.col.hra <- findColours(prev.int.hra, prev.pal)
+    
+    jpeg(paste0("../PopPlots/", 
+                year, "/OFM_Ages/OFM_",
+                year, "_agePrevUnder14_",
+                race,
+                ".jpeg"),
+         height = 480, width = 480)
+    {
+      par(lend = 1,
+          mar = c(0,0,2,0),
+          oma = c(0,0,1,0))
+      plot(hra,
+           col = prev.col.hra,
+           border = 'grey48', lwd = .25,
+           main = "")
+      legend('bottomleft',
+             title = 'Prevalence',
+             title.adj = 0,
+             ncol = 2,
+             bty = 'n',
+             cex = 0.75,
+             border = FALSE,
+             fill = prev.pal,
+             legend = names(attr(prev.col.hra, 'table')))
+      title(paste0("Prevalence of Population Under 14", "\n",
+                   ""),
+            font.main = 2, outer = FALSE,
+            adj = 0, cex.main = 1)
+      
+      title(paste0("\n",
+                   paste0("King County, ",
+                          race.clean , " (WA OFM, ", year,")")),
+            font.main = 1, outer = FALSE,
+            adj = 0, cex.main = 1)
+    }
+    dev.off()
+    
+    ### Distribution ####
+    hra_age_pop <- hra_age_pop %>% 
+      mutate(DistOver65 = PopOver65/sum(PopOver65),
+             DistUnder14 = PopUnder14/sum(PopUnder14))
+    
+    ## Use this to get an idea
+    prev.int.hra <- classIntervals(hra_age_pop$DistOver65,
+                                   style = 'jenks',
+                                   n = 9)
+    
+    breaks <- prev.int.hra$brks
+    breaks
+    
+    ## fix the breaks 
+    breaks <- c(0, 0.005,.01,
+                0.025, .05, .075,
+                0.1, 0.125, 0.15,
+                0.175)
+    
+    #### Over 65 ####
+    prev.int.hra <- classIntervals(hra_age_pop$DistOver65,
+                                   style = "fixed",
+                                   fixedBreaks = breaks,
+                                   n = 9)
+    ## assign colors
+    prev.col.hra <- findColours(prev.int.hra, prev.pal)
+    
+    jpeg(paste0("../PopPlots/", 
+                year, "/OFM_Ages/OFM_",
+                year, "_ageDistOver65_",
+                race,
+                ".jpeg"),
+         height = 480, width = 480)
+    {
+      par(lend = 1,
+          mar = c(0,0,2,0),
+          oma = c(0,0,1,0))
+      plot(hra,
+           col = prev.col.hra,
+           border = 'grey48', lwd = .25,
+           main = "")
+      legend('bottomleft',
+             title = 'Distribution',
+             title.adj = 0,
+             ncol = 2,
+             bty = 'n',
+             cex = 0.75,
+             border = FALSE,
+             fill = prev.pal,
+             legend = names(attr(prev.col.hra, 'table')))
+      title(paste0("Distribution of Population Over 65", "\n",
+                   ""),
+            font.main = 2, outer = FALSE,
+            adj = 0, cex.main = 1)
+      
+      title(paste0("\n",
+                   paste0("King County, ",
+                          race.clean, " (WA OFM, ", year,")")),
+            font.main = 1, outer = FALSE,
+            adj = 0, cex.main = 1)
+    }
+    dev.off()
+    
+    #### Under 14 ####
+    prev.int.hra <- classIntervals(hra_age_pop$DistUnder14,
+                                   style = "fixed",
+                                   fixedBreaks = breaks,
+                                   n = 9)
+    ## assign colors
+    prev.col.hra <- findColours(prev.int.hra, prev.pal)
+    
+    jpeg(paste0("../PopPlots/", 
+                year, "/OFM_Ages/OFM_",
+                year, "_ageDistUnder14_",
+                race,
+                ".jpeg"),
+         height = 480, width = 480)
+    {
+      par(lend = 1,
+          mar = c(0,0,2,0),
+          oma = c(0,0,1,0))
+      plot(hra,
+           col = prev.col.hra,
+           border = 'grey48', lwd = .25,
+           main = "")
+      legend('bottomleft',
+             title = 'Distribution',
+             title.adj = 0,
+             ncol = 2,
+             bty = 'n',
+             cex = 0.75,
+             border = FALSE,
+             fill = prev.pal,
+             legend = names(attr(prev.col.hra, 'table')))
+      title(paste0("Distribution of Population Under 14", "\n",
+                   ""),
+            font.main = 2, outer = FALSE,
+            adj = 0, cex.main = 1)
+      
+      title(paste0("\n",
+                   paste0("King County, ",
+                          race.clean, " (WA OFM, ", year,")")),
+            font.main = 1, outer = FALSE,
+            adj = 0, cex.main = 1)
+    }
+    dev.off()
+  }
+}
+
+## Race  ####
+
+cases.tmp <- covid_KC_race %>% 
+  filter(City == "All King County") %>% 
   dplyr::select(Confirmed_Cases) %>% 
+  mutate(Population2 = Confirmed_Cases) %>% 
+  as.matrix()
+
+
+cov.tmp <- covid_KC_race %>% 
+  filter(City == "All King County") %>% 
+  dplyr::select(Hospitalizations, Deaths) %>% 
+  as.matrix()
+
+row.names(cov.tmp) <-
+  row.names(cases.tmp) <- unique(covid_KC_race$Race_Ethnicity)
+colnames(cov.tmp) <-
+  colnames(cases.tmp) <- c("Hospitalizations", "Deaths")
+
+
+heights <- cbind(cases.tmp[,1],
+                 cov.tmp) %>% t()
+
+jpeg(paste0("../COVIDPlots/Barplot_Race_",
+            "_CasesHospDeath.jpeg"),
+     height = 480, width = 480)
+{
+  barplot(heights,
+          beside = TRUE,
+          col = pop.cols[c(5,4,2)],
+          border = FALSE,
+          xlab = "",
+          names.arg = rep("", ncol(heights)))
+  axis(1, at = seq(2.5, 4*ncol(heights), 4),
+       labels = colnames(heights),
+       cex.axis = 0.65)
+  legend('topleft',
+         bty = 'n',
+         fill = pop.cols[c(5,4,2)],
+         border = pop.cols[c(5,4,2)],
+         legend = c("Cases",
+                    "Hospitalizations",
+                    "Deaths"))
+  title(paste0("COVID-19 Outcomes by Race\n",
+               ""),
+        font.main = 2, outer = FALSE,
+        adj = 0, cex.main = 1)
+  
+  title(paste0("\n",
+               "King County, ",
+               race, "(as of Aug. 30, 2021)"),
+        font.main = 1, outer = FALSE,
+        adj = 0, cex.main = 1)
+}
+dev.off()    
+
+## By Cities ####
+cities <- unique(covid_KC$City)[-1]
+
+for(city in cities){
+  
+  cases.tmp <- covid_KC_race %>% 
+    filter(City == city) %>% 
+    dplyr::select(Confirmed_Cases) %>% 
     mutate(Population2 = Confirmed_Cases) %>% 
     as.matrix()
   
   
-  cov.tmp <- covid_KC %>% 
-    filter(Age_Group != "Unknown") %>% 
-    filter(City == "All King County") %>% 
+  cov.tmp <- covid_KC_race %>% 
+    filter(City == city) %>% 
     dplyr::select(Hospitalizations, Deaths) %>% 
     as.matrix()
   
   row.names(cov.tmp) <-
-    row.names(cases.tmp) <- unique(convert_ages$AgeCovid)
+    row.names(cases.tmp) <- unique(covid_KC_race$Race_Ethnicity)
   colnames(cov.tmp) <-
     colnames(cases.tmp) <- c("Hospitalizations", "Deaths")
   
-  pyr.obj <- get.bPop.pyramid(list(cases.tmp, cov.tmp),
-                              legend = c("Cases", "Hosp/Death"),
-                              LRcolnames = c("Hospitalizations", "Deaths"),
-                              LRmain = c("Hospitalizations", "Deaths"))
   
-  pdf("../COVIDPlots/Pyramid_",
-      race, "_CasesHospDeath.pdf",
-      height = 5, width = 5)
-  par(lend = 1)
-  plot(pyr.obj,
-       pyr1.par = list(col = pop.cols[4], 
-                       border = pop.cols[4]),
-       
-       pyr2.par = list(col = pop.cols[2], 
-                       border = pop.cols[2]))
+  heights <- cbind(cases.tmp[,1],
+                   cov.tmp) %>% t()
   
-  dev.off()
+  jpeg(paste0("../COVIDPlots/City/Barplot_City_",
+              race,  "_", gsub("/", "", city),
+              "_CasesHospDeath.jpeg"),
+       height = 480, width = 480)
+  {
+    barplot(heights,
+            beside = TRUE,
+            col = pop.cols[c(5,4,2)],
+            border = FALSE,
+            xlab = "",
+            names.arg = rep("", ncol(heights)))
+    axis(1, at = seq(2.5, 4*ncol(heights), 4),
+         labels = colnames(heights),
+         cex.axis = 0.65)
+    legend('topleft',
+           bty = 'n',
+           fill = pop.cols[c(5,4,2)],
+           border = pop.cols[c(5,4,2)],
+           legend = c("Cases",
+                      "Hospitalizations",
+                      "Deaths"))
+    title(paste0("COVID-19 Outcomes by Race\n",
+                 ""),
+          font.main = 2, outer = FALSE,
+          adj = 0, cex.main = 1)
+    
+    title(paste0("\n",
+                 city, ", ",
+                 race, "(as of Aug. 30, 2021)"),
+          font.main = 1, outer = FALSE,
+          adj = 0, cex.main = 1)
+  }
+  dev.off()   
 }
+

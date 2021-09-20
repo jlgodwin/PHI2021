@@ -1,23 +1,23 @@
-########################################################
-###
-### Plots households KC
 
 rm(list=ls())
-###################
-# -- Libraries -- #
-###################
+#####################################
+# -- load packages and functions -- #
+#####################################
 
-library(dplyr)
-library(survey)
 library(tidyverse)
 library(data.table)
 
 # constants
+
 main_dir <- "C:/Users/allorant/OneDrive - UW/Shared with Everyone/UW/4thYear/PHI2021/"
 data_dir <- paste0(main_dir, "data/")
 out_dir <- paste0(main_dir, "output/")
 
 code_dir <- paste0(main_dir, "PHI2021/household_size/")
+
+
+code_dir <- paste0(main_dir, "Code/PHI2021/household_size/")
+
 plotDF <- read_csv(paste0(out_dir,"All_KC_hh_size_total.csv")) %>%
   data.table() %>%
   dplyr::select(year,hh_type,tenure,
