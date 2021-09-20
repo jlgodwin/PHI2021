@@ -31,6 +31,7 @@ options(tigris_use_cache = TRUE)
 
 ## load pyramid script ###
 source('pyrPlot_JG_20210914.R')
+
 ## load WA OFM raw? ####
 loadOFM <- FALSE
 
@@ -58,14 +59,6 @@ kc_tracts_poly <- kc_tracts %>%
   st_geometry() %>%
   as(., "Spatial")
 
-sum(kc_tracts$GEOID %in% 
-      pop$Geoid)
-which_is_empty <- which(st_is_empty(kc_tracts$geometry))
-kc_tracts[which_is_empty, ]
-pop[pop$Geoid == kc_tracts$GEOID[which_is_empty], ]
-
-kc_tracts[which_is_empty, c("estimate", "moe")]
-sum(pop$Pop[pop$Geoid == kc_tracts$GEOID[which_is_empty]])
 
 ## HRA ####
 hra <- readOGR(dsn = "../Data",
