@@ -170,7 +170,7 @@ for(year in c(2010, 2014, 2019)){
     
     
     # x_at <- round(seq(0, max(pop.pyr), length.out = 5),-2)
-    x_at <- c(0, 1000, 5000, 10000, 15000)
+    x_at <- c(0, 1000, 5000, 10000, 15000, 20000)
     pyr.obj <- get.bPop.pyramid(pop.pyr,
                                 legend = paste0("ACS ", 
                                                 year-4, 
@@ -196,14 +196,21 @@ for(year in c(2010, 2014, 2019)){
                                    x_labels = c(rev(x_at[-1]), x_at),
                                    cex.axis = .75,
                                    cex.sub = .75,
-                                   x_lims = c(-17000,17000))
+                                   x_lims = c(-20000,20000))
       title(paste0("Households by Size and Tenure\n",
                    ""),
             font.main = 2, outer = FALSE,
             adj = 0, cex.main = 1)
       
+      if(year == 2010){
+        legend_string <- "Census"
+      }else{
+        legend_string <- "ACS"
+      }
       title(paste0("\n",
-                   hra.name, " (Estimated from ", legend_string, ")"),
+                   hra.name,
+                   " (Estimated from ",
+                   legend_string, ")"),
             font.main = 1, outer = FALSE,
             adj = 0, cex.main = 1)
     }
@@ -391,7 +398,14 @@ for(year in c(2010, 2014, 2019)){
       
       
       # x_at <- round(seq(0, max(pop.pyr), length.out = 5),-2)
-      x_at <- c(0, 1000, 2500, 5000, 7500)
+      if(hra.name == "Downtown"){
+        x_at <- c(0, 1000, 5000, 10000, 15000, 20000)
+        x_lims <- c(-20000, 20000)
+      }else{
+        x_at <- c(0, 500, 1000, 5000, 7500, 10000)
+        x_lims <- c(-10000, 10000)
+      }
+      
       pyr.obj <- get.bPop.pyramid(list(pyr.1, pyr.2),
                                   legend = c("ACS 2015-2019", "Census 2010"),
                                   LRcolnames = c("Owner", "Renter"),
@@ -417,7 +431,7 @@ for(year in c(2010, 2014, 2019)){
                                      x_labels = c(rev(x_at[-1]), x_at),
                                      cex.axis = .65,
                                      cex.sub = .75,
-                                     x_lims = c(-8750, 8750))
+                                     x_lims = x_lims)
         title(paste0("Households by Size and Tenure\n",
                      ""),
               font.main = 2, outer = FALSE,
@@ -473,7 +487,13 @@ for(year in c(2010, 2014, 2019)){
         row.names(pyr.2) <- c(1:6, "7+")
       
       
-      x_at <- c(-.3, -.2, -.1, -.05, 0, .05, .1, .2, .3)
+      if(hra.name == "Downtown"){
+        x_at <- c(-.6, -.5, -.25, -.1, -.05, 0, .05, .1, .25, .5, .60)
+        x_lims <- c(-.6, .6)
+      }else{
+        x_at <- c(-.3, -.2, -.1, -.05, 0, .05, .1, .2, .3)
+        x_lims <- c(-.3, .3)
+      }
       x_labels <- abs(x_at)
       pyr.obj <- get.bPop.pyramid(list(pyr.1, pyr.2),
                                   legend = c("ACS 2015-2019", "Census 2010"),
@@ -498,9 +518,9 @@ for(year in c(2010, 2014, 2019)){
                                                      "Census 2010"),
                                      x_at = x_at,
                                      x_labels = x_labels,
-                                     cex.axis = .75,
+                                     cex.axis = .65,
                                      cex.sub = .75,
-                                     x_lims = c(-.3, .3))
+                                     x_lims = x_lims)
         title(paste0("Prevalence of Households by Size and Tenure\n",
                      ""),
               font.main = 2, outer = FALSE,
@@ -546,7 +566,7 @@ for(year in c(2000, 2009)){
     row.names(pop.pyr) <- c(1:6, "7+")
     
     
-    x_at <- c(0, 1000, 5000, 10000, 15000)
+    x_at <- c(0, 1000, 5000, 10000, 15000, 20000)
     pyr.obj <- get.bPop.pyramid(pop.pyr,
                                 legend = paste0("ACS ", 
                                                 year-4, 
@@ -569,13 +589,19 @@ for(year in c(2000, 2009)){
                                    legend_text = legend_string,
                                    x_at = c(rev(-x_at[-1]), x_at),
                                    x_labels = c(rev(x_at[-1]), x_at),
-                                   cex.axis = .76,
+                                   cex.axis = .65,
                                    cex.sub = .75,
-                                   x_lims = c(-17000,17000))
+                                   x_lims = c(-20000,20000))
       title(paste0("Households by Size and Tenure\n",
                    ""),
             font.main = 2, outer = FALSE,
             adj = 0, cex.main = 1)
+      
+      if(year == 2000){
+        legend_string <- "Census"
+      }else{
+        legend_string <- "ACS"
+      }
       
       title(paste0("\n",
                    hra.name, " (Estimated from ", legend_string, ")"),
@@ -784,7 +810,7 @@ for(hra.name in hra@data$HRA2010v2_){
     row.names(pyr.2) <- c(1:6, "7+")
   
   
-  x_at <- c(0, 1000, 2500, 5000, 7500)
+  x_at <- c(0, 1000, 2500, 5000, 10000, 15000, 20000)
   pyr.obj <- get.bPop.pyramid(list(pyr.1, pyr.2),
                               legend = c("ACS 2015-2019",
                                          "Census 2000"),
@@ -811,7 +837,7 @@ for(hra.name in hra@data$HRA2010v2_){
                                  x_labels = c(rev(x_at[-1]), x_at),
                                  cex.axis = .6,
                                  cex.sub = .75,
-                                 x_lims = c(-8750,8750))
+                                 x_lims = c(-20000,20000))
     title(paste0("Households by Tenure\n",
                  ""),
           font.main = 2, outer = FALSE,
@@ -1054,7 +1080,7 @@ for(hra.name in hra@data$HRA2010v2_){
     row.names(pyr.2) <- c(1:6, "7+")
   
   
-  x_at <- c(0, 1000, 2500, 5000, 7500)
+  x_at <- c(0, 1000, 5000, 10000, 15000, 20000)
   pyr.obj <- get.bPop.pyramid(list(pyr.1, pyr.2),
                               legend = c("Census 2010",
                                          "Census 2000"),
@@ -1081,7 +1107,7 @@ for(hra.name in hra@data$HRA2010v2_){
                                  x_labels = c(rev(x_at[-1]), x_at),
                                  cex.axis = .75,
                                  cex.sub = .75,
-                                 x_lims = c(-8750, 8750))
+                                 x_lims = c(-20000, 20000))
     title(paste0("Households by Tenure\n",
                  ""),
           font.main = 2, outer = FALSE,
@@ -2865,7 +2891,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
                           "80% to 90%",
                           "< 80%"))
         title(paste0(tenure.type,
-                     "Households of Size ", size, "\n",
+                     " Households of Size ", size, "\n",
                      ""),
               font.main = 2, outer = FALSE,
               adj = 0, cex.main = 1)
