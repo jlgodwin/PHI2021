@@ -308,7 +308,7 @@ for(yr in c(2019, 2014, 2009)){
     pop.col.tract <- findColours(pop.int.tract, pop.pal)
     
     jpeg(paste0("../Race and Education Data and Plots/Tract/",
-                edu_lvl, "_CoV_",
+                edu_lvl,"_White_CoV_",
                 yr, ".jpeg"),
          height = 480, width = 480)
     {
@@ -494,7 +494,7 @@ for(yr in c(2019, 2014, 2009)){
     prev.col.tract <- findColours(prev.int.tract, prev.pal)
     
     jpeg(paste0("../Race and Education Data and Plots/Tract/",
-                edu_lvl, "_Prevalence_CoV_",
+                edu_lvl, "_Prevalence_White_CoV_",
                 yr, ".jpeg"),
          height = 480, width = 480)
     {
@@ -534,6 +534,174 @@ for(yr in c(2019, 2014, 2009)){
                         "80% to 90%",
                         "< 80%"))
       title(paste0("Prevalence of Population with ",
+                   title_string, " Education\n",
+                   ""),
+            font.main = 2, outer = FALSE,
+            adj = 0, cex.main = 1)
+      
+      title(paste0("\n",
+                   "White, (ACS ",
+                   yr - 5, "-", yr,")"),
+            font.main = 1, outer = FALSE,
+            adj = 0, cex.main = 1)
+    }
+    dev.off()
+    # End edu loop
+    
+    ### Distriution ####
+    edu_dist_tmp <- edu_lvl_tmp %>% 
+      ungroup() %>% 
+      mutate(Dist = estimate/sum(estimate))
+    # Grab palette
+    prev.pal <- brewer.pal(n = 9, name = "YlGnBu")
+    
+    ## Define breaks
+    breaks <- c(0, .005, .01, 
+                .025, .03, .04, 
+                .05, .1, .25,
+                .5)
+    
+    prev.int.hra <- classIntervals(edu_dist_tmp$Dist,
+                                   style = "fixed",
+                                   fixedBreaks = breaks,
+                                   n = 9)
+    prev.col.hra <- findColours(prev.int.hra, prev.pal)
+    
+    jpeg(paste0("../Race and Education Data and Plots/HRA/",
+                edu_lvl, "_Distribution_White_",
+                yr, ".jpeg"),
+         height = 480, width = 480)
+    par(lend = 1,
+        mar = c(0,0,2,0),
+        oma = c(0,0,1,0))
+    plot(hra,
+         col = prev.col.hra,
+         border = 'grey48', lwd = .25,
+         main = "")
+    legend('bottomleft',
+           title = 'Distribution',
+           title.adj = 0,
+           ncol = 2,
+           bty = 'n',
+           cex= 0.75,
+           border = FALSE,
+           fill = prev.pal,
+           legend = names(attr(prev.col.hra, 'table')))
+    title(paste0("Distribution of Population with ",
+                 title_string, " Education\n",
+                 ""),
+          font.main = 2, outer = FALSE,
+          adj = 0, cex.main = 1)
+    
+    title(paste0("\n",
+                 "White, (ACS ",
+                 yr - 5, "-", yr,")"),
+          font.main = 1, outer = FALSE,
+          adj = 0, cex.main = 1)
+    dev.off()
+    
+    #### Tract ####
+
+    edu_dist_tmp <- edu_data  %>% 
+      mutate(GEOID = as.character(GEOID)) %>% 
+      filter(GEOID %in% kc_tracts$GEOID) %>% 
+      mutate(SE = moe/qnorm(.9)) %>% 
+      pivot_longer(cols = c("less_than_hs",
+                            "hs_grad",
+                            "some_college",
+                            "college_grad"),
+                   names_to = "Education",
+                   values_to = "Educ_Val") %>% 
+      filter(Educ_Val == 1) %>% 
+      filter(grepl("C15002A", variable)) %>% 
+      filter(Year == yr) %>% 
+      filter(Education == edu_lvl) %>% 
+      group_by(Year, GEOID, Education) %>% 
+      summarise(estimate = sum(estimate),
+                SE = sum(SE)) %>% 
+      ungroup() %>% 
+      mutate(CoV = SE/estimate,
+             Density = 0,
+             GEOID = as.numeric(GEOID),
+             Dist = estimate/sum(estimate))
+      
+    
+    # less than 80% significance
+    edu_dist_tmp$Density[edu_dist_tmp$CoV < 1 &
+                           edu_dist_tmp$CoV >= 1/qnorm(.9)] <- 50
+    
+    # between 80 and 90%
+    edu_dist_tmp$Density[edu_dist_tmp$CoV < 1/qnorm(.9) &
+                           edu_dist_tmp$CoV >= 1/qnorm(.95)] <- 25
+    
+    if(yr < 2010){
+      spatialdf <- data.frame(GEOID = kc_tracts_2000$GEOID)
+      row.names(spatialdf) <- names(kc_tracts_2000_poly)
+      tract_spatialdf <- SpatialPolygonsDataFrame(kc_tracts_2000_poly,
+                                                  data = spatialdf)
+    }else{
+      spatialdf <- data.frame(GEOID = kc_tracts$GEOID)
+      row.names(spatialdf) <- names(kc_tracts_poly)
+      tract_spatialdf <- SpatialPolygonsDataFrame(kc_tracts_poly,
+                                                  data = spatialdf)
+    }
+    edu_dist_tmp <- edu_dist_tmp[match(tract_spatialdf$GEOID,
+                                       edu_dist_tmp$GEOID),]
+    ## Bin with fixed colors
+    ## Define breaks
+    breaks <- c(0, .005, .01, 
+                .025, .03, .04, 
+                .05, .1, .25,
+                .5)
+
+    
+    prev.int.tract <- classIntervals(edu_dist_tmp$Dist,
+                                     style = "fixed",
+                                     fixedBreaks = breaks,
+                                     n = 9)
+    prev.col.tract <- findColours(prev.int.tract, prev.pal)
+    
+    jpeg(paste0("../Race and Education Data and Plots/Tract/",
+                edu_lvl, "_Distribution_White_CoV_",
+                yr, ".jpeg"),
+         height = 480, width = 480)
+    {
+      par(lend = 1,
+          mar = c(0,0,2,0),
+          oma = c(0,0,1,0))
+      plot(tract_spatialdf,
+           col = prev.col.tract,
+           border = 'grey48', lwd = .25,
+           main = "")
+      hatch.idx <- which(edu_dist_tmp$Density > 0)
+      for(poly in hatch.idx){
+        points <- tract_spatialdf@polygons[[poly]]@Polygons[[1]]@coords
+        polygon(points[,1], points[,2],
+                border = FALSE,
+                density = edu_dist_tmp$Density[poly])
+      }
+      legend('bottomleft',
+             title = 'Distribution',
+             title.adj = 0,
+             ncol = 2,
+             bty = 'n',
+             cex= 0.75,
+             border = FALSE,
+             fill = prev.pal,
+             legend = names(attr(prev.col.tract, 'table')))
+      legend('bottomright',
+             title = 'Significance',
+             title.adj = 0,
+             ncol = 1,
+             bty = 'n',
+             cex= 0.75,
+             border = 'black',
+             fill = 'black',
+             density = c(0,25,50),
+             legend = c(">= 95%",
+                        "80% to 90%",
+                        "< 80%"))
+      title(paste0("Distribution of Population with ",
                    title_string, " Education\n",
                    ""),
             font.main = 2, outer = FALSE,
