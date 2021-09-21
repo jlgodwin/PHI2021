@@ -1746,9 +1746,11 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
      year != 2000){
     title_string <- paste0(year - 4, 
                            "-", year)
+    legend_string <- "ACS"
     
   }else{
     title_string <- year
+    legend_string <- "Census"
   }
   
   
