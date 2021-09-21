@@ -166,8 +166,8 @@ for(yr in c(2009, 2014, 2018)){
       filter(Year == yr) %>% 
       filter(tenure == tenure.type) 
     
-    tenure_hra_tmp <- tenure_hra_tmp[match(tenure_hra_tmp$HRA2010v2_,
-                                           hra@data$HRA2010v2_), ]
+    tenure_hra_tmp <- tenure_hra_tmp[match(hra@data$HRA2010v2_,
+                                           tenure_hra_tmp$HRA2010v2_), ]
     
     ## Bin with fixed colors
     breaks <- c(0, 2500, 5000,
@@ -240,8 +240,8 @@ for(yr in c(2009, 2014, 2018)){
     }
     tenure_tmp <- tenure_tmp %>% 
       filter(GEOID %in% tract_spatialdf$GEOID)
-    tenure_tmp <- tenure_tmp[match(tenure_tmp$GEOID,
-                                   tract_spatialdf$GEOID),]
+    tenure_tmp <- tenure_tmp[match(tract_spatialdf$GEOID,
+                                   tenure_tmp$GEOID),]
     ## Bin with fixed colors
     breaks <- c(0, 500, 1000,
                 2000, 3000, 4000,
@@ -364,8 +364,8 @@ for(yr in c(2009, 2014, 2018)){
       filter(Year == yr) %>% 
       filter(tenure == tenure.type)
     
-    tenure_prev_hra_tmp <- tenure_prev_hra_tmp[match(tenure_prev_hra_tmp$HRA2010v2_,
-                                                     hra@data$HRA2010v2_), ]
+    tenure_prev_hra_tmp <- tenure_prev_hra_tmp[match(hra@data$HRA2010v2_,
+                                                     tenure_prev_hra_tmp$HRA2010v2_), ]
     
     ## Bin with fixed colors
     prop.int.hra <- classIntervals(tenure_prev_hra_tmp$Prev,
@@ -444,8 +444,8 @@ for(yr in c(2009, 2014, 2018)){
     tenure_tmp <- tenure_tmp %>% 
       filter(GEOID %in% tract_spatialdf$GEOID)
     
-    tenure_tmp <- tenure_tmp[match(tenure_tmp$GEOID,
-                                   tract_spatialdf$GEOID),]
+    tenure_tmp <- tenure_tmp[match(tract_spatialdf$GEOID,
+                                   tenure_tmp$GEOID),]
     ## Bin with fixed colors
     prop.int.hra <- classIntervals(tenure_tmp$Prev,
                                    style = "fixed",
@@ -562,8 +562,8 @@ for(yr in c(2009, 2014, 2018)){
       filter(Year == yr) %>% 
       filter(tenure == tenure.type)
     
-    tenure_dist_hra_tmp <- tenure_dist_hra_tmp[match(tenure_dist_hra_tmp$HRA2010v2_,
-                                                     hra@data$HRA2010v2_), ]
+    tenure_dist_hra_tmp <- tenure_dist_hra_tmp[match(hra@data$HRA2010v2_,
+                                                     tenure_dist_hra_tmp$HRA2010v2_), ]
     
     ## Bin with fixed colors
     ## Define breaks
@@ -647,8 +647,8 @@ for(yr in c(2009, 2014, 2018)){
     }
     tenure_tmp <- tenure_tmp %>% 
       filter(GEOID %in% tract_spatialdf$GEOID)
-    tenure_tmp <- tenure_tmp[match(tenure_tmp$GEOID,
-                                   tract_spatialdf$GEOID),]
+    tenure_tmp <- tenure_tmp[match(tract_spatialdf$GEOID,
+                                   tenure_tmp$GEOID),]
     ## Bin with fixed colors
     breaks <- c(0, .001,
                 .002, .003,
