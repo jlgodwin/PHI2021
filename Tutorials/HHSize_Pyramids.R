@@ -1297,10 +1297,10 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
       hra@data$Est <- 0
     
     if(nrow(hh_size_tmp) != 0){
-      hra@data$Est[match(hh_size_tmp$FID_HRA_20,
-                         hra@data$FID_HRA_20)] <- hh_size_tmp$estimate
-      hra@data$Density[match(hh_size_tmp$FID_HRA_20,
-                             hra@data$FID_HRA_20)] <- hh_size_tmp$Density
+      hra@data$Est[match(hra@data$FID_HRA_20,
+                         hh_size_tmp$FID_HRA_20)] <- hh_size_tmp$estimate
+      hra@data$Density[match(hra@data$FID_HRA_20,
+                             hh_size_tmp$FID_HRA_20)] <- hh_size_tmp$Density
     }
     
     
@@ -1429,10 +1429,10 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
       hra@data$Prev <- 0
     
     if(nrow(hh_size_tmp) != 0){
-      hra@data$Prev[match(hh_size_tmp$FID_HRA_20,
-                          hra@data$FID_HRA_20)] <- hh_size_tmp$Prev
-      hra@data$Density[match(hh_size_tmp$FID_HRA_20,
-                             hra@data$FID_HRA_20)] <- hh_size_tmp$Density
+      hra@data$Prev[match(hra@data$FID_HRA_20,
+                          hh_size_tmp$FID_HRA_20)] <- hh_size_tmp$Prev
+      hra@data$Density[match(hra@data$FID_HRA_20,
+                             hh_size_tmp$FID_HRA_20)] <- hh_size_tmp$Density
     }
     
     
@@ -1548,10 +1548,10 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
       hra@data$Dist <- 0
     
     if(nrow(hh_size_tmp) != 0){
-      hra@data$Dist[match(hh_size_tmp$FID_HRA_20,
-                          hra@data$FID_HRA_20)] <- hh_size_tmp$Dist
-      hra@data$Density[match(hh_size_tmp$FID_HRA_20,
-                             hra@data$FID_HRA_20)] <- hh_size_tmp$Density
+      hra@data$Dist[match(hra@data$FID_HRA_20,
+                          hh_size_tmp$FID_HRA_20)] <- hh_size_tmp$Dist
+      hra@data$Density[match(hra@data$FID_HRA_20,
+                             hh_size_tmp$FID_HRA_20)] <- hh_size_tmp$Density
     }
     prev.int.hra <- classIntervals(hra@data$Dist,
                                    style = "fixed",
@@ -1750,12 +1750,12 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
         hra@data$Est <- 0
       
       if(nrow(hh_size_tmp) != 0){
-        hra@data$Est[match(hh_size_tmp$FID_HRA_20,
-                           hra@data$FID_HRA_20)] <-
+        hra@data$Est[match(hra@data$FID_HRA_20,
+                           hh_size_tmp$FID_HRA_20)] <-
           hh_size_tmp$estimate
         
-        hra@data$Density[match(hh_size_tmp$FID_HRA_20,
-                               hra@data$FID_HRA_20)] <- 
+        hra@data$Density[match(hra@data$FID_HRA_20,
+                              hh_size_tmp$FID_HRA_20)] <- 
           hh_size_tmp$Density
         
         hh.int.hra <- classIntervals(hra@data$Est,
@@ -1893,12 +1893,12 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
         hra@data$Prev <- 0
       
       if(nrow(hh_size_tmp) != 0){
-        hra@data$Prev[match(hh_size_tmp$FID_HRA_20,
-                            hra@data$FID_HRA_20)] <-
+        hra@data$Prev[match(hra@data$FID_HRA_20,
+                            hh_size_tmp$FID_HRA_20)] <-
           hh_size_tmp$Prev
         
-        hra@data$Density[match(hh_size_tmp$FID_HRA_20,
-                               hra@data$FID_HRA_20)] <- 
+        hra@data$Density[match(hra@data$FID_HRA_20,
+                               hh_size_tmp$FID_HRA_20)] <- 
           hh_size_tmp$Density
         prev.int.hra <- classIntervals(hra@data$Prev,
                                        style = "fixed",
@@ -2022,11 +2022,11 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
         hra@data$Dist <- 0
       
       if(nrow(hh_size_tmp) != 0){
-        hra@data$Dist[match(hh_size_tmp$FID_HRA_20,
-                            hra@data$FID_HRA_20)] <- 
+        hra@data$Dist[match(hra@data$FID_HRA_20,
+                            hh_size_tmp$FID_HRA_20)] <- 
           hh_size_tmp$Dist
-        hra@data$Density[match(hh_size_tmp$FID_HRA_20,
-                               hra@data$FID_HRA_20)] <-
+        hra@data$Density[match(hra@data$FID_HRA_20,
+                               hh_size_tmp$FID_HRA_20)] <-
           hh_size_tmp$Density
         
         prev.int.hra <- classIntervals(hra@data$Dist,
@@ -2277,8 +2277,8 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
       tract_spatialdf@data$Density <- 0
     
     if(nrow(hh_size_tmp) != 0){
-      poly_order.idx <- match(hh_size_tmp$GEOID,
-                              tract_spatialdf@data$GEOID)
+      poly_order.idx <- match(tract_spatialdf@data$GEOID,
+                              hh_size_tmp$GEOID)
       tract_spatialdf@data$Est[poly_order.idx] <-
         hh_size_tmp$estimate
       tract_spatialdf@data$Density[poly_order.idx] <-
@@ -2411,11 +2411,11 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
       tract_spatialdf@data$Prev <- 0
     
     if(nrow(hh_size_tmp) != 0){
-      tract_spatialdf@data$Prev[match(hh_size_tmp$GEOID,
-                                      tract_spatialdf@data$GEOID)] <- 
+      tract_spatialdf@data$Prev[match(tract_spatialdf@data$GEOID,
+                                      hh_size_tmp$GEOID)] <- 
         hh_size_tmp$Prev
-      tract_spatialdf@data$Density[match(hh_size_tmp$GEOID,
-                                         tract_spatialdf@data$GEOID)] <-
+      tract_spatialdf@data$Density[match(tract_spatialdf@data$GEOID,
+                                         hh_size_tmp$GEOID)] <-
         hh_size_tmp$Density
     }
     
@@ -2532,11 +2532,11 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
       tract_spatialdf@data$Dist <- 0
     
     if(nrow(hh_size_tmp) != 0){
-      tract_spatialdf@data$Dist[match(hh_size_tmp$GEOID,
-                                      tract_spatialdf@data$GEOID)] <-
+      tract_spatialdf@data$Dist[match(tract_spatialdf@data$GEOID,
+                                      hh_size_tmp$GEOID)] <-
         hh_size_tmp$Dist
-      tract_spatialdf@data$Density[match(hh_size_tmp$GEOID,
-                                         tract_spatialdf@data$GEOID)] <-
+      tract_spatialdf@data$Density[match(tract_spatialdf@data$GEOID,
+                                         hh_size_tmp$GEOID)] <-
         hh_size_tmp$Density
     }
     prev.int.tract <- classIntervals(tract_spatialdf@data$Dist,
@@ -2764,8 +2764,8 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
         tract_spatialdf@data$Density <- 0
       
       if(nrow(hh_size_tmp) != 0){
-        poly_order.idx <- match(hh_size_tmp$GEOID,
-                                tract_spatialdf@data$GEOID)
+        poly_order.idx <- match(tract_spatialdf@data$GEOID,
+                                hh_size_tmp$GEOID)
         tract_spatialdf@data$Est[poly_order.idx] <-
           hh_size_tmp$estimate
         tract_spatialdf@data$Density[poly_order.idx] <-
@@ -2914,8 +2914,8 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
         tract_spatialdf@data$Prev <- 0
       
       if(nrow(hh_size_tmp) != 0){
-        poly_order.idx <- match(hh_size_tmp$GEOID,
-                                tract_spatialdf@data$GEOID)
+        poly_order.idx <- match(tract_spatialdf@data$GEOID,
+                                hh_size_tmp$GEOID)
         tract_spatialdf@data$Prev[poly_order.idx] <-
           hh_size_tmp$Prev
         tract_spatialdf@data$Density[poly_order.idx] <-
@@ -3053,8 +3053,8 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
       
       
       if(nrow(hh_size_tmp) != 0){
-        poly_order.idx <- match(hh_size_tmp$GEOID,
-                                tract_spatialdf@data$GEOID)
+        poly_order.idx <- match(tract_spatialdf@data$GEOID,
+                                hh_size_tmp$GEOID)
         tract_spatialdf@data$Dist[poly_order.idx] <-
           hh_size_tmp$Dist
         tract_spatialdf@data$Density[poly_order.idx] <-
