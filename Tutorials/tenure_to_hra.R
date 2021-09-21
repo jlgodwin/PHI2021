@@ -350,9 +350,9 @@ breaks <- prop.int.hra$brks
 breaks
 
 ## Define breaks
-breaks <- c(0, .05, .15, .25,
-            .35, .45, .55, 
-            .65, .75, .85,
+breaks <- c(0, .05, .15, .2,
+            .3, .4, .5, 
+            .75, .85,
             1)
 
 for(yr in c(2009, 2014, 2018)){

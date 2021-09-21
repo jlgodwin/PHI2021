@@ -22,6 +22,7 @@ library(readxl)
 # Clear environment ####
 rm(list = ls())
 
+
 ## tidycensus key ####
 source('tidycensus_APIkey.R')
 census_api_key(myKey) 
