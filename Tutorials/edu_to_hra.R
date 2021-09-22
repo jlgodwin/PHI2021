@@ -67,6 +67,7 @@ kc_tracts_poly <- kc_tracts %>%
 kc_tracts_2000_poly <- kc_tracts_2000 %>% 
   st_geometry() %>%
   as(., "Spatial")
+
 kc_tracts_2000_poly <- spTransform(kc_tracts_2000_poly,
                                    kc_tracts_poly@proj4string)
 
@@ -548,7 +549,7 @@ for(yr in c(2019, 2014, 2009)){
     dev.off()
     # End edu loop
     
-    ### Distriution ####
+    ### Distribution ####
     edu_dist_tmp <- edu_lvl_tmp %>% 
       ungroup() %>% 
       mutate(Dist = estimate/sum(estimate))
