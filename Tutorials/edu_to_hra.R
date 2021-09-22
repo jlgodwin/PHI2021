@@ -410,8 +410,8 @@ for(yr in c(2019, 2014, 2009)){
            bty = 'n',
            cex= 0.75,
            border = FALSE,
-           fill = pop.pal,
-           legend = names(attr(pop.col.hra, 'table')))
+           fill = prev.pal,
+           legend = names(attr(prev.col.hra, 'table')))
     title(paste0("Prevalence of Population with ",
                  title_string, " Education\n",
                  ""),

@@ -5,8 +5,8 @@ pop.pyramid.bayesPop.pyramid <- function(pop.object, main=NULL, show.legend=TRUE
                                          cex.main=0.9, cex.sub=1, cex=1, cex.axis=1, x_lims = NULL,
                                          x_at=NULL, x_labels=NULL, legend_pos, legend_text = NULL, ...) {
   cur.par <- par(lend = 1,
-                 mar = c(2,3,3,3),
-                 oma = c(1,1,1,1))
+                 mar = c(3,3,3,3),
+                 oma = c(2,1,1,1))
   if((is.null(pop.object$pyramid) || length(pop.object$pyramid) == 0) && is.null(pop.object$CI)) 
     stop('Nothing to be plotted. Either pyramid or CI must be given in pop.object.')
   age.labels <- rownames(if(!is.null(pop.object$pyramid[[1]])) pop.object$pyramid[[1]] 
