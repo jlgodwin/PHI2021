@@ -1,5 +1,5 @@
-# setwd() ####
-setwd('~/Dropbox/PHI2021/Github/PHI-2021/Tutorials/')
+# # setwd() ####
+# setwd('~/Dropbox/PHI2021/Github/PHI-2021/Tutorials/')
 
 
 # Libraries ####
@@ -140,8 +140,7 @@ edu_data_hra_2000 <- edu_data %>%
 edu_data_hra <- bind_rows(edu_data_hra_2010,
                           edu_data_hra_2000) %>% 
   arrange(Year, FID_HRA_20, Education) %>% 
-  filter(!is.na(estimate)) %>% 
-  filter(Education == "college_grad")
+  filter(!is.na(estimate)) 
 
 # Maps ####
 if(!dir.exists('../Race and Education Data and Plots/HRA/')){
@@ -720,6 +719,12 @@ for(yr in c(2019, 2014, 2009)){
   # End year loop
 }
 
+## Filter on college grad attainment for rest of races ####
+edu_data_hra <- bind_rows(edu_data_hra_2010,
+                          edu_data_hra_2000) %>% 
+  arrange(Year, FID_HRA_20, Education) %>% 
+  filter(!is.na(estimate)) %>% 
+  filter(Education == "college_grad") #select just college grad attainment for plots
 ## Black ####
 
 edu_data_hra_tmp <- edu_data_hra %>% 
