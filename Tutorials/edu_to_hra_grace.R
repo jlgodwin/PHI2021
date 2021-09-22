@@ -140,7 +140,8 @@ edu_data_hra_2000 <- edu_data %>%
 edu_data_hra <- bind_rows(edu_data_hra_2010,
                           edu_data_hra_2000) %>% 
   arrange(Year, FID_HRA_20, Education) %>% 
-  filter(!is.na(estimate))
+  filter(!is.na(estimate)) %>% 
+  filter(Education == "college_grad")
 
 # Maps ####
 if(!dir.exists('../Race and Education Data and Plots/HRA/')){
@@ -149,10 +150,10 @@ if(!dir.exists('../Race and Education Data and Plots/HRA/')){
 }
 
 
-## White ####
+## Black ####
 
 edu_data_hra_tmp <- edu_data_hra %>% 
-  filter(grepl("C15002A", variable)) %>% 
+  filter(grepl("C15002B", variable)) %>% 
   group_by(Year, FID_HRA_20, HRA2010v2_,
            Education) %>% 
   summarise(estimate = sum(estimate),
@@ -221,7 +222,7 @@ for(yr in c(2019, 2014, 2009)){
     pop.col.hra <- findColours(pop.int.hra, pop.pal)
     
     jpeg(paste0("../Race and Education Data and Plots/HRA/",
-                edu_lvl, "_White_",
+                edu_lvl, "_Black_",
                 yr, ".jpeg"),
          height = 480, width = 480)
     par(lend = 1,
@@ -247,7 +248,7 @@ for(yr in c(2019, 2014, 2009)){
           adj = 0, cex.main = 1)
     
     title(paste0("\n",
-                 "White, (ACS ",
+                 "Black, (ACS ",
                  yr - 5, "-", yr,")"),
           font.main = 1, outer = FALSE,
           adj = 0, cex.main = 1)
@@ -265,7 +266,7 @@ for(yr in c(2019, 2014, 2009)){
                    names_to = "Education",
                    values_to = "Educ_Val") %>% 
       filter(Educ_Val == 1) %>% 
-      filter(grepl("C15002A", variable)) %>% 
+      filter(grepl("C15002B", variable)) %>% 
       filter(Year == yr) %>% 
       filter(Education == edu_lvl) %>% 
       group_by(GEOID, Education) %>% 
@@ -309,7 +310,7 @@ for(yr in c(2019, 2014, 2009)){
     pop.col.tract <- findColours(pop.int.tract, pop.pal)
     
     jpeg(paste0("../Race and Education Data and Plots/Tract/",
-                edu_lvl,"_White_CoV_",
+                edu_lvl,"_Black_CoV_",
                 yr, ".jpeg"),
          height = 480, width = 480)
     {
@@ -355,7 +356,7 @@ for(yr in c(2019, 2014, 2009)){
             adj = 0, cex.main = 1)
       
       title(paste0("\n",
-                   "White, (ACS ",
+                   "Black, (ACS ",
                    yr - 5, "-", yr,")"),
             font.main = 1, outer = FALSE,
             adj = 0, cex.main = 1)
@@ -393,7 +394,7 @@ for(yr in c(2019, 2014, 2009)){
     prev.col.hra <- findColours(prev.int.hra, prev.pal)
     
     jpeg(paste0("../Race and Education Data and Plots/HRA/",
-                edu_lvl, "_Prevalence_White_",
+                edu_lvl, "_Prevalence_Black_",
                 yr, ".jpeg"),
          height = 480, width = 480)
     par(lend = 1,
@@ -419,7 +420,7 @@ for(yr in c(2019, 2014, 2009)){
           adj = 0, cex.main = 1)
     
     title(paste0("\n",
-                 "White, (ACS ",
+                 "Black, (ACS ",
                  yr - 5, "-", yr,")"),
           font.main = 1, outer = FALSE,
           adj = 0, cex.main = 1)
@@ -445,7 +446,7 @@ for(yr in c(2019, 2014, 2009)){
                    names_to = "Education",
                    values_to = "Educ_Val") %>% 
       filter(Educ_Val == 1) %>% 
-      filter(grepl("C15002A", variable)) %>% 
+      filter(grepl("C15002B", variable)) %>% 
       filter(Year == yr) %>% 
       filter(Education == edu_lvl) %>% 
       group_by(Year, GEOID, Education) %>% 
@@ -495,7 +496,7 @@ for(yr in c(2019, 2014, 2009)){
     prev.col.tract <- findColours(prev.int.tract, prev.pal)
     
     jpeg(paste0("../Race and Education Data and Plots/Tract/",
-                edu_lvl, "_Prevalence_White_CoV_",
+                edu_lvl, "_Prevalence_Black_CoV_",
                 yr, ".jpeg"),
          height = 480, width = 480)
     {
@@ -541,7 +542,7 @@ for(yr in c(2019, 2014, 2009)){
             adj = 0, cex.main = 1)
       
       title(paste0("\n",
-                   "White, (ACS ",
+                   "Black, (ACS ",
                    yr - 5, "-", yr,")"),
             font.main = 1, outer = FALSE,
             adj = 0, cex.main = 1)
@@ -569,7 +570,7 @@ for(yr in c(2019, 2014, 2009)){
     prev.col.hra <- findColours(prev.int.hra, prev.pal)
     
     jpeg(paste0("../Race and Education Data and Plots/HRA/",
-                edu_lvl, "_Distribution_White_",
+                edu_lvl, "_Distribution_Black_",
                 yr, ".jpeg"),
          height = 480, width = 480)
     par(lend = 1,
@@ -595,7 +596,7 @@ for(yr in c(2019, 2014, 2009)){
           adj = 0, cex.main = 1)
     
     title(paste0("\n",
-                 "White, (ACS ",
+                 "Black, (ACS ",
                  yr - 5, "-", yr,")"),
           font.main = 1, outer = FALSE,
           adj = 0, cex.main = 1)
@@ -614,7 +615,7 @@ for(yr in c(2019, 2014, 2009)){
                    names_to = "Education",
                    values_to = "Educ_Val") %>% 
       filter(Educ_Val == 1) %>% 
-      filter(grepl("C15002A", variable)) %>% 
+      filter(grepl("C15002B", variable)) %>% 
       filter(Year == yr) %>% 
       filter(Education == edu_lvl) %>% 
       group_by(Year, GEOID, Education) %>% 
@@ -663,7 +664,7 @@ for(yr in c(2019, 2014, 2009)){
     prev.col.tract <- findColours(prev.int.tract, prev.pal)
     
     jpeg(paste0("../Race and Education Data and Plots/Tract/",
-                edu_lvl, "_Distribution_White_CoV_",
+                edu_lvl, "_Distribution_Black_CoV_",
                 yr, ".jpeg"),
          height = 480, width = 480)
     {
@@ -709,7 +710,7 @@ for(yr in c(2019, 2014, 2009)){
             adj = 0, cex.main = 1)
       
       title(paste0("\n",
-                   "White, (ACS ",
+                   "Black, (ACS ",
                    yr - 5, "-", yr,")"),
             font.main = 1, outer = FALSE,
             adj = 0, cex.main = 1)
@@ -721,4 +722,5 @@ for(yr in c(2019, 2014, 2009)){
 }
 
 
+### Create Asian Plots ###
 
