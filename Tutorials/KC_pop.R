@@ -833,12 +833,12 @@ jpeg(paste0("../PopPlots/Population/",
                                x_at = c(rev(-x_at[-1]), x_at),
                                x_labels = c(rev(x_at[-1]), x_at),
                                cex.axis = .65,
-                               cex.sub = .75,
-                               xlab = "Counts", ylab = "Age")
+                               cex.sub = .75)
   title(paste0("Population by Age and Sex\n",
                ""),
         font.main = 2, outer = FALSE,
-        adj = 0, cex.main = 1)
+        adj = 0, cex.main = 1.5)
+  title(xlab = "Counts")
   
   title(paste0("\n",
                "King County"),
@@ -866,8 +866,8 @@ jpeg(paste0("../PopPlots/Population/",
                                x_at = c(rev(-x_at[-1]), x_at),
                                x_labels = c(rev(x_at[-1]), x_at),
                                cex.axis = .65,
-                               cex.sub = .75,
-                               xlab = "Counts", ylab = "Age")
+                               cex.sub = .75)
+  title(xlab = "Counts")
 }
 dev.off()
 
@@ -894,17 +894,17 @@ jpeg(paste0("../PopPlots/Distribution/",
                                x_labels = abs(x_at),
                                cex.axis = .75,
                                cex.sub = .75,
-                               x_lims = c(-.065, .065),
-                               xlab = "Proportion", ylab ="Age")
+                               x_lims = c(-.065, .065))
   title(paste0("Distribution of Population by Age and Sex\n",
                ""),
         font.main = 2, outer = FALSE,
-        adj = 0, cex.main = 2)
+        adj = 0, cex.main = 1.5)
   
   title(paste0("\n",
                "King County"),
         font.main = 1, outer = FALSE,
-        adj = 0, cex.main = 1.5)
+        adj = 0, cex.main = 1)
+  title(xlab = "Proportion")
 }
 dev.off()
 
@@ -930,8 +930,8 @@ jpeg(paste0("../PopPlots/Distribution/",
                                x_labels = abs(x_at),
                                cex.axis = .75,
                                cex.sub = .75,
-                               x_lims = c(-.065, .065),
-                               xlab = "Proportion", ylab = "Age")
+                               x_lims = c(-.065, .065))
+  title(xlab = "Proportion")
 
 }
 dev.off()
@@ -1346,7 +1346,8 @@ for(race in unique(pop$Race_Lbl)){
     title(paste0("Population by Age and Sex\n",
                  ""),
           font.main = 2, outer = FALSE,
-          adj = 0, cex.main = 1)
+          adj = 0, cex.main = 1,
+          xlab =  "Counts")
     
     title(paste0("\n",
                  paste0("King County, ", race.clean)),
@@ -1380,12 +1381,12 @@ for(race in unique(pop$Race_Lbl)){
                                  x_labels = abs(x_at),
                                  cex.axis = .75,
                                  cex.sub = .75,
-                                 x_lims = c(-.035,.035),
-                                 xlab = "Proportion", ylab = "Age")
+                                 x_lims = c(-.035,.035))
     title(paste0("Prevalence of Population by Age and Sex\n",
                  ""),
           font.main = 2, outer = FALSE,
-          adj = 0, cex.main = 1)
+          adj = 0, cex.main = 1,
+          xlab = "Proportion")
     
     title(paste0("\n",
                  "King County, ", race.clean),
@@ -1421,17 +1422,17 @@ for(race in unique(pop$Race_Lbl)){
                                  x_labels = abs(x_at),
                                  cex.axis = .75,
                                  cex.sub = .75,
-                                 x_lims = c(-.085,.085),
-                                 xlab = "Proportion", ylab = "Age")
+                                 x_lims = c(-.085,.085))
     title(paste0("Distribution of Population by Age and Sex\n",
                  ""),
           font.main = 2, outer = FALSE,
-          adj = 0, cex.main = 2)
+          adj = 0, cex.main = 1.5)
+    title(xlab = "Proportion")
     
     title(paste0("\n",
                  "King County, ", race.clean),
           font.main = 1, outer = FALSE,
-          adj = 0, cex.main = 1.5)
+          adj = 0, cex.main = 1)
   }
   dev.off()
   
@@ -1462,10 +1463,11 @@ for(race in unique(pop$Race_Lbl)){
                                  cex.axis = .75,
                                  cex.sub = .75,
                                  x_lims = c(-.085,.085),
-                                 xlab = "Proportion", ylab = "Age")
+                                 )
     title(paste0(race.clean),
           font.main = 2, outer = FALSE,
           adj = 0, cex.main = 2)
+    title(xlab = "Proportion")
   }
   dev.off()
 }  
