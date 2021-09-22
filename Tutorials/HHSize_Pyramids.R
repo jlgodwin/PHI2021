@@ -214,6 +214,8 @@ for(year in c(2010, 2014, 2019)){
                    legend_string, ")"),
             font.main = 1, outer = FALSE,
             adj = 0, cex.main = 1)
+      title(ylab = "Household Size",
+            xlab = "Counts")
     }
     dev.off()
   }
@@ -274,6 +276,8 @@ for(year in c(2010, 2014, 2019)){
                  "King County (Estimated from ", legend_string, ")"),
           font.main = 1, outer = FALSE,
           adj = 0, cex.main = 1)
+    title(ylab = "Household Size",
+          xlab = "Counts")
   }
   dev.off()
   ## Compare 2010, 2015-2019 ####
@@ -310,9 +314,11 @@ for(year in c(2010, 2014, 2019)){
             font.main = 2, outer = FALSE,
             adj = 0, cex.main = 1)
       title(paste0("\n",
-                   "King County (Estimated from ", legend_string, ")"),
+                   "King County"),
             font.main = 1, outer = FALSE,
             adj = 0, cex.main = 1)
+      title(ylab = "Household Size",
+            xlab = "Counts")
     }
     dev.off()
     ### Prevalence ####
@@ -351,10 +357,11 @@ for(year in c(2010, 2014, 2019)){
             adj = 0, cex.main = 1)
       
       title(paste0("\n",
-                   "King County, ",
-                   year, "(Estimated from ", legend_string, ")"),
+                   "King County"),
             font.main = 1, outer = FALSE,
             adj = 0, cex.main = 1)
+      title(ylab = "Household Size",
+            xlab = "Proportion")
       
     }
     dev.off()
@@ -442,6 +449,8 @@ for(year in c(2010, 2014, 2019)){
                      hra.name, " (Estimated from ", legend_string, ")"),
               font.main = 1, outer = FALSE,
               adj = 0, cex.main = 1)
+        title(ylab = "Household Size",
+              xlab = "Proportion")
       }
       dev.off()
     }
@@ -531,6 +540,8 @@ for(year in c(2010, 2014, 2019)){
                      hra.name, " (Estimated from ", legend_string, ")"),
               font.main = 1, outer = FALSE,
               adj = 0, cex.main = 1)
+        title(ylab = "Household Size",
+              xlab = "Proportion")
       }
       dev.off()
     }
@@ -608,7 +619,9 @@ for(year in c(2000, 2009)){
                    hra.name, " (Estimated from ", legend_string, ")"),
             font.main = 1, outer = FALSE,
             adj = 0, cex.main = 1)
-    }
+      title(ylab = "Household Size",
+            xlab = "Counts")
+      }
     dev.off()
   }
   
@@ -672,6 +685,8 @@ for(year in c(2000, 2009)){
                  hra.name, " (Estimated from ", legend_string, ")"),
           font.main = 1, outer = FALSE,
           adj = 0, cex.main = 1)
+    title(ylab = "Household Size",
+          xlab = "Counts")
   }
   dev.off()
   
@@ -714,9 +729,11 @@ jpeg(paste0("../household_size/Pyramid/Pyramid_",
         adj = 0, cex.main = 1)
   
   title(paste0("\n",
-               "King County (Estimated from ", legend_string, ")"),
+               "King County"),
         font.main = 1, outer = FALSE,
         adj = 0, cex.main = 1)
+  title(ylab = "Household Size",
+        xlab = "Counts")
 }
 dev.off()
 
@@ -758,9 +775,11 @@ jpeg(paste0("../household_size/Pyramid/Pyramid_Prevalence",
         adj = 0, cex.main = 1)
   
   title(paste0("\n",
-               "King County (Estimated from ", legend_string, ")"),
+               "King County"),
         font.main = 1, outer = FALSE,
         adj = 0, cex.main = 1)
+  title(ylab = "Household Size",
+        xlab = "Proportion")
 }
 dev.off()
 
@@ -847,6 +866,8 @@ for(hra.name in hra@data$HRA2010v2_){
                  hra.name, " (Estimated from ", legend_string, ")"),
           font.main = 1, outer = FALSE,
           adj = 0, cex.main = .8)
+    title(ylab = "Household Size",
+          xlab = "Counts")
   }
   dev.off()
 }
@@ -942,6 +963,8 @@ for(hra.name in hra@data$HRA2010v2_){
     title(paste0("\n", hra.name, " (Estimated from ", legend_string, ")"),
           font.main = 1, outer = FALSE,
           adj = 0, cex.main = .8)
+    title(ylab = "Household Size",
+          xlab = "Counts")
   }
   dev.off()
 }
@@ -984,9 +1007,11 @@ jpeg(paste0("../household_size/Pyramid/Pyramid_",
         adj = 0, cex.main = 1)
   
   title(paste0("\n",
-               "King County (Estimated from ", legend_string, ")"),
+               "King County"),
         font.main = 1, outer = FALSE,
         adj = 0, cex.main = 1)
+  title(ylab = "Household Size",
+        xlab = "Counts")
 }
 dev.off()
 
@@ -1028,9 +1053,11 @@ jpeg(paste0("../household_size/Pyramid/Pyramid_Prevalence",
         adj = 0, cex.main = 1)
   
   title(paste0("\n",
-               "King County (Estimated from Census)"),
+               "King County"),
         font.main = 1, outer = FALSE,
         adj = 0, cex.main = 1)
+  title(ylab = "Household Size",
+        xlab = "Proportion")
 }
 dev.off()
 
@@ -1116,6 +1143,8 @@ for(hra.name in hra@data$HRA2010v2_){
     title(paste0("\n", hra.name, " (Estimated from Census)"),
           font.main = 1, outer = FALSE,
           adj = 0, cex.main = .8)
+    title(ylab = "Household Size",
+          xlab = "Counts")
   }
   dev.off()
 }
@@ -1227,6 +1256,8 @@ for(hra.name in hra@data$HRA2010v2_){
     title(paste0("\n", hra.name, " (Estimated from Census)"),
           font.main = 1, outer = FALSE,
           adj = 0, cex.main = .8)
+    title(ylab = "Household Size",
+          xlab = "Proportion")
   }
   dev.off()
 }
@@ -1344,7 +1375,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
          height = 480, width = 480)
     {
       par(lend = 1,
-          mar = c(0,0,2,0),
+          mar = c(0,0,1,0),
           oma = c(1,1,1,1))
       plot(hra,
            col = hh.col.hra,
@@ -1355,19 +1386,18 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
              title.adj = 0,
              ncol = 2,
              bty = 'n',
-             cex = 0.75,
+             cex = 1,
              border = FALSE,
              fill = hh.pal,
              legend = names(attr(hh.col.hra, 'table')))
-      title(paste0("Households of Size ", size, "\n",
-                   ""),
+      title(paste0("Counts of Households of Size ", size),
             font.main = 2, outer = FALSE,
-            adj = 0, cex.main = 1)
+            adj = 0, cex.main = 2)
       
-      title(paste0("\n",
-                   title_string, " (Estimated from ", legend_string, ")"),
-            font.main = 1, outer = FALSE,
-            adj = 0, cex.main = 1)
+      # title(paste0("\n",
+      #              title_string, " (Estimated from ", legend_string, ")"),
+      #       font.main = 1, outer = FALSE,
+      #       adj = 0, cex.main = 1)
     }
     dev.off()
     
@@ -1378,7 +1408,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
          height = 480, width = 480)
     {
       par(lend = 1,
-          mar = c(0,0,2,0),
+          mar = c(0,0,1,0),
           oma = c(1,1,1,1))
       plot(hra,
            col = hh.col.hra,
@@ -1397,7 +1427,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
              title.adj = 0,
              ncol = 2,
              bty = 'n',
-             cex = 0.75,
+             cex = 1,
              border = FALSE,
              fill = hh.pal,
              legend = names(attr(hh.col.hra, 'table')))
@@ -1406,22 +1436,21 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
              title.adj = 0,
              ncol = 1,
              bty = 'n',
-             cex= 0.75,
+             cex= 1,
              border = 'black',
              fill = 'black',
              density = c(0,25,50),
              legend = c(">= 95%",
                         "80% to 90%",
                         "< 80%"))
-      title(paste0("Households of Size ", size, "\n",
-                   ""),
+      title(paste0("Counts of Households of Size ", size),
             font.main = 2, outer = FALSE,
-            adj = 0, cex.main = 1)
+            adj = 0, cex.main = 2)
       
-      title(paste0("\n",
-                   title_string, " (Estimated from ", legend_string, ")"),
-            font.main = 1, outer = FALSE,
-            adj = 0, cex.main = 1)
+      # title(paste0("\n",
+      #              title_string, " (Estimated from ", legend_string, ")"),
+      #       font.main = 1, outer = FALSE,
+      #       adj = 0, cex.main = 1)
     }
     dev.off()
   }
@@ -1476,7 +1505,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
          height = 480, width = 480)
     {
       par(lend = 1,
-          mar = c(0,0,2,0),
+          mar = c(0,0,1,0),
           oma = c(1,1,1,1))
       plot(hra,
            col = prev.col.hra,
@@ -1487,19 +1516,18 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
              title.adj = 0,
              ncol = 2,
              bty = 'n',
-             cex = 0.75,
+             cex = 1,
              border = FALSE,
              fill = prev.pal,
              legend = names(attr(prev.col.hra, 'table')))
-      title(paste0("Prevalence of Households of Size ", size, "\n",
-                   ""),
+      title(paste0("Prevalence of Households of Size ", size),
             font.main = 2, outer = FALSE,
-            adj = 0, cex.main = 1)
+            adj = 0, cex.main = 2)
       
-      title(paste0("\n",
-                   title_string, " (Estimated from ", legend_string, ")"),
-            font.main = 1, outer = FALSE,
-            adj = 0, cex.main = 1)
+      # title(paste0("\n",
+      #              title_string, " (Estimated from ", legend_string, ")"),
+      #       font.main = 1, outer = FALSE,
+      #       adj = 0, cex.main = 1)
     }
     dev.off()
     
@@ -1511,7 +1539,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
          height = 480, width = 480)
     {
       par(lend = 1,
-          mar = c(0,0,2,0),
+          mar = c(0,0,1,0),
           oma = c(1,1,1,1))
       plot(hra,
            col = prev.col.hra,
@@ -1530,7 +1558,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
              title.adj = 0,
              ncol = 2,
              bty = 'n',
-             cex = 0.75,
+             cex = 1,
              border = FALSE,
              fill = prev.pal,
              legend = names(attr(prev.col.hra, 'table')))
@@ -1546,15 +1574,14 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
              legend = c(">= 95%",
                         "80% to 90%",
                         "< 80%"))
-      title(paste0("Prevalence of Households of Size ", size, "\n",
-                   ""),
+      title(paste0("Prevalence of Households of Size "),
             font.main = 2, outer = FALSE,
-            adj = 0, cex.main = 1)
-      
-      title(paste0("\n",
-                   title_string, " (Estimated from ", legend_string, ")"),
-            font.main = 1, outer = FALSE,
-            adj = 0, cex.main = 1)
+            adj = 0, cex.main = 2)
+      # 
+      # title(paste0("\n",
+      #              title_string, " (Estimated from ", legend_string, ")"),
+      #       font.main = 1, outer = FALSE,
+      #       adj = 0, cex.main = 1)
     }
     dev.off()
   }
@@ -1594,7 +1621,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
          height = 480, width = 480)
     {
       par(lend = 1,
-          mar = c(0,0,2,0),
+          mar = c(0,0,1,0),
           oma = c(1,1,1,1))
       plot(hra,
            col = prev.col.hra,
@@ -1606,19 +1633,19 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
              title.adj = 0,
              ncol = 2,
              bty = 'n',
-             cex = 0.75,
+             cex = 1,
              border = FALSE,
              fill = prev.pal,
              legend = names(attr(prev.col.hra, 'table')))
-      title(paste0("Distribution of Households of Size ", size, "\n",
-                   ""),
+      title(paste0("Distribution of Households of Size ",
+                   size),
             font.main = 2, outer = FALSE,
-            adj = 0, cex.main = 1)
-      
-      title(paste0("\n",
-                   title_string, " (Estimated from ", legend_string, ")"),
-            font.main = 1, outer = FALSE,
-            adj = 0, cex.main = 1)
+            adj = 0, cex.main = 2)
+      # 
+      # title(paste0("\n",
+      #              title_string, " (Estimated from ", legend_string, ")"),
+      #       font.main = 1, outer = FALSE,
+      #       adj = 0, cex.main = 1)
     }
     dev.off()
     
@@ -1629,7 +1656,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
          height = 480, width = 480)
     {
       par(lend = 1,
-          mar = c(0,0,2,0),
+          mar = c(0,0,1,0),
           oma = c(1,1,1,1))
       plot(hra,
            col = prev.col.hra,
@@ -1647,7 +1674,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
              title.adj = 0,
              ncol = 2,
              bty = 'n',
-             cex = 0.75,
+             cex = 1,
              border = FALSE,
              fill = prev.pal,
              legend = names(attr(prev.col.hra, 'table')))
@@ -1663,15 +1690,14 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
              legend = c(">= 95%",
                         "80% to 90%",
                         "< 80%"))
-      title(paste0("Distribution of Households of Size ", size, "\n",
-                   ""),
+      title(paste0("Distribution of Households of Size ", size),
             font.main = 2, outer = FALSE,
-            adj = 0, cex.main = 1)
+            adj = 0, cex.main = 2)
       
-      title(paste0("\n",
-                   title_string, " (Estimated from ", legend_string, ")"),
-            font.main = 1, outer = FALSE,
-            adj = 0, cex.main = 1)
+      # title(paste0("\n",
+      #              title_string, " (Estimated from ", legend_string, ")"),
+      #       font.main = 1, outer = FALSE,
+      #       adj = 0, cex.main = 1)
     }
     dev.off()
     
@@ -1804,7 +1830,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
            height = 480, width = 480)
       {
         par(lend = 1,
-            mar = c(0,0,2,0),
+            mar = c(0,0,1,0),
             oma = c(1,1,1,1))
         plot(hra,
              col = hh.col.hra,
@@ -1815,13 +1841,12 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
                title.adj = 0,
                ncol = 2,
                bty = 'n',
-               cex = 0.75,
+               cex = 1,
                border = FALSE,
                fill = hh.pal,
                legend = names(attr(hh.col.hra, 'table')))
         title(paste0(tenure.type,
-                     " Households of Size ", size, "\n",
-                     ""),
+                     " Households of Size ", size),
               font.main = 2, outer = FALSE,
               adj = 0, cex.main = 1)
         
@@ -1840,7 +1865,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
            height = 480, width = 480)
       {
         par(lend = 1,
-            mar = c(0,0,2,0),
+            mar = c(0,0,1,0),
             oma = c(1,1,1,1))
         plot(hra,
              col = hh.col.hra,
@@ -1859,7 +1884,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
                title.adj = 0,
                ncol = 2,
                bty = 'n',
-               cex = 0.75,
+               cex = 1,
                border = FALSE,
                fill = hh.pal,
                legend = names(attr(hh.col.hra, 'table')))
@@ -1947,7 +1972,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
            height = 480, width = 480)
       {
         par(lend = 1,
-            mar = c(0,0,2,0),
+            mar = c(0,0,1,0),
             oma = c(1,1,1,1))
         plot(hra,
              col = prev.col.hra,
@@ -1958,7 +1983,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
                title.adj = 0,
                ncol = 2,
                bty = 'n',
-               cex = 0.75,
+               cex = 1,
                border = FALSE,
                fill = prev.pal,
                legend = names(attr(prev.col.hra, 'table')))
@@ -1983,7 +2008,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
            height = 480, width = 480)
       {
         par(lend = 1,
-            mar = c(0,0,2,0),
+            mar = c(0,0,1,0),
             oma = c(1,1,1,1))
         plot(hra,
              col = prev.col.hra,
@@ -2002,7 +2027,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
                title.adj = 0,
                ncol = 2,
                bty = 'n',
-               cex = 0.75,
+               cex = 1,
                border = FALSE,
                fill = prev.pal,
                legend = names(attr(prev.col.hra, 'table')))
@@ -2076,7 +2101,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
            height = 480, width = 480)
       {
         par(lend = 1,
-            mar = c(0,0,2,0),
+            mar = c(0,0,1,0),
             oma = c(1,1,1,1))
         plot(hra,
              col = prev.col.hra,
@@ -2087,7 +2112,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
                title.adj = 0,
                ncol = 2,
                bty = 'n',
-               cex = 0.75,
+               cex = 1,
                border = FALSE,
                fill = prev.pal,
                legend = names(attr(prev.col.hra, 'table')))
@@ -2112,7 +2137,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
            height = 480, width = 480)
       {
         par(lend = 1,
-            mar = c(0,0,2,0),
+            mar = c(0,0,1,0),
             oma = c(1,1,1,1))
         plot(hra,
              col = prev.col.hra,
@@ -2131,7 +2156,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
                title.adj = 0,
                ncol = 2,
                bty = 'n',
-               cex = 0.75,
+               cex = 1,
                border = FALSE,
                fill = prev.pal,
                legend = names(attr(prev.col.hra, 'table')))
@@ -2328,7 +2353,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
          height = 480, width = 480)
     {
       par(lend = 1,
-          mar = c(0,0,2,0),
+          mar = c(0,0,1,0),
           oma = c(1,1,1,1))
       plot(tract_spatialdf,
            col = hh.col.tract,
@@ -2339,11 +2364,11 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
              title.adj = 0,
              ncol = 2,
              bty = 'n',
-             cex = 0.75,
+             cex = 1,
              border = FALSE,
              fill = hh.pal,
              legend = names(attr(hh.col.tract, 'table')))
-      title(paste0("Households of Size ", size, "\n",
+      title(paste0("Counts of Households of Size ", size, "\n",
                    ""),
             font.main = 2, outer = FALSE,
             adj = 0, cex.main = 1)
@@ -2362,7 +2387,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
          height = 480, width = 480)
     {
       par(lend = 1,
-          mar = c(0,0,2,0),
+          mar = c(0,0,1,0),
           oma = c(1,1,1,1))
       plot(tract_spatialdf,
            col = hh.col.tract,
@@ -2381,7 +2406,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
              title.adj = 0,
              ncol = 2,
              bty = 'n',
-             cex = 0.75,
+             cex = 1,
              border = FALSE,
              fill = hh.pal,
              legend = names(attr(hh.col.tract, 'table')))
@@ -2397,7 +2422,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
              legend = c(">= 95%",
                         "80% to 90%",
                         "< 80%"))
-      title(paste0("Households of Size ", size, "\n",
+      title(paste0("Counts of Households of Size ", size, "\n",
                    ""),
             font.main = 2, outer = FALSE,
             adj = 0, cex.main = 1)
@@ -2462,7 +2487,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
          height = 480, width = 480)
     {
       par(lend = 1,
-          mar = c(0,0,2,0),
+          mar = c(0,0,1,0),
           oma = c(1,1,1,1))
       plot(tract_spatialdf,
            col = prev.col.tract,
@@ -2473,7 +2498,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
              title.adj = 0,
              ncol = 2,
              bty = 'n',
-             cex = 0.75,
+             cex = 1,
              border = FALSE,
              fill = prev.pal,
              legend = names(attr(prev.col.tract, 'table')))
@@ -2497,7 +2522,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
          height = 480, width = 480)
     {
       par(lend = 1,
-          mar = c(0,0,2,0),
+          mar = c(0,0,1,0),
           oma = c(1,1,1,1))
       plot(tract_spatialdf,
            col = prev.col.tract,
@@ -2516,7 +2541,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
              title.adj = 0,
              ncol = 2,
              bty = 'n',
-             cex = 0.75,
+             cex = 1,
              border = FALSE,
              fill = prev.pal,
              legend = names(attr(prev.col.tract, 'table')))
@@ -2582,7 +2607,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
          height = 480, width = 480)
     {
       par(lend = 1,
-          mar = c(0,0,2,0),
+          mar = c(0,0,1,0),
           oma = c(1,1,1,1))
       plot(tract_spatialdf,
            col = prev.col.tract,
@@ -2594,7 +2619,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
              title.adj = 0,
              ncol = 2,
              bty = 'n',
-             cex = 0.75,
+             cex = 1,
              border = FALSE,
              fill = prev.pal,
              legend = names(attr(prev.col.tract, 'table')))
@@ -2617,7 +2642,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
          height = 480, width = 480)
     {
       par(lend = 1,
-          mar = c(0,0,2,0),
+          mar = c(0,0,1,0),
           oma = c(1,1,1,1))
       plot(tract_spatialdf,
            col = prev.col.tract,
@@ -2635,7 +2660,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
              title.adj = 0,
              ncol = 2,
              bty = 'n',
-             cex = 0.75,
+             cex = 1,
              border = FALSE,
              fill = prev.pal,
              legend = names(attr(prev.col.tract, 'table')))
@@ -2819,7 +2844,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
            height = 480, width = 480)
       {
         par(lend = 1,
-            mar = c(0,0,2,0),
+            mar = c(0,0,1,0),
             oma = c(1,1,1,1))
         plot(tract_spatialdf,
              col = hh.col.tract,
@@ -2830,7 +2855,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
                title.adj = 0,
                ncol = 2,
                bty = 'n',
-               cex = 0.75,
+               cex = 1,
                border = FALSE,
                fill = hh.pal,
                legend = names(attr(hh.col.tract, 'table')))
@@ -2858,7 +2883,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
            height = 480, width = 480)
       {
         par(lend = 1,
-            mar = c(0,0,2,0),
+            mar = c(0,0,1,0),
             oma = c(1,1,1,1))
         plot(tract_spatialdf,
              col = hh.col.tract,
@@ -2877,7 +2902,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
                title.adj = 0,
                ncol = 2,
                bty = 'n',
-               cex = 0.75,
+               cex = 1,
                border = FALSE,
                fill = hh.pal,
                legend = names(attr(hh.col.tract, 'table')))
@@ -2968,7 +2993,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
            height = 480, width = 480)
       {
         par(lend = 1,
-            mar = c(0,0,2,0),
+            mar = c(0,0,1,0),
             oma = c(1,1,1,1))
         plot(tract_spatialdf,
              col = prev.col.tract,
@@ -2979,7 +3004,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
                title.adj = 0,
                ncol = 2,
                bty = 'n',
-               cex = 0.75,
+               cex = 1,
                border = FALSE,
                fill = prev.pal,
                legend = names(attr(prev.col.tract, 'table')))
@@ -3008,7 +3033,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
            height = 480, width = 480)
       {
         par(lend = 1,
-            mar = c(0,0,2,0),
+            mar = c(0,0,1,0),
             oma = c(1,1,1,1))
         plot(tract_spatialdf,
              col = prev.col.tract,
@@ -3027,7 +3052,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
                title.adj = 0,
                ncol = 2,
                bty = 'n',
-               cex = 0.75,
+               cex = 1,
                border = FALSE,
                fill = prev.pal,
                legend = names(attr(prev.col.tract, 'table')))
@@ -3105,7 +3130,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
            height = 480, width = 480)
       {
         par(lend = 1,
-            mar = c(0,0,2,0),
+            mar = c(0,0,1,0),
             oma = c(1,1,1,1))
         plot(tract_spatialdf,
              col = prev.col.tract,
@@ -3117,7 +3142,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
                title.adj = 0,
                ncol = 2,
                bty = 'n',
-               cex = 0.75,
+               cex = 1,
                border = FALSE,
                fill = prev.pal,
                legend = names(attr(prev.col.tract, 'table')))
@@ -3143,7 +3168,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
            height = 480, width = 480)
       {
         par(lend = 1,
-            mar = c(0,0,2,0),
+            mar = c(0,0,1,0),
             oma = c(1,1,1,1))
         plot(tract_spatialdf,
              col = prev.col.tract,
@@ -3161,7 +3186,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
                title.adj = 0,
                ncol = 2,
                bty = 'n',
-               cex = 0.75,
+               cex = 1,
                border = FALSE,
                fill = prev.pal,
                legend = names(attr(prev.col.tract, 'table')))

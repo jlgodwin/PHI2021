@@ -131,6 +131,11 @@ tenure_hra <- bind_rows(tenure_hra_2010,
   filter(!is.na(value))
 
 # Maps ####
+impact_areas <- c("Burien", "Kent-SE", "Kent-West",
+                  "SeaTac/Tukwila", "Beacon/Gtown/S.Park",
+                  "Fed Way-Central/Military Rd", "NW Seattle")
+
+hra@data$ImpactArea <- hra@data$HRA2010v2_ %in% impact_areas
 
 ## Population ####
 
@@ -185,7 +190,7 @@ for(yr in c(2009, 2014, 2018)){
                 yr, ".jpeg"),
          height = 480, width = 480)
     par(lend = 1,
-        mar = c(0,0,2,0),
+        mar = c(0,0,1,0),
         oma = c(0,0,1,0))
     plot(hra,
          col = pop.col.hra,
@@ -196,20 +201,55 @@ for(yr in c(2009, 2014, 2018)){
            title.adj = 0,
            ncol = 2,
            bty = 'n',
-           cex= 0.75,
+           cex= 1,
            border = FALSE,
            fill = pop.pal,
            legend = names(attr(pop.col.hra, 'table')))
-    title(paste0(tenure.type, "-occupied Households\n",
-                 ""),
+    title(paste0(tenure.type, "-occupied Households"),
           font.main = 2, outer = FALSE,
-          adj = 0, cex.main = 1)
+          adj = 0, cex.main = 2)
     
-    title(paste0("\n",
-                 "King County (ACS ",
-                 yr - 5, "-", yr,")"),
-          font.main = 1, outer = FALSE,
-          adj = 0, cex.main = 1)
+    # title(paste0("\n",
+    #              "King County (ACS ",
+    #              yr - 5, "-", yr,")"),
+    #       font.main = 1, outer = FALSE,
+    #       adj = 0, cex.main = 1)
+    dev.off()
+    
+    jpeg(paste0("../TenurePlots/Map_HRA_ImpactOutline",
+                tenure.type, "_",
+                yr, ".jpeg"),
+         height = 480, width = 480)
+    par(lend = 1,
+        mar = c(0,0,1,0),
+        oma = c(0,0,1,0))
+    plot(hra,
+         col = pop.col.hra,
+         border = 'grey48', lwd = .25,
+         main = "")
+    for(poly in which(hra@data$ImpactArea)){
+      points <- hra@polygons[[poly]]@Polygons[[1]]@coords
+      polygon(points[,1], points[,2],
+              border = 'white', lwd = 2)
+    }
+    legend('bottomleft',
+           title = 'Households',
+           title.adj = 0,
+           ncol = 2,
+           bty = 'n',
+           cex= 1,
+           border = FALSE,
+           fill = pop.pal,
+           legend = names(attr(pop.col.hra, 'table')))
+    title(paste0(tenure.type, "-occupied Households"),
+          font.main = 2, outer = FALSE,
+          adj = 0, cex.main = 2)
+    
+    # title(paste0("\n",
+    #              "King County (ACS ",
+    #              yr - 5, "-", yr,")"),
+    #       font.main = 1, outer = FALSE,
+    #       adj = 0, cex.main = 1)
     dev.off()
     
     ### Tract ####
@@ -259,25 +299,24 @@ for(yr in c(2009, 2014, 2018)){
          height = 480, width = 480)
     {
       par(lend = 1,
-          mar = c(0,0,2,0),
+          mar = c(0,0,1,0),
           oma = c(0,0,1,0))
       plot(tract_spatialdf,
            col = pop.col.hra,
            border = 'grey48', lwd = .25,
            main = "")
-      hatch.idx <- which(tenure_tmp$Density > 0)
-      for(poly in hatch.idx){
-        points <- tract_spatialdf@polygons[[poly]]@Polygons[[1]]@coords
+      for(poly in which(hra@data$ImpactArea)){
+        points <- hra@polygons[[poly]]@Polygons[[1]]@coords
         polygon(points[,1], points[,2],
-                border = FALSE,
-                density = tenure_tmp$Density[poly])
+                border = 'white',
+                lwd = 2)
       }
       legend('bottomleft',
              title = 'Households',
              title.adj = 0,
              ncol = 2,
              bty = 'n',
-             cex= 0.75,
+             cex= 1,
              border = FALSE,
              fill = pop.pal,
              legend = names(attr(pop.col.hra, 'table')))
@@ -286,7 +325,7 @@ for(yr in c(2009, 2014, 2018)){
              title.adj = 0,
              ncol = 1,
              bty = 'n',
-             cex= 0.75,
+             cex= 1,
              border = 'black',
              fill = 'black',
              density = c(0,25,50),
@@ -355,6 +394,8 @@ breaks <- c(0, .05, .15, .2,
             .75, .85,
             1)
 
+
+
 for(yr in c(2009, 2014, 2018)){
   for(tenure.type in c("Renter", "Owner")){
     ## Make sure your df is in right order for mapping,
@@ -379,7 +420,7 @@ for(yr in c(2009, 2014, 2018)){
                 yr, ".jpeg"),
          height = 480, width = 480)
     par(lend = 1,
-        mar = c(0,0,2,0),
+        mar = c(0,0,1,0),
         oma = c(0,0,1,0))
     plot(hra,
          col = prop.col.hra,
@@ -390,23 +431,61 @@ for(yr in c(2009, 2014, 2018)){
            title.adj = 0,
            ncol = 2,
            bty = 'n',
-           cex= 0.75,
+           cex= 1,
            border = FALSE,
            fill = prop.pal,
            legend = names(attr(prop.col.hra, 'table')))
     title(paste0("Prevalence of ",
                  tenure.type,
-                 "-occupied Households\n",
-                 ""),
+                 "-occupied Households"),
           font.main = 2, outer = FALSE,
-          adj = 0, cex.main = 1)
+          adj = 0, cex.main = 2)
     
-    title(paste0("\n",
-                 "King County (ACS ",
-                 yr - 5, "-", yr,")"),
-          font.main = 1, outer = FALSE,
-          adj = 0, cex.main = 1)
+    # title(paste0("\n",
+    #              "King County (ACS ",
+    #              yr - 5, "-", yr,")"),
+    #       font.main = 1, outer = FALSE,
+    #       adj = 0, cex.main = 1)
     dev.off()
+    
+    jpeg(paste0("../TenurePlots/Map_HRA_",
+                tenure.type, "_Prevalence_ImpactOutline",
+                yr, ".jpeg"),
+         height = 480, width = 480)
+    par(lend = 1,
+        mar = c(0,0,1,0),
+        oma = c(0,0,1,0))
+    plot(hra,
+         col = prop.col.hra,
+         border = 'grey48', lwd = .25,
+         main = "")
+    for(poly in which(hra@data$ImpactArea)){
+      points <- hra@polygons[[poly]]@Polygons[[1]]@coords
+      polygon(points[,1], points[,2],
+              border = 'white', lwd = 2)
+    }
+    legend('bottomleft',
+           title = 'Prevalence',
+           title.adj = 0,
+           ncol = 2,
+           bty = 'n',
+           cex= 1,
+           border = FALSE,
+           fill = prop.pal,
+           legend = names(attr(prop.col.hra, 'table')))
+    title(paste0("Prevalence of ",
+                 tenure.type,
+                 "-occupied Households"),
+          font.main = 2, outer = FALSE,
+          adj = 0, cex.main = 2)
+    
+    # title(paste0("\n",
+    #              "King County (ACS ",
+    #              yr - 5, "-", yr,")"),
+    #       font.main = 1, outer = FALSE,
+    #       adj = 0, cex.main = 1)
+    dev.off()
+    
     
     ### Tract ####
     tenure_tract_total <- tenure %>% 
@@ -458,25 +537,24 @@ for(yr in c(2009, 2014, 2018)){
                 yr, ".jpeg"),
          height = 480, width = 480)
     par(lend = 1,
-        mar = c(0,0,2,0),
+        mar = c(0,0,1,0),
         oma = c(0,0,1,0))
     plot(tract_spatialdf,
          col = prop.col.hra,
          border = 'grey48', lwd = .25,
          main = "")
-    hatch.idx <- which(tenure_tmp$Density > 0)
-    for(poly in hatch.idx){
-      points <- tract_spatialdf@polygons[[poly]]@Polygons[[1]]@coords
+    for(poly in which(hra@data$ImpactArea)){
+      points <- hra@polygons[[poly]]@Polygons[[1]]@coords
       polygon(points[,1], points[,2],
-              border = FALSE,
-              density = tenure_tmp$Density[poly])
+              border = 'white',
+              lwd = 2)
     }
     legend('bottomleft',
            title = 'Prevalence',
            title.adj = 0,
            ncol = 2,
            bty = 'n',
-           cex= 0.75,
+           cex= 1,
            border = FALSE,
            fill = prop.pal,
            legend = names(attr(prop.col.hra, 'table')))
@@ -485,7 +563,7 @@ for(yr in c(2009, 2014, 2018)){
            title.adj = 0,
            ncol = 1,
            bty = 'n',
-           cex= 0.75,
+           cex= 1,
            border = 'black',
            fill = 'black',
            density = c(0,25,50),
@@ -493,16 +571,15 @@ for(yr in c(2009, 2014, 2018)){
                       "80% to 90%",
                       "< 80%"))
     title(paste0("Prevalence of ",
-                 tenure.type, "-occupied Households\n",
-                 ""),
+                 tenure.type, "-occupied Households"),
           font.main = 2, outer = FALSE,
-          adj = 0, cex.main = 1)
+          adj = 0, cex.main = 2)
     
-    title(paste0("\n",
-                 "King County (ACS ",
-                 yr - 5, "-", yr,")"),
-          font.main = 1, outer = FALSE,
-          adj = 0, cex.main = 1)
+    # title(paste0("\n",
+    #              "King County (ACS ",
+    #              yr - 5, "-", yr,")"),
+    #       font.main = 1, outer = FALSE,
+    #       adj = 0, cex.main = 1)
     dev.off()
   }
 }
@@ -582,7 +659,46 @@ for(yr in c(2009, 2014, 2018)){
                 yr, ".jpeg"),
          height = 480, width = 480)
     par(lend = 1,
-        mar = c(0,0,2,0),
+        mar = c(0,0,1,0),
+        oma = c(0,0,1,0))
+    plot(hra,
+         col = prop.col.hra,
+         border = 'grey48', lwd = .25,
+         main = "")
+    for(poly in which(hra@data$ImpactArea)){
+      points <- hra@polygons[[poly]]@Polygons[[1]]@coords
+      polygon(points[,1], points[,2],
+              border = 'white',
+              lwd = 2)
+    }
+    legend('bottomleft',
+           title = 'Distribution',
+           title.adj = 0,
+           ncol = 2,
+           bty = 'n',
+           cex= 1,
+           border = FALSE,
+           fill = prop.pal,
+           legend = names(attr(prop.col.hra, 'table')))
+    title(paste0("Distribution of ",
+                 tenure.type,
+                 "-occupied Households"),
+          font.main = 2, outer = FALSE,
+          adj = 0, cex.main = 2)
+    
+    # title(paste0("\n",
+    #              "King County (ACS ",
+    #              yr - 5, "-", yr,")"),
+    #       font.main = 1, outer = FALSE,
+    #       adj = 0, cex.main = 1)
+    dev.off()
+    
+    jpeg(paste0("../TenurePlots/Map_HRA_",
+                tenure.type, "_Distribution_ImpactOutline",
+                yr, ".jpeg"),
+         height = 480, width = 480)
+    par(lend = 1,
+        mar = c(0,0,1,0),
         oma = c(0,0,1,0))
     plot(hra,
          col = prop.col.hra,
@@ -593,22 +709,21 @@ for(yr in c(2009, 2014, 2018)){
            title.adj = 0,
            ncol = 2,
            bty = 'n',
-           cex= 0.75,
+           cex= 1,
            border = FALSE,
            fill = prop.pal,
            legend = names(attr(prop.col.hra, 'table')))
     title(paste0("Distribution of ",
                  tenure.type,
-                 "-occupied Households\n",
-                 ""),
+                 "-occupied Households"),
           font.main = 2, outer = FALSE,
-          adj = 0, cex.main = 1)
+          adj = 0, cex.main = 2)
     
-    title(paste0("\n",
-                 "King County (ACS ",
-                 yr - 5, "-", yr,")"),
-          font.main = 1, outer = FALSE,
-          adj = 0, cex.main = 1)
+    # title(paste0("\n",
+    #              "King County (ACS ",
+    #              yr - 5, "-", yr,")"),
+    #       font.main = 1, outer = FALSE,
+    #       adj = 0, cex.main = 1)
     dev.off()
     
     
@@ -666,25 +781,24 @@ for(yr in c(2009, 2014, 2018)){
                 yr, ".jpeg"),
          height = 480, width = 480)
     par(lend = 1,
-        mar = c(0,0,2,0),
+        mar = c(0,0,1,0),
         oma = c(0,0,1,0))
     plot(tract_spatialdf,
          col = prop.col.hra,
          border = 'grey48', lwd = .25,
          main = "")
-    hatch.idx <- which(tenure_tmp$Density > 0)
-    for(poly in hatch.idx){
-      points <- tract_spatialdf@polygons[[poly]]@Polygons[[1]]@coords
+    for(poly in which(hra@data$ImpactArea)){
+      points <- hra@polygons[[poly]]@Polygons[[1]]@coords
       polygon(points[,1], points[,2],
-              border = FALSE,
-              density = tenure_tmp$Density[poly])
+              border = 'white',
+              lwd = 2)
     }
     legend('bottomleft',
            title = 'Distribution',
            title.adj = 0,
            ncol = 2,
            bty = 'n',
-           cex= 0.75,
+           cex= 1,
            border = FALSE,
            fill = prop.pal,
            legend = names(attr(prop.col.hra, 'table')))
@@ -693,7 +807,7 @@ for(yr in c(2009, 2014, 2018)){
            title.adj = 0,
            ncol = 1,
            bty = 'n',
-           cex= 0.75,
+           cex= 1,
            border = 'black',
            fill = 'black',
            density = c(0,25,50),
@@ -701,16 +815,15 @@ for(yr in c(2009, 2014, 2018)){
                       "80% to 90%",
                       "< 80%"))
     title(paste0("Distribution of ",
-                 tenure.type, "-occupied Households\n",
-                 ""),
+                 tenure.type, "-occupied Households"),
           font.main = 2, outer = FALSE,
-          adj = 0, cex.main = 1)
+          adj = 0, cex.main = 2)
     
-    title(paste0("\n",
-                 "King County (ACS ",
-                 yr - 5, "-", yr,")"),
-          font.main = 1, outer = FALSE,
-          adj = 0, cex.main = 1)
+    # title(paste0("\n",
+    #              "King County (ACS ",
+    #              yr - 5, "-", yr,")"),
+    #       font.main = 1, outer = FALSE,
+    #       adj = 0, cex.main = 1)
     dev.off()
   }
 }
