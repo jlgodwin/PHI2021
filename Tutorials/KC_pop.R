@@ -3718,11 +3718,11 @@ jpeg(paste0("../PopPlots/",
          title.adj = 0,
          ncol = 2,
          bty = 'n',
-         cex = 0.75,
+         cex = 1,
          border = FALSE,
          fill = pop.pal,
          legend = names(attr(pop.col.hra, 'table')))
-  title(paste0("King County Population: 2045"),
+  title(paste0("Projected King County Population: 2045"),
         font.main = 2, outer = FALSE,
         adj = 0, cex.main = 1)
   
