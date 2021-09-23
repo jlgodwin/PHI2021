@@ -665,12 +665,6 @@ for(yr in c(2009, 2014, 2018)){
          col = prop.col.hra,
          border = 'grey48', lwd = .25,
          main = "")
-    for(poly in which(hra@data$ImpactArea)){
-      points <- hra@polygons[[poly]]@Polygons[[1]]@coords
-      polygon(points[,1], points[,2],
-              border = 'white',
-              lwd = 2)
-    }
     legend('bottomleft',
            title = 'Distribution',
            title.adj = 0,
@@ -704,6 +698,12 @@ for(yr in c(2009, 2014, 2018)){
          col = prop.col.hra,
          border = 'grey48', lwd = .25,
          main = "")
+    for(poly in which(hra@data$ImpactArea)){
+      points <- hra@polygons[[poly]]@Polygons[[1]]@coords
+      polygon(points[,1], points[,2],
+              border = 'white',
+              lwd = 2)
+    }
     legend('bottomleft',
            title = 'Distribution',
            title.adj = 0,
@@ -725,6 +725,8 @@ for(yr in c(2009, 2014, 2018)){
     #       font.main = 1, outer = FALSE,
     #       adj = 0, cex.main = 1)
     dev.off()
+    
+    
     
     
     ### Tract ####

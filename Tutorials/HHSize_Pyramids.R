@@ -621,7 +621,7 @@ for(year in c(2000, 2009)){
             adj = 0, cex.main = 1)
       title(ylab = "Household Size",
             xlab = "Counts")
-      }
+    }
     dev.off()
   }
   
@@ -1313,6 +1313,8 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
     # between 80 and 90%
     hh_year_tmp$Density[hh_year_tmp$CoV < 1/qnorm(.9) &
                           hh_year_tmp$CoV >= 1/qnorm(.95)] <- 25
+    hh_year_tmp$Density[hh_year_tmp$CoV < 1/qnorm(.95) &
+                          hh_year_tmp$CoV >= 1/qnorm(.975)] <- 5
     
     hh_year_total <- hh_year_tmp %>% 
       group_by(FID_HRA_20, HRA2010v2_) %>% 
@@ -1375,7 +1377,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
          height = 480, width = 480)
     {
       par(lend = 1,
-          mar = c(0,0,1,0),
+          mar = c(0,0,3,0),
           oma = c(1,1,1,1))
       plot(hra,
            col = hh.col.hra,
@@ -1390,9 +1392,9 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
              border = FALSE,
              fill = hh.pal,
              legend = names(attr(hh.col.hra, 'table')))
-      title(paste0("Counts of Households of Size ", size),
+      title(paste0("Counts of Households\nSize ", size),
             font.main = 2, outer = FALSE,
-            adj = 0, cex.main = 2)
+            adj = 0, cex.main = 1.5)
       
       # title(paste0("\n",
       #              title_string, " (Estimated from ", legend_string, ")"),
@@ -1401,309 +1403,423 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
     }
     dev.off()
     
-    ### Add CoV ####
     jpeg(paste0("../household_size/HRA/Population/", 
                 "Households_Size",
-                size, "_CoV_", year, ".jpeg"),
+                size, "_", year, "_Burien.jpeg"),
          height = 480, width = 480)
     {
       par(lend = 1,
-          mar = c(0,0,1,0),
+          mar = c(0,0,3,0),
           oma = c(1,1,1,1))
       plot(hra,
            col = hh.col.hra,
            border = 'grey48', lwd = .25,
            main = "")
-      
-      hatch.idx <- which(hra@data$Density > 0)
-      for(poly in hatch.idx){
-        points <- hra@polygons[[poly]]@Polygons[[1]]@coords
-        polygon(points[,1], points[,2],
-                border = FALSE,
-                density = hra@data$Density[poly])
-      }
-      legend('bottomleft',
-             title = 'Households',
-             title.adj = 0,
-             ncol = 2,
-             bty = 'n',
-             cex = 1,
-             border = FALSE,
-             fill = hh.pal,
-             legend = names(attr(hh.col.hra, 'table')))
-      legend('bottomright',
-             title = 'Significance',
-             title.adj = 0,
-             ncol = 1,
-             bty = 'n',
-             cex= 1,
-             border = 'black',
-             fill = 'black',
-             density = c(0,25,50),
-             legend = c(">= 95%",
-                        "80% to 90%",
-                        "< 80%"))
-      title(paste0("Counts of Households of Size ", size),
-            font.main = 2, outer = FALSE,
-            adj = 0, cex.main = 2)
-      
-      # title(paste0("\n",
-      #              title_string, " (Estimated from ", legend_string, ")"),
-      #       font.main = 1, outer = FALSE,
-      #       adj = 0, cex.main = 1)
-    }
+      burien.idx <- which(hra@data$HRA2010v2_ == "Burien")
+      points <- hra@polygons[[burien.idx]]@Polygons[[1]]@coords
+      polygon(points[,1], points[,2],
+              border = 'white', lwd= 2)
+    legend('bottomleft',
+           title = 'Households',
+           title.adj = 0,
+           ncol = 2,
+           bty = 'n',
+           cex = 1,
+           border = FALSE,
+           fill = hh.pal,
+           legend = names(attr(hh.col.hra, 'table')))
+    title(paste0("Counts of Households\nSize ", size),
+          font.main = 2, outer = FALSE,
+          adj = 0, cex.main = 1.5)
+    
+    # title(paste0("\n",
+    #              title_string, " (Estimated from ", legend_string, ")"),
+    #       font.main = 1, outer = FALSE,
+    #       adj = 0, cex.main = 1)
+  }
     dev.off()
+  
+  ### Add CoV ####
+  jpeg(paste0("../household_size/HRA/Population/", 
+              "Households_Size",
+              size, "_CoV_", year, ".jpeg"),
+       height = 480, width = 480)
+  {
+    par(lend = 1,
+        mar = c(0,0,3,0),
+        oma = c(1,1,1,1))
+    plot(hra,
+         col = hh.col.hra,
+         border = 'grey48', lwd = .25,
+         main = "")
+    
+    hatch.idx <- which(hra@data$Density > 0)
+    for(poly in hatch.idx){
+      points <- hra@polygons[[poly]]@Polygons[[1]]@coords
+      polygon(points[,1], points[,2],
+              border = FALSE,
+              density = hra@data$Density[poly])
+    }
+    legend('bottomleft',
+           title = 'Households',
+           title.adj = 0,
+           ncol = 2,
+           bty = 'n',
+           cex = 1,
+           border = FALSE,
+           fill = hh.pal,
+           legend = names(attr(hh.col.hra, 'table')))
+    legend('bottomright',
+           title = 'Probability of\n Significant Uncertainty',
+           title.adj = 0,
+           ncol = 1,
+           bty = 'n',
+           cex= 0.75,
+           border = 'black',
+           fill = 'black',
+           density = c(0,25,50),
+           legend = c("<= 5%",
+                      "5%-10%",
+                      "10%-20%",
+                      "> 20%"))
+    title(paste0("Counts of Households\nSize ", size),
+          font.main = 2, outer = FALSE,
+          adj = 0, cex.main = 1.5)
+    
+    # title(paste0("\n",
+    #              title_string, " (Estimated from ", legend_string, ")"),
+    #       font.main = 1, outer = FALSE,
+    #       adj = 0, cex.main = 1)
+  }
+  dev.off()
+}
+
+### Prevalence ####
+prev.pal <- brewer.pal(n = 9, name = "YlGnBu")
+
+hh_year_tmp <- hh_year_tmp %>% 
+  left_join(hh_year_total,
+            by = c("FID_HRA_20" = "FID_HRA_20",
+                   "HRA2010v2_" = "HRA2010v2_"),
+            suffix = c("", "_Total")) %>% 
+  filter(!is.na(HRA2010v2_)) %>% 
+  mutate(Prev = estimate/estimate_Total)
+prev.int.hra <- classIntervals(hh_year_tmp$Prev,
+                               style = 'jenks',
+                               n = 9)
+
+breaks <- prev.int.hra$brks
+breaks <- c(0, .05, .1,
+            .15, .2, .25,
+            .4, .5, .6, .75)
+## Get color based on RColorBrwere palette for 
+## each area
+
+
+for(size in unique(hh_year_tmp$hh_size)){
+  
+  hh_size_tmp <- hh_year_tmp %>% 
+    filter(hh_size == size)
+  hra@data$Density <- 
+    hra@data$Prev <- 0
+  
+  if(nrow(hh_size_tmp) != 0){
+    hra@data$Prev[match(hra@data$FID_HRA_20,
+                        hh_size_tmp$FID_HRA_20)] <- hh_size_tmp$Prev
+    hra@data$Density[match(hra@data$FID_HRA_20,
+                           hh_size_tmp$FID_HRA_20)] <- hh_size_tmp$Density
   }
   
-  ### Prevalence ####
-  prev.pal <- brewer.pal(n = 9, name = "YlGnBu")
   
-  hh_year_tmp <- hh_year_tmp %>% 
-    left_join(hh_year_total,
-              by = c("FID_HRA_20" = "FID_HRA_20",
-                     "HRA2010v2_" = "HRA2010v2_"),
-              suffix = c("", "_Total")) %>% 
-    filter(!is.na(HRA2010v2_)) %>% 
-    mutate(Prev = estimate/estimate_Total)
-  prev.int.hra <- classIntervals(hh_year_tmp$Prev,
-                                 style = 'jenks',
+  prev.int.hra <- classIntervals(hra@data$Prev,
+                                 style = "fixed",
+                                 fixedBreaks = breaks,
                                  n = 9)
-  
-  breaks <- prev.int.hra$brks
-  breaks <- c(0, .05, .1,
-              .15, .2, .25,
-              .4, .5, .6, .75)
-  ## Get color based on RColorBrwere palette for 
-  ## each area
+  prev.col.hra <- findColours(prev.int.hra, prev.pal)
   
   
-  for(size in unique(hh_year_tmp$hh_size)){
+  jpeg(paste0("../household_size/HRA/Prevalence/", 
+              "Households_Size",
+              size, "_Prevalence_", year, ".jpeg"),
+       height = 480, width = 480)
+  {
+    par(lend = 1,
+        mar = c(0,0,3,0),
+        oma = c(1,1,1,1))
+    plot(hra,
+         col = prev.col.hra,
+         border = 'grey48', lwd = .25,
+         main = "")
+    legend('bottomleft',
+           title = 'Prevalence',
+           title.adj = 0,
+           ncol = 2,
+           bty = 'n',
+           cex = 1,
+           border = FALSE,
+           fill = prev.pal,
+           legend = names(attr(prev.col.hra, 'table')))
+    title(paste0("Prevalence of Households\nSize ", size),
+          font.main = 2, outer = FALSE,
+          adj = 0, cex.main = 1.5)
     
-    hh_size_tmp <- hh_year_tmp %>% 
-      filter(hh_size == size)
-    hra@data$Density <- 
-      hra@data$Prev <- 0
-    
-    if(nrow(hh_size_tmp) != 0){
-      hra@data$Prev[match(hra@data$FID_HRA_20,
-                          hh_size_tmp$FID_HRA_20)] <- hh_size_tmp$Prev
-      hra@data$Density[match(hra@data$FID_HRA_20,
-                             hh_size_tmp$FID_HRA_20)] <- hh_size_tmp$Density
-    }
-    
-    
-    prev.int.hra <- classIntervals(hra@data$Prev,
-                                   style = "fixed",
-                                   fixedBreaks = breaks,
-                                   n = 9)
-    prev.col.hra <- findColours(prev.int.hra, prev.pal)
-    
-    
-    jpeg(paste0("../household_size/HRA/Prevalence/", 
-                "Households_Size",
-                size, "_Prevalence_", year, ".jpeg"),
-         height = 480, width = 480)
-    {
-      par(lend = 1,
-          mar = c(0,0,1,0),
-          oma = c(1,1,1,1))
-      plot(hra,
-           col = prev.col.hra,
-           border = 'grey48', lwd = .25,
-           main = "")
-      legend('bottomleft',
-             title = 'Prevalence',
-             title.adj = 0,
-             ncol = 2,
-             bty = 'n',
-             cex = 1,
-             border = FALSE,
-             fill = prev.pal,
-             legend = names(attr(prev.col.hra, 'table')))
-      title(paste0("Prevalence of Households of Size ", size),
-            font.main = 2, outer = FALSE,
-            adj = 0, cex.main = 2)
-      
-      # title(paste0("\n",
-      #              title_string, " (Estimated from ", legend_string, ")"),
-      #       font.main = 1, outer = FALSE,
-      #       adj = 0, cex.main = 1)
-    }
-    dev.off()
-    
-    ### Add CoV ####
-    
-    jpeg(paste0("../household_size/HRA/Prevalence/", 
-                "Households_Size",
-                size, "_Prevalence_CoV_", year, ".jpeg"),
-         height = 480, width = 480)
-    {
-      par(lend = 1,
-          mar = c(0,0,1,0),
-          oma = c(1,1,1,1))
-      plot(hra,
-           col = prev.col.hra,
-           border = 'grey48', lwd = .25,
-           main = "")
-      
-      hatch.idx <- which(hra@data$Density > 0)
-      for(poly in hatch.idx){
-        points <- hra@polygons[[poly]]@Polygons[[1]]@coords
-        polygon(points[,1], points[,2],
-                border = FALSE,
-                density = hra@data$Density[poly])
-      }
-      legend('bottomleft',
-             title = 'Prevalence',
-             title.adj = 0,
-             ncol = 2,
-             bty = 'n',
-             cex = 1,
-             border = FALSE,
-             fill = prev.pal,
-             legend = names(attr(prev.col.hra, 'table')))
-      legend('bottomright',
-             title = 'Significance',
-             title.adj = 0,
-             ncol = 1,
-             bty = 'n',
-             cex= 0.75,
-             border = 'black',
-             fill = 'black',
-             density = c(0,25,50),
-             legend = c(">= 95%",
-                        "80% to 90%",
-                        "< 80%"))
-      title(paste0("Prevalence of Households of Size "),
-            font.main = 2, outer = FALSE,
-            adj = 0, cex.main = 2)
-      # 
-      # title(paste0("\n",
-      #              title_string, " (Estimated from ", legend_string, ")"),
-      #       font.main = 1, outer = FALSE,
-      #       adj = 0, cex.main = 1)
-    }
-    dev.off()
+    # title(paste0("\n",
+    #              title_string, " (Estimated from ", legend_string, ")"),
+    #       font.main = 1, outer = FALSE,
+    #       adj = 0, cex.main = 1)
   }
+  dev.off()
   
-  ### Distribution ####
-  
-  breaks <- c(0, .005, .01,
-              .02, .025, .03,
-              .045, .06, .075, .1)
-  
-  for(size in unique(hh_year_tmp$hh_size)){
+  jpeg(paste0("../household_size/HRA/Prevalence/", 
+              "Households_Size",
+              size, "_Prevalence_", year, "_Burien.jpeg"),
+       height = 480, width = 480)
+  {
+    par(lend = 1,
+        mar = c(0,0,3,0),
+        oma = c(1,1,1,1))
+    plot(hra,
+         col = prev.col.hra,
+         border = 'grey48', lwd = .25,
+         main = "")
+    burien.idx <- which(hra@data$HRA2010v2_ == "Burien")
+    points <- hra@polygons[[burien.idx]]@Polygons[[1]]@coords
+    polygon(points[,1], points[,2],
+            border = 'white', lwd= 2)
+    legend('bottomleft',
+           title = 'Prevalence',
+           title.adj = 0,
+           ncol = 2,
+           bty = 'n',
+           cex = 1,
+           border = FALSE,
+           fill = prev.pal,
+           legend = names(attr(prev.col.hra, 'table')))
+    title(paste0("Prevalence of Households\nSize ", size),
+          font.main = 2, outer = FALSE,
+          adj = 0, cex.main = 1.5)
     
-    hh_size_tmp <- hh_year_tmp %>% 
-      filter(hh_size == size) %>% 
-      mutate(Dist = estimate/sum(estimate))
-    hh_size_tmp$Dist %>% summary() %>% print()
-    hra@data$Density <-
-      hra@data$Dist <- 0
-    
-    if(nrow(hh_size_tmp) != 0){
-      hra@data$Dist[match(hra@data$FID_HRA_20,
-                          hh_size_tmp$FID_HRA_20)] <- hh_size_tmp$Dist
-      hra@data$Density[match(hra@data$FID_HRA_20,
-                             hh_size_tmp$FID_HRA_20)] <- hh_size_tmp$Density
-    }
-    prev.int.hra <- classIntervals(hra@data$Dist,
-                                   style = "fixed",
-                                   fixedBreaks = breaks,
-                                   n = 9)
-    prev.col.hra <- findColours(prev.int.hra, prev.pal)
-    
-    
-    
-    jpeg(paste0("../household_size/HRA/Distribution/", 
-                "Households_Size",
-                size, "_Distribution_", year, ".jpeg"),
-         height = 480, width = 480)
-    {
-      par(lend = 1,
-          mar = c(0,0,1,0),
-          oma = c(1,1,1,1))
-      plot(hra,
-           col = prev.col.hra,
-           border = 'grey48', lwd = .25,
-           main = "")
-      
-      legend('bottomleft',
-             title = 'Distribution',
-             title.adj = 0,
-             ncol = 2,
-             bty = 'n',
-             cex = 1,
-             border = FALSE,
-             fill = prev.pal,
-             legend = names(attr(prev.col.hra, 'table')))
-      title(paste0("Distribution of Households of Size ",
-                   size),
-            font.main = 2, outer = FALSE,
-            adj = 0, cex.main = 2)
-      # 
-      # title(paste0("\n",
-      #              title_string, " (Estimated from ", legend_string, ")"),
-      #       font.main = 1, outer = FALSE,
-      #       adj = 0, cex.main = 1)
-    }
-    dev.off()
-    
-    ### Add CoV ####
-    jpeg(paste0("../household_size/HRA/Distribution/", 
-                "Households_Size",
-                size, "_Distribution_CoV_", year, ".jpeg"),
-         height = 480, width = 480)
-    {
-      par(lend = 1,
-          mar = c(0,0,1,0),
-          oma = c(1,1,1,1))
-      plot(hra,
-           col = prev.col.hra,
-           border = 'grey48', lwd = .25,
-           main = "")
-      hatch.idx <- which(hra@data$Density > 0)
-      for(poly in hatch.idx){
-        points <- hra@polygons[[poly]]@Polygons[[1]]@coords
-        polygon(points[,1], points[,2],
-                border = FALSE,
-                density = hra@data$Density[poly])
-      }
-      legend('bottomleft',
-             title = 'Distribution',
-             title.adj = 0,
-             ncol = 2,
-             bty = 'n',
-             cex = 1,
-             border = FALSE,
-             fill = prev.pal,
-             legend = names(attr(prev.col.hra, 'table')))
-      legend('bottomright',
-             title = 'Significance',
-             title.adj = 0,
-             ncol = 1,
-             bty = 'n',
-             cex= 0.75,
-             border = 'black',
-             fill = 'black',
-             density = c(0,25,50),
-             legend = c(">= 95%",
-                        "80% to 90%",
-                        "< 80%"))
-      title(paste0("Distribution of Households of Size ", size),
-            font.main = 2, outer = FALSE,
-            adj = 0, cex.main = 2)
-      
-      # title(paste0("\n",
-      #              title_string, " (Estimated from ", legend_string, ")"),
-      #       font.main = 1, outer = FALSE,
-      #       adj = 0, cex.main = 1)
-    }
-    dev.off()
-    
-    # End size dist loop
+    # title(paste0("\n",
+    #              title_string, " (Estimated from ", legend_string, ")"),
+    #       font.main = 1, outer = FALSE,
+    #       adj = 0, cex.main = 1)
   }
-  # End year loop
+  dev.off()
+  
+  
+  ### Add CoV ####
+  
+  jpeg(paste0("../household_size/HRA/Prevalence/", 
+              "Households_Size",
+              size, "_Prevalence_CoV_", year, ".jpeg"),
+       height = 480, width = 480)
+  {
+    par(lend = 1,
+        mar = c(0,0,3,0),
+        oma = c(1,1,1,1))
+    plot(hra,
+         col = prev.col.hra,
+         border = 'grey48', lwd = .25,
+         main = "")
+    
+    hatch.idx <- which(hra@data$Density > 0)
+    for(poly in hatch.idx){
+      points <- hra@polygons[[poly]]@Polygons[[1]]@coords
+      polygon(points[,1], points[,2],
+              border = FALSE,
+              density = hra@data$Density[poly])
+    }
+    legend('bottomleft',
+           title = 'Prevalence',
+           title.adj = 0,
+           ncol = 2,
+           bty = 'n',
+           cex = 1,
+           border = FALSE,
+           fill = prev.pal,
+           legend = names(attr(prev.col.hra, 'table')))
+    legend('bottomright',
+           title = 'Probability of\n Significant Uncertainty',
+           title.adj = 0,
+           ncol = 1,
+           bty = 'n',
+           cex= 0.75,
+           border = 'black',
+           fill = 'black',
+           density = c(0,25,50),
+           legend = c("<= 5%",
+                      "5%-10%",
+                      "10%-20%",
+                      "> 20%"))
+    title(paste0("Prevalence of Households\nSize "),
+          font.main = 2, outer = FALSE,
+          adj = 0, cex.main = 1.5)
+    # 
+    # title(paste0("\n",
+    #              title_string, " (Estimated from ", legend_string, ")"),
+    #       font.main = 1, outer = FALSE,
+    #       adj = 0, cex.main = 1)
+  }
+  dev.off()
+}
+
+### Distribution ####
+
+breaks <- c(0, .005, .01,
+            .02, .025, .03,
+            .045, .06, .075, .1)
+
+for(size in unique(hh_year_tmp$hh_size)){
+  
+  hh_size_tmp <- hh_year_tmp %>% 
+    filter(hh_size == size) %>% 
+    mutate(Dist = estimate/sum(estimate))
+  hh_size_tmp$Dist %>% summary() %>% print()
+  hra@data$Density <-
+    hra@data$Dist <- 0
+  
+  if(nrow(hh_size_tmp) != 0){
+    hra@data$Dist[match(hra@data$FID_HRA_20,
+                        hh_size_tmp$FID_HRA_20)] <- hh_size_tmp$Dist
+    hra@data$Density[match(hra@data$FID_HRA_20,
+                           hh_size_tmp$FID_HRA_20)] <- hh_size_tmp$Density
+  }
+  prev.int.hra <- classIntervals(hra@data$Dist,
+                                 style = "fixed",
+                                 fixedBreaks = breaks,
+                                 n = 9)
+  prev.col.hra <- findColours(prev.int.hra, prev.pal)
+  
+  
+  
+  jpeg(paste0("../household_size/HRA/Distribution/", 
+              "Households_Size",
+              size, "_Distribution_", year, ".jpeg"),
+       height = 480, width = 480)
+  {
+    par(lend = 1,
+        mar = c(0,0,3,0),
+        oma = c(1,1,1,1))
+    plot(hra,
+         col = prev.col.hra,
+         border = 'grey48', lwd = .25,
+         main = "")
+    
+    legend('bottomleft',
+           title = 'Distribution',
+           title.adj = 0,
+           ncol = 2,
+           bty = 'n',
+           cex = 1,
+           border = FALSE,
+           fill = prev.pal,
+           legend = names(attr(prev.col.hra, 'table')))
+    title(paste0("Distribution of Households\nSize ",
+                 size),
+          font.main = 2, outer = FALSE,
+          adj = 0, cex.main = 1.5)
+    # 
+    # title(paste0("\n",
+    #              title_string, " (Estimated from ", legend_string, ")"),
+    #       font.main = 1, outer = FALSE,
+    #       adj = 0, cex.main = 1)
+  }
+  dev.off()
+  
+  
+  jpeg(paste0("../household_size/HRA/Distribution/", 
+              "Households_Size",
+              size, "_Distribution_", year, "_Burien.jpeg"),
+       height = 480, width = 480)
+  {
+    par(lend = 1,
+        mar = c(0,0,3,0),
+        oma = c(1,1,1,1))
+    plot(hra,
+         col = prev.col.hra,
+         border = 'grey48', lwd = .25,
+         main = "")
+    burien.idx <- which(hra@data$HRA2010v2_ == "Burien")
+    points <- hra@polygons[[burien.idx]]@Polygons[[1]]@coords
+    polygon(points[,1], points[,2],
+            border = prev.pal[9], lwd= 2)
+    legend('bottomleft',
+           title = 'Distribution',
+           title.adj = 0,
+           ncol = 2,
+           bty = 'n',
+           cex = 1,
+           border = FALSE,
+           fill = prev.pal,
+           legend = names(attr(prev.col.hra, 'table')))
+    title(paste0("Distribution of Households\nSize ",
+                 size),
+          font.main = 2, outer = FALSE,
+          adj = 0, cex.main = 1.5)
+    # 
+    # title(paste0("\n",
+    #              title_string, " (Estimated from ", legend_string, ")"),
+    #       font.main = 1, outer = FALSE,
+    #       adj = 0, cex.main = 1)
+  }
+  dev.off()
+  
+  ### Add CoV ####
+  jpeg(paste0("../household_size/HRA/Distribution/", 
+              "Households_Size",
+              size, "_Distribution_CoV_", year, ".jpeg"),
+       height = 480, width = 480)
+  {
+    par(lend = 1,
+        mar = c(0,0,3,0),
+        oma = c(1,1,1,1))
+    plot(hra,
+         col = prev.col.hra,
+         border = 'grey48', lwd = .25,
+         main = "")
+    hatch.idx <- which(hra@data$Density > 0)
+    for(poly in hatch.idx){
+      points <- hra@polygons[[poly]]@Polygons[[1]]@coords
+      polygon(points[,1], points[,2],
+              border = FALSE,
+              density = hra@data$Density[poly])
+    }
+    legend('bottomleft',
+           title = 'Distribution',
+           title.adj = 0,
+           ncol = 2,
+           bty = 'n',
+           cex = 1,
+           border = FALSE,
+           fill = prev.pal,
+           legend = names(attr(prev.col.hra, 'table')))
+    legend('bottomright',
+           title = 'Probability of\n Significant Uncertainty',
+           title.adj = 0,
+           ncol = 1,
+           bty = 'n',
+           cex= 0.75,
+           border = 'black',
+           fill = 'black',
+           density = c(0,25,50),
+           legend = c("<= 5%",
+                      "5%-10%",
+                      "10%-20%",
+                      "> 20%"))
+    title(paste0("Distribution of Households\nSize ", size),
+          font.main = 2, outer = FALSE,
+          adj = 0, cex.main = 1.5)
+    
+    # title(paste0("\n",
+    #              title_string, " (Estimated from ", legend_string, ")"),
+    #       font.main = 1, outer = FALSE,
+    #       adj = 0, cex.main = 1)
+  }
+  dev.off()
+  
+  # End size dist loop
+}
+# End year loop
 }
 
 ### Household Size by Tenure ####
@@ -1810,7 +1926,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
           hh_size_tmp$estimate
         
         hra@data$Density[match(hra@data$FID_HRA_20,
-                              hh_size_tmp$FID_HRA_20)] <- 
+                               hh_size_tmp$FID_HRA_20)] <- 
           hh_size_tmp$Density
         
         hh.int.hra <- classIntervals(hra@data$Est,
@@ -1830,7 +1946,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
            height = 480, width = 480)
       {
         par(lend = 1,
-            mar = c(0,0,1,0),
+            mar = c(0,0,3,0),
             oma = c(1,1,1,1))
         plot(hra,
              col = hh.col.hra,
@@ -1846,7 +1962,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
                fill = hh.pal,
                legend = names(attr(hh.col.hra, 'table')))
         title(paste0(tenure.type,
-                     " Households of Size ", size),
+                     " Households\nSize ", size),
               font.main = 2, outer = FALSE,
               adj = 0, cex.main = 1)
         
@@ -1865,7 +1981,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
            height = 480, width = 480)
       {
         par(lend = 1,
-            mar = c(0,0,1,0),
+            mar = c(0,0,3,0),
             oma = c(1,1,1,1))
         plot(hra,
              col = hh.col.hra,
@@ -1889,7 +2005,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
                fill = hh.pal,
                legend = names(attr(hh.col.hra, 'table')))
         legend('bottomright',
-               title = 'Significance',
+               title = 'Probability of\n Significant Uncertainty',
                title.adj = 0,
                ncol = 1,
                bty = 'n',
@@ -1897,11 +2013,12 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
                border = 'black',
                fill = 'black',
                density = c(0,25,50),
-               legend = c(">= 95%",
-                          "80% to 90%",
-                          "< 80%"))
+               legend = c("<= 5%",
+                          "5%-10%",
+                          "10%-20%",
+                          "> 20%"))
         title(paste0(tenure.type,
-                     " Households of Size ", size, "\n",
+                     " Households\nSize ", size, "\n",
                      ""),
               font.main = 2, outer = FALSE,
               adj = 0, cex.main = 1)
@@ -1972,7 +2089,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
            height = 480, width = 480)
       {
         par(lend = 1,
-            mar = c(0,0,1,0),
+            mar = c(0,0,3,0),
             oma = c(1,1,1,1))
         plot(hra,
              col = prev.col.hra,
@@ -1988,7 +2105,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
                fill = prev.pal,
                legend = names(attr(prev.col.hra, 'table')))
         title(paste0("Prevalence of ",
-                     tenure.type, " Households of Size ", size, "\n",
+                     tenure.type, " Households\nSize ", size, "\n",
                      ""),
               font.main = 2, outer = FALSE,
               adj = 0, cex.main = 1)
@@ -2008,7 +2125,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
            height = 480, width = 480)
       {
         par(lend = 1,
-            mar = c(0,0,1,0),
+            mar = c(0,0,3,0),
             oma = c(1,1,1,1))
         plot(hra,
              col = prev.col.hra,
@@ -2032,7 +2149,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
                fill = prev.pal,
                legend = names(attr(prev.col.hra, 'table')))
         legend('bottomright',
-               title = 'Significance',
+               title = 'Probability of\n Significant Uncertainty',
                title.adj = 0,
                ncol = 1,
                bty = 'n',
@@ -2040,12 +2157,13 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
                border = 'black',
                fill = 'black',
                density = c(0,25,50),
-               legend = c(">= 95%",
-                          "80% to 90%",
-                          "< 80%"))
+               legend = c("<= 5%",
+                          "5%-10%",
+                          "10%-20%",
+                          "> 20%"))
         title(paste0("Prevalence of ",
                      tenure.type,
-                     " Households of Size ", size, "\n",
+                     " Households\nSize ", size, "\n",
                      ""),
               font.main = 2, outer = FALSE,
               adj = 0, cex.main = 1)
@@ -2101,7 +2219,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
            height = 480, width = 480)
       {
         par(lend = 1,
-            mar = c(0,0,1,0),
+            mar = c(0,0,3,0),
             oma = c(1,1,1,1))
         plot(hra,
              col = prev.col.hra,
@@ -2117,7 +2235,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
                fill = prev.pal,
                legend = names(attr(prev.col.hra, 'table')))
         title(paste0("Distribution of ",
-                     tenure.type, " Households of Size ", size, "\n",
+                     tenure.type, " Households\nSize ", size, "\n",
                      ""),
               font.main = 2, outer = FALSE,
               adj = 0, cex.main = 1)
@@ -2137,7 +2255,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
            height = 480, width = 480)
       {
         par(lend = 1,
-            mar = c(0,0,1,0),
+            mar = c(0,0,3,0),
             oma = c(1,1,1,1))
         plot(hra,
              col = prev.col.hra,
@@ -2162,7 +2280,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
                legend = names(attr(prev.col.hra, 'table')))
         
         legend('bottomright',
-               title = 'Significance',
+               title = 'Probability of\n Significant Uncertainty',
                title.adj = 0,
                ncol = 1,
                bty = 'n',
@@ -2170,12 +2288,13 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
                border = 'black',
                fill = 'black',
                density = c(0,25,50),
-               legend = c(">= 95%",
-                          "80% to 90%",
-                          "< 80%"))
+               legend = c("<= 5%",
+                          "5%-10%",
+                          "10%-20%",
+                          "> 20%"))
         
         title(paste0("Distribution of ",
-                     tenure.type, " Households of Size ", size, "\n",
+                     tenure.type, " Households\nSize ", size, "\n",
                      ""),
               font.main = 2, outer = FALSE,
               adj = 0, cex.main = 1)
@@ -2353,7 +2472,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
          height = 480, width = 480)
     {
       par(lend = 1,
-          mar = c(0,0,1,0),
+          mar = c(0,0,3,0),
           oma = c(1,1,1,1))
       plot(tract_spatialdf,
            col = hh.col.tract,
@@ -2368,7 +2487,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
              border = FALSE,
              fill = hh.pal,
              legend = names(attr(hh.col.tract, 'table')))
-      title(paste0("Counts of Households of Size ", size, "\n",
+      title(paste0("Counts of Households\nSize ", size, "\n",
                    ""),
             font.main = 2, outer = FALSE,
             adj = 0, cex.main = 1)
@@ -2387,7 +2506,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
          height = 480, width = 480)
     {
       par(lend = 1,
-          mar = c(0,0,1,0),
+          mar = c(0,0,3,0),
           oma = c(1,1,1,1))
       plot(tract_spatialdf,
            col = hh.col.tract,
@@ -2411,7 +2530,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
              fill = hh.pal,
              legend = names(attr(hh.col.tract, 'table')))
       legend('bottomright',
-             title = 'Significance',
+             title = 'Probability of\n Significant Uncertainty',
              title.adj = 0,
              ncol = 1,
              bty = 'n',
@@ -2419,10 +2538,11 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
              border = 'black',
              fill = 'black',
              density = c(0,25,50),
-             legend = c(">= 95%",
-                        "80% to 90%",
-                        "< 80%"))
-      title(paste0("Counts of Households of Size ", size, "\n",
+             legend = c("<= 5%",
+                        "5%-10%",
+                        "10%-20%",
+                        "> 20%"))
+      title(paste0("Counts of Households\nSize ", size, "\n",
                    ""),
             font.main = 2, outer = FALSE,
             adj = 0, cex.main = 1)
@@ -2487,7 +2607,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
          height = 480, width = 480)
     {
       par(lend = 1,
-          mar = c(0,0,1,0),
+          mar = c(0,0,3,0),
           oma = c(1,1,1,1))
       plot(tract_spatialdf,
            col = prev.col.tract,
@@ -2502,7 +2622,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
              border = FALSE,
              fill = prev.pal,
              legend = names(attr(prev.col.tract, 'table')))
-      title(paste0("Prevalence of Households of Size ", size, "\n",
+      title(paste0("Prevalence of Households\nSize ", size, "\n",
                    ""),
             font.main = 2, outer = FALSE,
             adj = 0, cex.main = 1)
@@ -2522,7 +2642,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
          height = 480, width = 480)
     {
       par(lend = 1,
-          mar = c(0,0,1,0),
+          mar = c(0,0,3,0),
           oma = c(1,1,1,1))
       plot(tract_spatialdf,
            col = prev.col.tract,
@@ -2546,7 +2666,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
              fill = prev.pal,
              legend = names(attr(prev.col.tract, 'table')))
       legend('bottomright',
-             title = 'Significance',
+             title = 'Probability of\n Significant Uncertainty',
              title.adj = 0,
              ncol = 1,
              bty = 'n',
@@ -2554,10 +2674,11 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
              border = 'black',
              fill = 'black',
              density = c(0,25,50),
-             legend = c(">= 95%",
-                        "80% to 90%",
-                        "< 80%"))
-      title(paste0("Prevalence of Households of Size ", size, "\n",
+             legend = c("<= 5%",
+                        "5%-10%",
+                        "10%-20%",
+                        "> 20%"))
+      title(paste0("Prevalence of Households \nSize ", size, "\n",
                    ""),
             font.main = 2, outer = FALSE,
             adj = 0, cex.main = 1)
@@ -2607,7 +2728,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
          height = 480, width = 480)
     {
       par(lend = 1,
-          mar = c(0,0,1,0),
+          mar = c(0,0,3,0),
           oma = c(1,1,1,1))
       plot(tract_spatialdf,
            col = prev.col.tract,
@@ -2623,7 +2744,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
              border = FALSE,
              fill = prev.pal,
              legend = names(attr(prev.col.tract, 'table')))
-      title(paste0("Distribution of Households of Size ", size, "\n",
+      title(paste0("Distribution of Households \nSize ", size, "\n",
                    ""),
             font.main = 2, outer = FALSE,
             adj = 0, cex.main = 1)
@@ -2642,7 +2763,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
          height = 480, width = 480)
     {
       par(lend = 1,
-          mar = c(0,0,1,0),
+          mar = c(0,0,3,0),
           oma = c(1,1,1,1))
       plot(tract_spatialdf,
            col = prev.col.tract,
@@ -2665,7 +2786,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
              fill = prev.pal,
              legend = names(attr(prev.col.tract, 'table')))
       legend('bottomright',
-             title = 'Significance',
+             title = 'Probability of\n Significant Uncertainty',
              title.adj = 0,
              ncol = 1,
              bty = 'n',
@@ -2673,10 +2794,11 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
              border = 'black',
              fill = 'black',
              density = c(0,25,50),
-             legend = c(">= 95%",
-                        "80% to 90%",
-                        "< 80%"))
-      title(paste0("Distribution of Households of Size ", size, "\n",
+             legend = c("<= 5%",
+                        "5%-10%",
+                        "10%-20%",
+                        "> 20%"))
+      title(paste0("Distribution of Households \nSize ", size, "\n",
                    ""),
             font.main = 2, outer = FALSE,
             adj = 0, cex.main = 1)
@@ -2844,7 +2966,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
            height = 480, width = 480)
       {
         par(lend = 1,
-            mar = c(0,0,1,0),
+            mar = c(0,0,3,0),
             oma = c(1,1,1,1))
         plot(tract_spatialdf,
              col = hh.col.tract,
@@ -2860,7 +2982,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
                fill = hh.pal,
                legend = names(attr(hh.col.tract, 'table')))
         title(paste0(tenure.type,
-                     " Households of Size ", size, "\n",
+                     " Households \nSize ", size, "\n",
                      ""),
               font.main = 2, outer = FALSE,
               adj = 0, cex.main = 1)
@@ -2883,7 +3005,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
            height = 480, width = 480)
       {
         par(lend = 1,
-            mar = c(0,0,1,0),
+            mar = c(0,0,3,0),
             oma = c(1,1,1,1))
         plot(tract_spatialdf,
              col = hh.col.tract,
@@ -2907,7 +3029,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
                fill = hh.pal,
                legend = names(attr(hh.col.tract, 'table')))
         legend('bottomright',
-               title = 'Significance',
+               title = 'Probability of\n Significant Uncertainty',
                title.adj = 0,
                ncol = 1,
                bty = 'n',
@@ -2915,11 +3037,12 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
                border = 'black',
                fill = 'black',
                density = c(0,25,50),
-               legend = c(">= 95%",
-                          "80% to 90%",
-                          "< 80%"))
+               legend = c("<= 5%",
+                          "5%-10%",
+                          "10%-20%",
+                          "> 20%"))
         title(paste0(tenure.type,
-                     " Households of Size ", size, "\n",
+                     " Households \nSize ", size, "\n",
                      ""),
               font.main = 2, outer = FALSE,
               adj = 0, cex.main = 1)
@@ -2993,7 +3116,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
            height = 480, width = 480)
       {
         par(lend = 1,
-            mar = c(0,0,1,0),
+            mar = c(0,0,3,0),
             oma = c(1,1,1,1))
         plot(tract_spatialdf,
              col = prev.col.tract,
@@ -3010,7 +3133,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
                legend = names(attr(prev.col.tract, 'table')))
         title(paste0("Prevalence of ",
                      tenure.type,
-                     " Households of Size ", size, "\n",
+                     " Households \nSize ", size, "\n",
                      ""),
               font.main = 2, outer = FALSE,
               adj = 0, cex.main = 1)
@@ -3033,7 +3156,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
            height = 480, width = 480)
       {
         par(lend = 1,
-            mar = c(0,0,1,0),
+            mar = c(0,0,3,0),
             oma = c(1,1,1,1))
         plot(tract_spatialdf,
              col = prev.col.tract,
@@ -3057,7 +3180,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
                fill = prev.pal,
                legend = names(attr(prev.col.tract, 'table')))
         legend('bottomright',
-               title = 'Significance',
+               title = 'Probability of\n Significant Uncertainty',
                title.adj = 0,
                ncol = 1,
                bty = 'n',
@@ -3065,12 +3188,13 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
                border = 'black',
                fill = 'black',
                density = c(0,25,50),
-               legend = c(">= 95%",
-                          "80% to 90%",
-                          "< 80%"))
+               legend = c("<= 5%",
+                          "5%-10%",
+                          "10%-20%",
+                          "> 20%"))
         title(paste0("Prevalence of ",
                      tenure.type, 
-                     " Households of Size ", size, "\n",
+                     " Households \nSize ", size, "\n",
                      ""),
               font.main = 2, outer = FALSE,
               adj = 0, cex.main = 1)
@@ -3130,7 +3254,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
            height = 480, width = 480)
       {
         par(lend = 1,
-            mar = c(0,0,1,0),
+            mar = c(0,0,3,0),
             oma = c(1,1,1,1))
         plot(tract_spatialdf,
              col = prev.col.tract,
@@ -3148,7 +3272,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
                legend = names(attr(prev.col.tract, 'table')))
         title(paste0("Distribution of ",
                      tenure.type, 
-                     " Households of Size ", size, "\n",
+                     " Households \nSize ", size, "\n",
                      ""),
               font.main = 2, outer = FALSE,
               adj = 0, cex.main = 1)
@@ -3168,7 +3292,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
            height = 480, width = 480)
       {
         par(lend = 1,
-            mar = c(0,0,1,0),
+            mar = c(0,0,3,0),
             oma = c(1,1,1,1))
         plot(tract_spatialdf,
              col = prev.col.tract,
@@ -3191,7 +3315,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
                fill = prev.pal,
                legend = names(attr(prev.col.tract, 'table')))
         legend('bottomright',
-               title = 'Significance',
+               title = 'Probability of\n Significant Uncertainty',
                title.adj = 0,
                ncol = 1,
                bty = 'n',
@@ -3199,12 +3323,13 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
                border = 'black',
                fill = 'black',
                density = c(0,25,50),
-               legend = c(">= 95%",
-                          "80% to 90%",
-                          "< 80%"))
+               legend = c("<= 5%",
+                          "5%-10%",
+                          "10%-20%",
+                          "> 20%"))
         title(paste0("Distribution of ",
                      tenure.type, 
-                     " Households of Size ", size, "\n",
+                     " Households \nSize ", size, "\n",
                      ""),
               font.main = 2, outer = FALSE,
               adj = 0, cex.main = 1)
