@@ -519,7 +519,12 @@ pchange <- st_as_sf(hra) %>%
   labs(fill= "") +
   map_theme_main+
   scale_fill_gradient2()+
-  theme(legend.title = element_text(size = 12, face = "bold"))
+  theme(legend.title = element_text(size = 12, face = "bold"),
+        legend.key.height= unit(.4, 'cm'),
+        legend.key.width= unit(.4, 'cm'),
+        legend.text = element_text(size=5),
+        legend.margin=margin(0,0,0,0),
+        legend.box.margin=margin(-5,-5,-5,-5))
 
 legend2 <- get_legend(pchange)  
 
