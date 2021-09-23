@@ -60,7 +60,8 @@ popold <- readxl::read_xlsx("../Data/ofm_pop_sade_county_2000_to_2010.xlsx",
   filter(`Age Group` != "Total") %>% 
   as.data.frame()
 
-
+## Projections ###
+proj <- read.csv('../Data/hra_age5_race_sex_proj_2000_2045.csv')
 ## WA OFM ####
 if(loadOFM){
   popall <- read.csv("../Data/sade_all_2010_to_2020.csv") %>% 
@@ -3669,3 +3670,65 @@ for(city in cities){
   dev.off()   
 }
 
+## Projections ####
+### Population maps by HRA ####
+
+hra_pop <- proj %>% 
+  rename("HRA" = "GEOID",
+         "Age_Lbl" = "Age5") %>% 
+  group_by(Year, HRA) %>% 
+  summarise(Pop = sum(value)) %>% 
+  filter(Year == 2045) %>% 
+  ungroup()
+
+
+pop.int.hra <- classIntervals(hra_pop$Pop,
+                              style = 'jenks',
+                              n = 9)
+
+breaks <- pop.int.hra$brks
+breaks
+breaks <- c(0, 15000,
+            30000,  45000,
+            60000, 75000, 90000,
+            100000, 120000)
+## Get color based on RColorBrwere palette for 
+## each area
+year <- 2045
+pop.pal <- brewer.pal(n = 9, name = "Blues")
+pop.int.hra <- classIntervals(hra_pop$Pop,
+                              style = 'fixed',
+                              fixedBreaks = breaks,
+                              n = 9)
+pop.col.hra <- findColours(pop.int.hra, pop.pal)
+
+jpeg(paste0("../PopPlots/", 
+            year, "_Population.jpeg"),
+     height = 480, width = 480)
+{
+  par(lend = 1,
+      mar = c(0,0,2,0),
+      oma = c(0,0,1,0))
+  plot(hra,
+       col = pop.col.hra,
+       border = 'grey48', lwd = .25,
+       main = "")
+  legend('bottomleft',
+         title = 'Population',
+         title.adj = 0,
+         ncol = 2,
+         bty = 'n',
+         cex = 0.75,
+         border = FALSE,
+         fill = pop.pal,
+         legend = names(attr(pop.col.hra, 'table')))
+  title(paste0("King County Population: 2045"),
+        font.main = 2, outer = FALSE,
+        adj = 0, cex.main = 1)
+  
+  # title(paste0("\n",
+  #              paste0("King County (WA OFM, ", year,")")),
+  #       font.main = 1, outer = FALSE,
+  #       adj = 0, cex.main = 1)
+}
+dev.off()
