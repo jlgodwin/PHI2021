@@ -141,12 +141,12 @@ plot.df <- st_as_sf(hra) %>%
 
 p2 <- ggplot(plot.df) + 
   geom_sf(aes(fill=diff_hh)) +
-  ggtitle("Difference in projected number of households in 2025-2045") +
-  labs(fill = "Number of households") +
+  ggtitle("Projected number of new households between 2025-2045") +
+  labs(fill = "Number of new households") +
   scale_x_discrete(expand = c(0, 0)) +
   scale_y_discrete(expand = c(0, 0)) +
   map_theme_main + 
-  scale_fill_distiller(palette = "RdBu")
+  scale_fill_distiller(palette = "Blues", direction = 1)
 
 ggsave(p2, filename = paste0(code_dir, "Report_plots/Difference_in_number_hh_2025-2045.png"),
        width = 9, height = 6)
