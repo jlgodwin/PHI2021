@@ -1294,11 +1294,13 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
   
   if(year != 2010 &
      year != 2000){
-    title_string <- paste0(year - 4, 
+    legend_string <- 
+      title_string <- paste0(year - 4, 
                            "-", year)
     
   }else{
     title_string <- year
+    legend_string <- year
   }
   
   ### Households ####
@@ -1402,7 +1404,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
              fill = hh.pal,
              legend = names(attr(hh.col.hra, 'table')))
       legend('bottomright',
-             title = 'Significance',
+             title = 'Probability of\nSignificant Uncertainty',
              title.adj = 0,
              ncol = 1,
              bty = 'n',
@@ -1410,9 +1412,9 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
              border = 'black',
              fill = 'black',
              density = c(0,25,50),
-             legend = c(">= 95%",
-                        "80% to 90%",
-                        "< 80%"))
+             legend = c("< 10%",
+                        "10%-20%",
+                        "> 20%"))
       title(paste0("Households of Size ", size, "\n",
                    ""),
             font.main = 2, outer = FALSE,
@@ -1535,7 +1537,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
              fill = prev.pal,
              legend = names(attr(prev.col.hra, 'table')))
       legend('bottomright',
-             title = 'Significance',
+             title = 'Probability of\nSignificant Uncertainty',
              title.adj = 0,
              ncol = 1,
              bty = 'n',
@@ -1543,9 +1545,9 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
              border = 'black',
              fill = 'black',
              density = c(0,25,50),
-             legend = c(">= 95%",
-                        "80% to 90%",
-                        "< 80%"))
+             legend = c("< 10%",
+                        "10%-20%",
+                        "> 20%"))
       title(paste0("Prevalence of Households of Size ", size, "\n",
                    ""),
             font.main = 2, outer = FALSE,
@@ -1652,7 +1654,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
              fill = prev.pal,
              legend = names(attr(prev.col.hra, 'table')))
       legend('bottomright',
-             title = 'Significance',
+             title = 'Probability of\nSignificant Uncertainty',
              title.adj = 0,
              ncol = 1,
              bty = 'n',
@@ -1660,9 +1662,9 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
              border = 'black',
              fill = 'black',
              density = c(0,25,50),
-             legend = c(">= 95%",
-                        "80% to 90%",
-                        "< 80%"))
+             legend = c("< 10%",
+                        "10%-20%",
+                        "> 20%"))
       title(paste0("Distribution of Households of Size ", size, "\n",
                    ""),
             font.main = 2, outer = FALSE,
@@ -1744,11 +1746,13 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
   
   if(year != 2010 &
      year != 2000){
-    title_string <- paste0(year - 4, 
+    legend_string <-
+      title_string <- paste0(year - 4, 
                            "-", year)
     
   }else{
-    title_string <- year
+   legend_string <- 
+     title_string <- year
   }
   
   
@@ -1862,7 +1866,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
                fill = hh.pal,
                legend = names(attr(hh.col.hra, 'table')))
         legend('bottomright',
-               title = 'Significance',
+               title = 'Probability of\nSignificant Uncertainty',
                title.adj = 0,
                ncol = 1,
                bty = 'n',
@@ -1870,9 +1874,9 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
                border = 'black',
                fill = 'black',
                density = c(0,25,50),
-               legend = c(">= 95%",
-                          "80% to 90%",
-                          "< 80%"))
+               legend = c("< 10%",
+                          "10%-20%",
+                          "> 20%"))
         title(paste0(tenure.type,
                      " Households of Size ", size, "\n",
                      ""),
@@ -2005,7 +2009,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
                fill = prev.pal,
                legend = names(attr(prev.col.hra, 'table')))
         legend('bottomright',
-               title = 'Significance',
+               title = 'Probability of\nSignificant Uncertainty',
                title.adj = 0,
                ncol = 1,
                bty = 'n',
@@ -2013,9 +2017,9 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
                border = 'black',
                fill = 'black',
                density = c(0,25,50),
-               legend = c(">= 95%",
-                          "80% to 90%",
-                          "< 80%"))
+               legend = c("< 10%",
+                          "10%-20%",
+                          "> 20%"))
         title(paste0("Prevalence of ",
                      tenure.type,
                      " Households of Size ", size, "\n",
@@ -2135,7 +2139,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
                legend = names(attr(prev.col.hra, 'table')))
         
         legend('bottomright',
-               title = 'Significance',
+               title = 'Probability of\nSignificant Uncertainty',
                title.adj = 0,
                ncol = 1,
                bty = 'n',
@@ -2143,9 +2147,9 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
                border = 'black',
                fill = 'black',
                density = c(0,25,50),
-               legend = c(">= 95%",
-                          "80% to 90%",
-                          "< 80%"))
+               legend = c("< 10%",
+                          "10%-20%",
+                          "> 20%"))
         
         title(paste0("Distribution of ",
                      tenure.type, " Households of Size ", size, "\n",
@@ -2384,7 +2388,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
              fill = hh.pal,
              legend = names(attr(hh.col.tract, 'table')))
       legend('bottomright',
-             title = 'Significance',
+             title = 'Probability of\nSignificant Uncertainty',
              title.adj = 0,
              ncol = 1,
              bty = 'n',
@@ -2392,9 +2396,9 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
              border = 'black',
              fill = 'black',
              density = c(0,25,50),
-             legend = c(">= 95%",
-                        "80% to 90%",
-                        "< 80%"))
+             legend = c("< 10%",
+                        "10%-20%",
+                        "> 20%"))
       title(paste0("Households of Size ", size, "\n",
                    ""),
             font.main = 2, outer = FALSE,
@@ -2519,7 +2523,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
              fill = prev.pal,
              legend = names(attr(prev.col.tract, 'table')))
       legend('bottomright',
-             title = 'Significance',
+             title = 'Probability of\nSignificant Uncertainty',
              title.adj = 0,
              ncol = 1,
              bty = 'n',
@@ -2527,9 +2531,9 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
              border = 'black',
              fill = 'black',
              density = c(0,25,50),
-             legend = c(">= 95%",
-                        "80% to 90%",
-                        "< 80%"))
+             legend = c("< 10%",
+                        "10%-20%",
+                        "> 20%"))
       title(paste0("Prevalence of Households of Size ", size, "\n",
                    ""),
             font.main = 2, outer = FALSE,
@@ -2638,7 +2642,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
              fill = prev.pal,
              legend = names(attr(prev.col.tract, 'table')))
       legend('bottomright',
-             title = 'Significance',
+             title = 'Probability of\nSignificant Uncertainty',
              title.adj = 0,
              ncol = 1,
              bty = 'n',
@@ -2646,9 +2650,9 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
              border = 'black',
              fill = 'black',
              density = c(0,25,50),
-             legend = c(">= 95%",
-                        "80% to 90%",
-                        "< 80%"))
+             legend = c("< 10%",
+                        "10%-20%",
+                        "> 20%"))
       title(paste0("Distribution of Households of Size ", size, "\n",
                    ""),
             font.main = 2, outer = FALSE,
@@ -2880,7 +2884,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
                fill = hh.pal,
                legend = names(attr(hh.col.tract, 'table')))
         legend('bottomright',
-               title = 'Significance',
+               title = 'Probability of\nSignificant Uncertainty',
                title.adj = 0,
                ncol = 1,
                bty = 'n',
@@ -2888,9 +2892,9 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
                border = 'black',
                fill = 'black',
                density = c(0,25,50),
-               legend = c(">= 95%",
-                          "80% to 90%",
-                          "< 80%"))
+               legend = c("< 10%",
+                          "10%-20%",
+                          "> 20%"))
         title(paste0(tenure.type,
                      " Households of Size ", size, "\n",
                      ""),
@@ -3030,7 +3034,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
                fill = prev.pal,
                legend = names(attr(prev.col.tract, 'table')))
         legend('bottomright',
-               title = 'Significance',
+               title = 'Probability of\nSignificant Uncertainty',
                title.adj = 0,
                ncol = 1,
                bty = 'n',
@@ -3038,9 +3042,9 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
                border = 'black',
                fill = 'black',
                density = c(0,25,50),
-               legend = c(">= 95%",
-                          "80% to 90%",
-                          "< 80%"))
+               legend = c("< 10%",
+                          "10%-20%",
+                          "> 20%"))
         title(paste0("Prevalence of ",
                      tenure.type, 
                      " Households of Size ", size, "\n",
@@ -3164,7 +3168,7 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
                fill = prev.pal,
                legend = names(attr(prev.col.tract, 'table')))
         legend('bottomright',
-               title = 'Significance',
+               title = 'Probability of\nSignificant Uncertainty',
                title.adj = 0,
                ncol = 1,
                bty = 'n',
@@ -3172,9 +3176,9 @@ for(year in c(2000, 2009, 2010, 2014, 2019)){
                border = 'black',
                fill = 'black',
                density = c(0,25,50),
-               legend = c(">= 95%",
-                          "80% to 90%",
-                          "< 80%"))
+               legend = c("< 10%",
+                          "10%-20%",
+                          "> 20%"))
         title(paste0("Distribution of ",
                      tenure.type, 
                      " Households of Size ", size, "\n",
