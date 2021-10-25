@@ -90,7 +90,7 @@ burden_hra_2010 <- burden %>%
                 variable) %>% 
   mutate(GEOID = as.character(GEOID)) %>% 
   rename("burden" = "variable") %>% 
-  filter(Year == 2019) %>% 
+  filter(Year >= 2010) %>% 
   filter(GEOID %in% kc_tracts$GEOID) %>% 
   left_join(tracts_to_hra$acs5_2019,
             by = c("GEOID" = "GEOID"),
@@ -139,6 +139,14 @@ hra@data$ImpactArea <- hra@data$HRA2010v2_ %in% impact_areas
 
 if(!dir.exists('../burdenPlots/')){
   dir.create('../burdenPlots/')
+  dir.create('../burdenPlots/HRA/')
+  dir.create('../burdenPlots/HRA/Population/')
+  dir.create('../burdenPlots/HRA/Prevalence/')
+  dir.create('../burdenPlots/HRA/Distribution/')
+  dir.create('../burdenPlots/Tract/')
+  dir.create('../burdenPlots/Tract/Population/')
+  dir.create('../burdenPlots/Tract/Prevalence/')
+  dir.create('../burdenPlots/Tract/Distribution/')
 }
 
 # Grab palette
@@ -168,11 +176,11 @@ for(yr in c(2009, 2014, 2019)){
     ## i.e. burden_hra_tmp is ordered like hra@data
     
     if(burden.type == "low_burden"){
-      legend_string <- "Low Rent Burden"
+      legend_string <- "Low Rent-burdened"
     }else if(burden.type == "severely_burdened"){
-      legend_string <- "Severely Rent Burden"
+      legend_string <- "Severely Rent-burdened"
     }else if(burden.type == "highly_burdened"){
-      legend_string <- "High Rent Burden"
+      legend_string <- "High Rent-burdened"
     }
     burden_hra_tmp <- burden_hra %>% 
       filter(Year == yr) %>% 
@@ -192,164 +200,173 @@ for(yr in c(2009, 2014, 2019)){
                                   n = 9)
     pop.col.hra <- findColours(pop.int.hra, pop.pal)
     
-    jpeg(paste0("../burdenPlots/Map_HRA_",
+    jpeg(paste0("../burdenPlots/HRA/Population/",
+                "Map_HRA_",
                 burden.type, "_",
                 yr, ".jpeg"),
          height = 480, width = 480)
-    par(lend = 1,
-        mar = c(0,0,1,0),
-        oma = c(0,0,1,0))
-    plot(hra,
-         col = pop.col.hra,
-         border = 'grey48', lwd = .25,
-         main = "")
-    legend('bottomleft',
-           title = 'Households',
-           title.adj = 0,
-           ncol = 2,
-           bty = 'n',
-           cex= 1,
-           border = FALSE,
-           fill = pop.pal,
-           legend = names(attr(pop.col.hra, 'table')))
-    title(paste0("Counts of ", legend_string, " Households"),
-          font.main = 2, outer = FALSE,
-          adj = 0, cex.main = 2)
-    
-    # title(paste0("\n",
-    #              "King County (ACS ",
-    #              yr - 5, "-", yr,")"),
-    #       font.main = 1, outer = FALSE,
-    #       adj = 0, cex.main = 1)
-    dev.off()
-    
-    jpeg(paste0("../burdenPlots/Map_HRA_ImpactOutline",
-                burden.type, "_",
-                yr, ".jpeg"),
-         height = 480, width = 480)
-    par(lend = 1,
-        mar = c(0,0,1,0),
-        oma = c(0,0,1,0))
-    plot(hra,
-         col = pop.col.hra,
-         border = 'grey48', lwd = .25,
-         main = "")
-    for(poly in which(hra@data$ImpactArea)){
-      points <- hra@polygons[[poly]]@Polygons[[1]]@coords
-      polygon(points[,1], points[,2],
-              border = 'white', lwd = 2)
+    {
+      par(lend = 1,
+          mar = c(0,0,1,0),
+          oma = c(0,0,1,0))
+      plot(hra,
+           col = pop.col.hra,
+           border = 'grey48', lwd = .25,
+           main = "")
+      legend('bottomleft',
+             title = 'Households',
+             title.adj = 0,
+             ncol = 2,
+             bty = 'n',
+             cex= 1,
+             border = FALSE,
+             fill = pop.pal,
+             legend = names(attr(pop.col.hra, 'table')))
+      title(paste0("Counts of ", legend_string, " Households"),
+            font.main = 2, outer = FALSE,
+            adj = 0, cex.main = 1.5)
+      
+      title(paste0("\n\n\n",
+                   "King County (ACS ",
+                   yr - 5, "-", yr,")"),
+            font.main = 1, outer = FALSE,
+            adj = 0, cex.main = 1)
     }
-    legend('bottomleft',
-           title = 'Households',
-           title.adj = 0,
-           ncol = 2,
-           bty = 'n',
-           cex= 1,
-           border = FALSE,
-           fill = pop.pal,
-           legend = names(attr(pop.col.hra, 'table')))
-    title(paste0("Counts of ", legend_string, " Households"),
-          font.main = 2, outer = FALSE,
-          adj = 0, cex.main = 2)
-    
-    # title(paste0("\n",
-    #              "King County (ACS ",
-    #              yr - 5, "-", yr,")"),
-    #       font.main = 1, outer = FALSE,
-    #       adj = 0, cex.main = 1)
     dev.off()
     
-    # ### Tract ####
-    # burden_tmp <- burden %>% 
-    #   filter(Year == yr) %>% 
-    #   mutate(burden = gsub(" occupied", "",
-    #                        short_label)) %>% 
-    #   filter(burden == burden.type) %>% 
-    #   mutate(Density = 0) 
-    # 
-    # # less than 80% significance
-    # burden_tmp$Density[burden_tmp$CoV >= 1/qnorm(.9)] <- 50
-    # 
-    # # between 80 and 90%
-    # burden_tmp$Density[burden_tmp$CoV < 1/qnorm(.9) &
-    #                      burden_tmp$CoV >= 1/qnorm(.95)] <- 25
-    # 
-    # if(yr < 2010){
-    #   spatialdf <- data.frame(GEOID = kc_tracts_2000$GEOID)
-    #   row.names(spatialdf) <- names(kc_tracts_2000_poly)
-    #   tract_spatialdf <- SpatialPolygonsDataFrame(kc_tracts_2000_poly,
-    #                                               data = spatialdf)
-    # }else{
-    #   spatialdf <- data.frame(GEOID = kc_tracts$GEOID)
-    #   row.names(spatialdf) <- names(kc_tracts_poly)
-    #   tract_spatialdf <- SpatialPolygonsDataFrame(kc_tracts_poly,
-    #                                               data = spatialdf)
-    # }
-    # burden_tmp <- burden_tmp %>% 
-    #   filter(GEOID %in% tract_spatialdf$GEOID)
-    # burden_tmp <- burden_tmp[match(tract_spatialdf$GEOID,
-    #                                burden_tmp$GEOID),]
-    # ## Bin with fixed colors
-    # breaks <- c(0, 500, 1000,
-    #             2000, 3000, 4000,
-    #             5000, 7500, 10000,
-    #             14000)
-    # pop.int.hra <- classIntervals(burden_tmp$value,
-    #                               style = "fixed",
-    #                               fixedBreaks = breaks,
-    #                               n = 9)
-    # pop.col.hra <- findColours(pop.int.hra, pop.pal)
-    # 
-    # jpeg(paste0("../burdenPlots/Map_Tract_",
-    #             burden.type, "_CoV_",
-    #             yr, ".jpeg"),
-    #      height = 480, width = 480)
-    # {
-    #   par(lend = 1,
-    #       mar = c(0,0,1,0),
-    #       oma = c(0,0,1,0))
-    #   plot(tract_spatialdf,
-    #        col = pop.col.hra,
-    #        border = 'grey48', lwd = .25,
-    #        main = "")
-    #   for(poly in which(hra@data$ImpactArea)){
-    #     points <- hra@polygons[[poly]]@Polygons[[1]]@coords
-    #     polygon(points[,1], points[,2],
-    #             border = 'white',
-    #             lwd = 2)
-    #   }
-    #   legend('bottomleft',
-    #          title = 'Households',
-    #          title.adj = 0,
-    #          ncol = 2,
-    #          bty = 'n',
-    #          cex= 1,
-    #          border = FALSE,
-    #          fill = pop.pal,
-    #          legend = names(attr(pop.col.hra, 'table')))
-    #   legend('bottomright',
-    #          title = 'Significance',
-    #          title.adj = 0,
-    #          ncol = 1,
-    #          bty = 'n',
-    #          cex= 1,
-    #          border = 'black',
-    #          fill = 'black',
-    #          density = c(0,25,50),
-    #          legend = c(">= 95%",
-    #                     "80% to 90%",
-    #                     "< 80%"))
-    #   title(paste0("Counts of ", legend_string, " Households"),
-    #         font.main = 2, outer = FALSE,
-    #         adj = 0, cex.main = 2)
-    #   
-    #   title(paste0("\n",
-    #                "King County (ACS ",
-    #                yr - 5, "-", yr,")"),
-    #         font.main = 1, outer = FALSE,
-    #         adj = 0, cex.main = 1)
-    # }
-    # dev.off()
+    jpeg(paste0("../burdenPlots/HRA/Population/",
+                "Map_HRA_ImpactOutline",
+                burden.type, "_",
+                yr, ".jpeg"),
+         height = 480, width = 480)
+    {
+      par(lend = 1,
+          mar = c(0,0,1,0),
+          oma = c(0,0,1,0))
+      plot(hra,
+           col = pop.col.hra,
+           border = 'grey48', lwd = .25,
+           main = "")
+      for(poly in which(hra@data$ImpactArea)){
+        points <- hra@polygons[[poly]]@Polygons[[1]]@coords
+        polygon(points[,1], points[,2],
+                border = 'white', lwd = 2)
+      }
+      legend('bottomleft',
+             title = 'Households',
+             title.adj = 0,
+             ncol = 2,
+             bty = 'n',
+             cex= 1,
+             border = FALSE,
+             fill = pop.pal,
+             legend = names(attr(pop.col.hra, 'table')))
+      title(paste0("Counts of ", legend_string, " Households"),
+            font.main = 2, outer = FALSE,
+            adj = 0, cex.main = 1.5)
+      
+      title(paste0("\n\n\n",
+                   "King County (ACS ",
+                   yr - 5, "-", yr,")"),
+            font.main = 1, outer = FALSE,
+            adj = 0, cex.main = 1.5)
+    }
+    dev.off()
+    
+    ### Tract ####
+    
+    
+    if(yr < 2010){
+      spatialdf <- data.frame(GEOID = kc_tracts_2000$GEOID)
+      row.names(spatialdf) <- names(kc_tracts_2000_poly)
+      tract_spatialdf <- SpatialPolygonsDataFrame(kc_tracts_2000_poly,
+                                                  data = spatialdf)
+    }else{
+      spatialdf <- data.frame(GEOID = kc_tracts$GEOID)
+      row.names(spatialdf) <- names(kc_tracts_poly)
+      tract_spatialdf <- SpatialPolygonsDataFrame(kc_tracts_poly,
+                                                  data = spatialdf)
+    }
+    
+    burden_tmp <- burden %>%
+      filter(Year == yr) %>%
+      mutate(GEOID = as.character(GEOID)) %>%
+      filter(GEOID %in% tract_spatialdf$GEOID) %>% 
+      rename("burden" = "variable") %>% 
+      filter(burden == burden.type) %>%
+      mutate(Density = 0)
+    
+    # less than 80% significance
+    burden_tmp$Density[burden_tmp$CoV >= 1/qnorm(.9)] <- 50
+    
+    # between 80 and 90%
+    burden_tmp$Density[burden_tmp$CoV < 1/qnorm(.9) &
+                         burden_tmp$CoV >= 1/qnorm(.95)] <- 25
+    
+    burden_tmp <- burden_tmp[match(tract_spatialdf$GEOID,
+                                   burden_tmp$GEOID),]
+    ## Bin with fixed colors
+    breaks <- c(0, 500, 1000,
+                2000, 3000, 4000,
+                5000, 7500, 10000,
+                14000)
+    pop.int.hra <- classIntervals(burden_tmp$value,
+                                  style = "fixed",
+                                  fixedBreaks = breaks,
+                                  n = 9)
+    pop.col.hra <- findColours(pop.int.hra, pop.pal)
+    
+    jpeg(paste0("../burdenPlots/Tract/Population/",
+                "Map_Tract_",
+                burden.type, "_CoV_",
+                yr, ".jpeg"),
+         height = 480, width = 480)
+    {
+      par(lend = 1,
+          mar = c(0,0,1,0),
+          oma = c(0,0,1,0))
+      plot(tract_spatialdf,
+           col = pop.col.hra,
+           border = 'grey48', lwd = .25,
+           main = "")
+      for(poly in which(hra@data$ImpactArea)){
+        points <- hra@polygons[[poly]]@Polygons[[1]]@coords
+        polygon(points[,1], points[,2],
+                border = 'white',
+                lwd = 2)
+      }
+      legend('bottomleft',
+             title = 'Households',
+             title.adj = 0,
+             ncol = 2,
+             bty = 'n',
+             cex= 1,
+             border = FALSE,
+             fill = pop.pal,
+             legend = names(attr(pop.col.hra, 'table')))
+      legend('bottomright',
+             title = "Probability of \nSignificant Uncertainty",
+             title.adj = 0,
+             ncol = 1,
+             bty = 'n',
+             cex= 1,
+             border = 'black',
+             fill = 'black',
+             density = c(0,25,50),
+             legend = c(">= 95%",
+                        "80% to 90%",
+                        "< 80%"))
+      title(paste0("Counts of ", legend_string, " Households"),
+            font.main = 2, outer = FALSE,
+            adj = 0, cex.main = 1.5)
+      
+      title(paste0("\n\n\n",
+                   "King County (ACS ",
+                   yr - 5, "-", yr,")"),
+            font.main = 1, outer = FALSE,
+            adj = 0, cex.main = 1)
+    }
+    dev.off()
   }
 }
 
@@ -409,11 +426,11 @@ for(yr in c(2009, 2014, 2019)){
     ## Make sure your df is in right order for mapping,
     ## i.e. burden_hra_tmp is ordered like hra@data
     if(burden.type == "low_burden"){
-      legend_string <- "Low Rent Burden"
+      legend_string <- "Low Rent-burdened"
     }else if(burden.type == "severely_burdened"){
-      legend_string <- "Severely Rent Burden"
+      legend_string <- "Severely Rent-burdened"
     }else if(burden.type == "highly_burdened"){
-      legend_string <- "High Rent Burden"
+      legend_string <- "High Rent-burdened"
     }
     burden_prev_hra_tmp <- burden_prev_hra %>% 
       filter(Year == yr) %>% 
@@ -429,86 +446,90 @@ for(yr in c(2009, 2014, 2019)){
                                    n = 9)
     prop.col.hra <- findColours(prop.int.hra, prop.pal)
     
-    jpeg(paste0("../burdenPlots/Map_HRA_",
+    jpeg(paste0("../burdenPlots/HRA/Prevalence/",
+                "Map_HRA_",
                 burden.type, "_Prevalence_",
                 yr, ".jpeg"),
          height = 480, width = 480)
-    par(lend = 1,
-        mar = c(0,0,1,0),
-        oma = c(0,0,1,0))
-    plot(hra,
-         col = prop.col.hra,
-         border = 'grey48', lwd = .25,
-         main = "")
-    legend('bottomleft',
-           title = 'Prevalence',
-           title.adj = 0,
-           ncol = 2,
-           bty = 'n',
-           cex= 1,
-           border = FALSE,
-           fill = prop.pal,
-           legend = names(attr(prop.col.hra, 'table')))
-    title(paste0("Prevalence of ", legend_string, " Households"),
-          font.main = 2, outer = FALSE,
-          adj = 0, cex.main = 2)
-    
-    # title(paste0("\n",
-    #              "King County (ACS ",
-    #              yr - 5, "-", yr,")"),
-    #       font.main = 1, outer = FALSE,
-    #       adj = 0, cex.main = 1)
+    {
+      par(lend = 1,
+          mar = c(0,0,1,0),
+          oma = c(0,0,1,0))
+      plot(hra,
+           col = prop.col.hra,
+           border = 'grey48', lwd = .25,
+           main = "")
+      legend('bottomleft',
+             title = 'Prevalence',
+             title.adj = 0,
+             ncol = 2,
+             bty = 'n',
+             cex= 1,
+             border = FALSE,
+             fill = prop.pal,
+             legend = names(attr(prop.col.hra, 'table')))
+      title(paste0("Prevalence of ", legend_string, " Households"),
+            font.main = 2, outer = FALSE,
+            adj = 0, cex.main = 1.5)
+      
+      title(paste0("\n\n\n",
+                   "King County (ACS ",
+                   yr - 5, "-", yr,")"),
+            font.main = 1, outer = FALSE,
+            adj = 0, cex.main = 1)
+    }
     dev.off()
     
-    jpeg(paste0("../burdenPlots/Map_HRA_",
+    jpeg(paste0("../burdenPlots/HRA/Prevalence/",
+                "Map_HRA_",
                 burden.type, "_Prevalence_ImpactOutline",
                 yr, ".jpeg"),
          height = 480, width = 480)
-    par(lend = 1,
-        mar = c(0,0,1,0),
-        oma = c(0,0,1,0))
-    plot(hra,
-         col = prop.col.hra,
-         border = 'grey48', lwd = .25,
-         main = "")
-    for(poly in which(hra@data$ImpactArea)){
-      points <- hra@polygons[[poly]]@Polygons[[1]]@coords
-      polygon(points[,1], points[,2],
-              border = 'white', lwd = 2)
+    {
+      par(lend = 1,
+          mar = c(0,0,1,0),
+          oma = c(0,0,1,0))
+      plot(hra,
+           col = prop.col.hra,
+           border = 'grey48', lwd = .25,
+           main = "")
+      for(poly in which(hra@data$ImpactArea)){
+        points <- hra@polygons[[poly]]@Polygons[[1]]@coords
+        polygon(points[,1], points[,2],
+                border = 'white', lwd = 2)
+      }
+      legend('bottomleft',
+             title = 'Prevalence',
+             title.adj = 0,
+             ncol = 2,
+             bty = 'n',
+             cex= 1,
+             border = FALSE,
+             fill = prop.pal,
+             legend = names(attr(prop.col.hra, 'table')))
+      title(paste0("Prevalence of ", legend_string, " Households"),
+            font.main = 2, outer = FALSE,
+            adj = 0, cex.main = 1.5)
+      
+      title(paste0("\n\n\n",
+                   "King County (ACS ",
+                   yr - 5, "-", yr,")"),
+            font.main = 1, outer = FALSE,
+            adj = 0, cex.main = 1)
     }
-    legend('bottomleft',
-           title = 'Prevalence',
-           title.adj = 0,
-           ncol = 2,
-           bty = 'n',
-           cex= 1,
-           border = FALSE,
-           fill = prop.pal,
-           legend = names(attr(prop.col.hra, 'table')))
-    title(paste0("Prevalence of ", legend_string, " Households"),
-          font.main = 2, outer = FALSE,
-          adj = 0, cex.main = 2)
-    
-    # title(paste0("\n",
-    #              "King County (ACS ",
-    #              yr - 5, "-", yr,")"),
-    #       font.main = 1, outer = FALSE,
-    #       adj = 0, cex.main = 1)
     dev.off()
     
     
     ### Tract ####
     burden_tract_total <- burden %>% 
       filter(Year == yr) %>% 
-      mutate(burden = gsub(" occupied", "",
-                           short_label)) %>% 
+      rename("burden" = "variable") %>% 
       group_by(GEOID) %>% 
       summarise(value = sum(value),
                 SE = sum(SE)) 
     burden_tmp <- burden %>% 
       filter(Year == yr) %>% 
-      mutate(burden = gsub(" occupied", "",
-                           short_label)) %>% 
+      rename("burden" = "variable") %>% 
       filter(burden == burden.type) %>%
       left_join(burden_tract_total,
                 by = c("GEOID" = "GEOID"),
@@ -542,53 +563,56 @@ for(yr in c(2009, 2014, 2019)){
                                    n = 9)
     prop.col.hra <- findColours(prop.int.hra, prop.pal)
     
-    jpeg(paste0("../burdenPlots/Map_Tract_",
+    jpeg(paste0("../burdenPlots/Tract/Prevalence/",
+                "Map_Tract_",
                 burden.type, "_Prevalence_CoV_",
                 yr, ".jpeg"),
          height = 480, width = 480)
-    par(lend = 1,
-        mar = c(0,0,1,0),
-        oma = c(0,0,1,0))
-    plot(tract_spatialdf,
-         col = prop.col.hra,
-         border = 'grey48', lwd = .25,
-         main = "")
-    for(poly in which(hra@data$ImpactArea)){
-      points <- hra@polygons[[poly]]@Polygons[[1]]@coords
-      polygon(points[,1], points[,2],
-              border = 'white',
-              lwd = 2)
+    {
+      par(lend = 1,
+          mar = c(0,0,1,0),
+          oma = c(0,0,1,0))
+      plot(tract_spatialdf,
+           col = prop.col.hra,
+           border = 'grey48', lwd = .25,
+           main = "")
+      for(poly in which(hra@data$ImpactArea)){
+        points <- hra@polygons[[poly]]@Polygons[[1]]@coords
+        polygon(points[,1], points[,2],
+                border = 'white',
+                lwd = 2)
+      }
+      legend('bottomleft',
+             title = 'Prevalence',
+             title.adj = 0,
+             ncol = 2,
+             bty = 'n',
+             cex= 1,
+             border = FALSE,
+             fill = prop.pal,
+             legend = names(attr(prop.col.hra, 'table')))
+      legend('bottomright',
+             title = "Probability of \nSignificant Uncertainty",
+             title.adj = 0,
+             ncol = 1,
+             bty = 'n',
+             cex= 1,
+             border = 'black',
+             fill = 'black',
+             density = c(0,25,50),
+             legend = c(">= 95%",
+                        "80% to 90%",
+                        "< 80%"))
+      title(paste0("Prevalence of ", legend_string, " Households"),
+            font.main = 2, outer = FALSE,
+            adj = 0, cex.main = 1.5)
+      
+      title(paste0("\n\n\n",
+                   "King County (ACS ",
+                   yr - 5, "-", yr,")"),
+            font.main = 1, outer = FALSE,
+            adj = 0, cex.main = 1)
     }
-    legend('bottomleft',
-           title = 'Prevalence',
-           title.adj = 0,
-           ncol = 2,
-           bty = 'n',
-           cex= 1,
-           border = FALSE,
-           fill = prop.pal,
-           legend = names(attr(prop.col.hra, 'table')))
-    legend('bottomright',
-           title = 'Significance',
-           title.adj = 0,
-           ncol = 1,
-           bty = 'n',
-           cex= 1,
-           border = 'black',
-           fill = 'black',
-           density = c(0,25,50),
-           legend = c(">= 95%",
-                      "80% to 90%",
-                      "< 80%"))
-    title(paste0("Prevalence of ", legend_string, " Households"),
-          font.main = 2, outer = FALSE,
-          adj = 0, cex.main = 2)
-    
-    # title(paste0("\n",
-    #              "King County (ACS ",
-    #              yr - 5, "-", yr,")"),
-    #       font.main = 1, outer = FALSE,
-    #       adj = 0, cex.main = 1)
     dev.off()
   }
 }
@@ -647,11 +671,11 @@ for(yr in c(2009, 2014, 2019)){
     ## Make sure your df is in right order for mapping,
     ## i.e. burden_hra_tmp is ordered like hra@data
     if(burden.type == "low_burden"){
-      legend_string <- "Low Rent Burden"
+      legend_string <- "Low Rent-burdened"
     }else if(burden.type == "severely_burdened"){
-      legend_string <- "Severely Rent Burden"
+      legend_string <- "Severely Rent-burdened"
     }else if(burden.type == "highly_burdened"){
-      legend_string <- "High Rent Burden"
+      legend_string <- "High Rent-burdened"
     }
     burden_dist_hra_tmp <- burden_dist_hra %>% 
       filter(Year == yr) %>% 
@@ -662,100 +686,101 @@ for(yr in c(2009, 2014, 2019)){
     
     ## Bin with fixed colors
     ## Define breaks
-    breaks <- c(0.0025, .005, .0075,
+    breaks <- c(0, .005, .0075,
                 .01, .02, .03, 
                 .04, .05, .075,
                 .10)
+    # print(max(burden_dist_hra_tmp$Dist))
     prop.int.hra <- classIntervals(burden_dist_hra_tmp$Dist,
                                    style = "fixed",
                                    fixedBreaks = breaks,
                                    n = 9)
     prop.col.hra <- findColours(prop.int.hra, prop.pal)
     
-    jpeg(paste0("../burdenPlots/Map_HRA_",
+    jpeg(paste0("../burdenPlots/HRA/Distribution/Map_HRA_",
                 burden.type, "_Distribution_",
                 yr, ".jpeg"),
          height = 480, width = 480)
-    par(lend = 1,
-        mar = c(0,0,1,0),
-        oma = c(0,0,1,0))
-    plot(hra,
-         col = prop.col.hra,
-         border = 'grey48', lwd = .25,
-         main = "")
-    legend('bottomleft',
-           title = 'Distribution',
-           title.adj = 0,
-           ncol = 2,
-           bty = 'n',
-           cex= 1,
-           border = FALSE,
-           fill = prop.pal,
-           legend = names(attr(prop.col.hra, 'table')))
-    title(paste0("Distribution of ", legend_string, " Households"),
-          font.main = 2, outer = FALSE,
-          adj = 0, cex.main = 2)
-    
-    # title(paste0("\n",
-    #              "King County (ACS ",
-    #              yr - 5, "-", yr,")"),
-    #       font.main = 1, outer = FALSE,
-    #       adj = 0, cex.main = 1)
+    {
+      par(lend = 1,
+          mar = c(0,0,1,0),
+          oma = c(0,0,1,0))
+      plot(hra,
+           col = prop.col.hra,
+           border = 'grey48', lwd = .25,
+           main = "")
+      legend('bottomleft',
+             title = 'Distribution',
+             title.adj = 0,
+             ncol = 2,
+             bty = 'n',
+             cex= 1,
+             border = FALSE,
+             fill = prop.pal,
+             legend = names(attr(prop.col.hra, 'table')))
+      title(paste0("Distribution of ", legend_string, " Households"),
+            font.main = 2, outer = FALSE,
+            adj = 0, cex.main = 1.5)
+      
+      title(paste0("\n\n\n",
+                   "King County (ACS ",
+                   yr - 5, "-", yr,")"),
+            font.main = 1, outer = FALSE,
+            adj = 0, cex.main = 1)
+    }
     dev.off()
     
-    jpeg(paste0("../burdenPlots/Map_HRA_",
+    jpeg(paste0("../burdenPlots/HRA/Distribution/Map_HRA_",
                 burden.type, "_Distribution_ImpactOutline",
                 yr, ".jpeg"),
          height = 480, width = 480)
-    par(lend = 1,
-        mar = c(0,0,3,0),
-        oma = c(0,0,1,0))
-    plot(hra,
-         col = prop.col.hra,
-         border = 'grey48', lwd = .25,
-         main = "")
-    for(poly in which(hra@data$ImpactArea)){
-      points <- hra@polygons[[poly]]@Polygons[[1]]@coords
-      polygon(points[,1], points[,2],
-              border = 'white',
-              lwd = 2)
+    {
+      par(lend = 1,
+          mar = c(0,0,3,0),
+          oma = c(0,0,1,0))
+      plot(hra,
+           col = prop.col.hra,
+           border = 'grey48', lwd = .25,
+           main = "")
+      for(poly in which(hra@data$ImpactArea)){
+        points <- hra@polygons[[poly]]@Polygons[[1]]@coords
+        polygon(points[,1], points[,2],
+                border = 'white',
+                lwd = 2)
+      }
+      legend('bottomleft',
+             title = 'Distribution',
+             title.adj = 0,
+             ncol = 2,
+             bty = 'n',
+             cex= 1,
+             border = FALSE,
+             fill = prop.pal,
+             legend = names(attr(prop.col.hra, 'table')))
+      title(paste0("Distribution of Households\n",
+                   legend_string),
+            font.main = 2, outer = FALSE,
+            adj = 0, cex.main = 1.5)
+      
+      title(paste0("\n\n\n",
+                   "King County (ACS ",
+                   yr - 5, "-", yr,")"),
+            font.main = 1, outer = FALSE,
+            adj = 0, cex.main = 1)
     }
-    legend('bottomleft',
-           title = 'Distribution',
-           title.adj = 0,
-           ncol = 2,
-           bty = 'n',
-           cex= 1,
-           border = FALSE,
-           fill = prop.pal,
-           legend = names(attr(prop.col.hra, 'table')))
-    title(paste0("Distribution of Households\n",
-                 legend_string),
-          font.main = 2, outer = FALSE,
-          adj = 0, cex.main = 1.5)
-    
-    # title(paste0("\n",
-    #              "King County (ACS ",
-    #              yr - 5, "-", yr,")"),
-    #       font.main = 1, outer = FALSE,
-    #       adj = 0, cex.main = 1)
     dev.off()
-    
-    
     
     
     ### Tract ####
     burden_tract_total <- burden %>% 
       filter(Year == yr) %>% 
-      mutate(burden = gsub(" occupied", "",
-                           short_label)) %>% 
+      rename("burden" = "variable") %>% 
       group_by(burden) %>% 
       summarise(value = sum(value),
                 SE = sum(SE)) 
     burden_tmp <- burden %>% 
       filter(Year == yr) %>% 
-      mutate(burden = gsub(" occupied", "",
-                           short_label)) %>% 
+      rename("burden" = "variable") %>% 
       filter(burden == burden.type) %>%
       left_join(burden_tract_total,
                 by = c("burden" = "burden"),
@@ -783,63 +808,67 @@ for(yr in c(2009, 2014, 2019)){
                                    burden_tmp$GEOID),]
     ## Bin with fixed colors
     breaks <- c(0, .001,
-                .002, .003,
-                .004, .005,
+                .0025, .005,
                 .0075, .01,
-                .0125)
+                .0125, 0.015,
+                0.0175, .02)
+    # print(max(burden_tmp$Dist))
     prop.int.hra <- classIntervals(burden_tmp$Dist,
                                    style = "fixed",
                                    fixedBreaks = breaks,
                                    n = 9)
     prop.col.hra <- findColours(prop.int.hra, prop.pal)
     
-    jpeg(paste0("../burdenPlots/Map_Tract_",
+    jpeg(paste0("../burdenPlots/Tract/Distribution/",
+                "Map_Tract_",
                 burden.type, "_Distribution_CoV_",
                 yr, ".jpeg"),
          height = 480, width = 480)
-    par(lend = 1,
-        mar = c(0,0,1,0),
-        oma = c(0,0,1,0))
-    plot(tract_spatialdf,
-         col = prop.col.hra,
-         border = 'grey48', lwd = .25,
-         main = "")
-    for(poly in which(hra@data$ImpactArea)){
-      points <- hra@polygons[[poly]]@Polygons[[1]]@coords
-      polygon(points[,1], points[,2],
-              border = 'white',
-              lwd = 2)
+    {
+      par(lend = 1,
+          mar = c(0,0,1,0),
+          oma = c(0,0,1,0))
+      plot(tract_spatialdf,
+           col = prop.col.hra,
+           border = 'grey48', lwd = .25,
+           main = "")
+      for(poly in which(hra@data$ImpactArea)){
+        points <- hra@polygons[[poly]]@Polygons[[1]]@coords
+        polygon(points[,1], points[,2],
+                border = 'white',
+                lwd = 2)
+      }
+      legend('bottomleft',
+             title = 'Distribution',
+             title.adj = 0,
+             ncol = 2,
+             bty = 'n',
+             cex= 1,
+             border = FALSE,
+             fill = prop.pal,
+             legend = names(attr(prop.col.hra, 'table')))
+      legend('bottomright',
+             title = "Probability of \nSignificant Uncertainty",
+             title.adj = 0,
+             ncol = 1,
+             bty = 'n',
+             cex= 1,
+             border = 'black',
+             fill = 'black',
+             density = c(0,25,50),
+             legend = c(">= 95%",
+                        "80% to 90%",
+                        "< 80%"))
+      title(paste0("Distribution of ", legend_string, " Households"),
+            font.main = 2, outer = FALSE,
+            adj = 0, cex.main = 1.5)
+      
+      title(paste0("\n\n\n",
+                   "King County (ACS ",
+                   yr - 5, "-", yr,")"),
+            font.main = 1, outer = FALSE,
+            adj = 0, cex.main = 1)
     }
-    legend('bottomleft',
-           title = 'Distribution',
-           title.adj = 0,
-           ncol = 2,
-           bty = 'n',
-           cex= 1,
-           border = FALSE,
-           fill = prop.pal,
-           legend = names(attr(prop.col.hra, 'table')))
-    legend('bottomright',
-           title = 'Significance',
-           title.adj = 0,
-           ncol = 1,
-           bty = 'n',
-           cex= 1,
-           border = 'black',
-           fill = 'black',
-           density = c(0,25,50),
-           legend = c(">= 95%",
-                      "80% to 90%",
-                      "< 80%"))
-    title(paste0("Distribution of ", legend_string, " Households"),
-          font.main = 2, outer = FALSE,
-          adj = 0, cex.main = 2)
-    
-    # title(paste0("\n",
-    #              "King County (ACS ",
-    #              yr - 5, "-", yr,")"),
-    #       font.main = 1, outer = FALSE,
-    #       adj = 0, cex.main = 1)
     dev.off()
   }
 }
