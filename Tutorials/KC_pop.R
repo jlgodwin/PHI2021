@@ -71,7 +71,7 @@ if(loadOFM){
     filter(grepl("53033", Geoid)) %>% 
     as.data.frame()
   
-  for(year in c(2010, 2012, 2015, 2017, 2020)){
+  for(year in c(2010, 2012, 2015, 2017, 2020)[5]){
     pop <- popall %>% 
       filter(Year == year)
     save(pop,
@@ -299,7 +299,7 @@ for(year in c(2010, 2012, 2015,
                                  cex.axis = .65,
                                  cex.sub = .75,
                                  x_lims = c(-.065,.065))
-    title(paste0("Prevalence of Population by Age and Sex\n",
+    title(paste0("Distribution of Population by Age and Sex\n",
                  ""),
           font.main = 2, outer = FALSE,
           adj = 0, cex.main = 1)
@@ -2126,10 +2126,10 @@ for(year in c(2010, 2012, 2015,
 #   filter()
 
 
-covid_KC_overall <- readxl::read_xlsx('../Data/overall_geo-aug-30.xlsx',
+covid_KC_overall <- readxl::read_xlsx('../Data/overall_geo-oct-18.xlsx',
                                       sheet = "HRA")
-covid_KC <- readxl::read_xlsx('../Data/overall_city_demo-aug-30.xlsx')
-covid_KC_race <- readxl::read_xlsx('../Data/overall_city_demo-aug-30.xlsx',
+covid_KC <- readxl::read_xlsx('../Data/overall_city_demo-oct-18.xlsx')
+covid_KC_race <- readxl::read_xlsx('../Data/overall_city_demo-oct-18.xlsx',
                                    sheet = 'Race_Ethnicity')
 
 convert_ages <- expand.grid(AgeStartCovid = seq(0,80,10),
@@ -2192,7 +2192,7 @@ title(paste0("Cumulative COVID-19 Outcomes\n",
       adj = 0, cex.main = 1)
 
 title(paste0("\n",
-             "King County (as of Aug. 30, 2021)"),
+             "King County (as of Oct. 18, 2021)"),
       font.main = 1, outer = FALSE,
       adj = 0, cex.main = 1)
 
@@ -2246,7 +2246,7 @@ for(city in cities){
             adj = 0, cex.main = 1)
       
       title(paste0("\n", city,
-                   " (as of Aug. 30, 2021)"),
+                   " (as of Oct. 18, 2021)"),
             font.main = 1, outer = FALSE,
             adj = 0, cex.main = 1)
     }
@@ -2282,7 +2282,7 @@ for(city in cities){
             adj = 0, cex.main = 1)
       
       title(paste0("\n", city,
-                   " (as of Aug. 30, 2021)"),
+                   " (as of Oct. 18, 2021)"),
             font.main = 1, outer = FALSE,
             adj = 0, cex.main = 1)
     }
@@ -2317,9 +2317,9 @@ cases.int.hra <- classIntervals(covid_hra_tmp$Confirmed_Cases,
 
 breaks <- cases.int.hra$brks
 breaks <- c(0, 250, 500,
-            1500, 2500,
-            3500, 4500, 5000, 6000,
-            6600)
+            1000, 2000,
+            3000, 4000, 5000, 6000,
+            7750)
 ## Get color based on RColorBrwere palette for 
 ## each area
 
@@ -2333,7 +2333,11 @@ cases.int.hra <- classIntervals(covid_hra_tmp$Confirmed_Cases,
                                 fixedBreaks = breaks,
                                 n = 9)
 cases.col.hra <- findColours(cases.int.hra, cases.pal)
+impact_areas <- c("Burien", "Kent-SE", "Kent-West",
+                  "SeaTac/Tukwila", "Beacon/Gtown/S.Park",
+                  "Fed Way-Central/Military Rd", "NW Seattle")
 
+hra@data$ImpactArea <- hra@data$HRA2010v2_ %in% impact_areas
 
 jpeg(paste0("../COVIDPlots/Map_HRA_Cases.jpeg"),
      height = 480, width = 480)
@@ -2344,6 +2348,12 @@ plot(hra,
      col = cases.col.hra,
      border = 'grey48', lwd = .25,
      main = "")
+for(poly in which(hra@data$ImpactArea)){
+  points <- hra@polygons[[poly]]@Polygons[[1]]@coords
+  polygon(points[,1], points[,2],
+          border = 'white',
+          lwd = 2)
+}
 legend('bottomleft',
        title = 'Cases',
        title.adj = 0,
@@ -2359,7 +2369,7 @@ title(paste0("Cumulative COVID-19 Cases\n",
       adj = 0, cex.main = 1)
 
 title(paste0("\n",
-             "King County (as of Aug. 30, 2021)"),
+             "King County (as of Oct. 18, 2021)"),
       font.main = 1, outer = FALSE,
       adj = 0, cex.main = 1)
 dev.off()
@@ -2372,7 +2382,7 @@ prev.int.hra <- classIntervals(covid_hra_tmp$CasesPrev,
 breaks <- prev.int.hra$brks
 breaks <- c(0, .015, .03,
             .045, .06, .075,
-            .085, .095, .105, .12)
+            .085, .1, .125, .15)
 prev.pal <- brewer.pal(n = 9,  name = "YlGnBu")
 
 covid_hra_tmp <- covid_hra_tmp[match(covid_hra_tmp$Location_Name,
@@ -2394,6 +2404,12 @@ plot(hra,
      col = prev.col.hra,
      border = 'grey48', lwd = .25,
      main = "")
+for(poly in which(hra@data$ImpactArea)){
+  points <- hra@polygons[[poly]]@Polygons[[1]]@coords
+  polygon(points[,1], points[,2],
+          border = 'white',
+          lwd = 2)
+}
 legend('bottomleft',
        title = 'Prevalence',
        title.adj = 0,
@@ -2409,7 +2425,7 @@ title(paste0("Prevalence of Cumulative COVID-19 Cases\n",
       adj = 0, cex.main = 1)
 
 title(paste0("\n",
-             "King County (as of Aug. 30, 2021)"),
+             "King County (as of Oct. 18, 2021)"),
       font.main = 1, outer = FALSE,
       adj = 0, cex.main = 1)
 dev.off()
@@ -2445,6 +2461,12 @@ plot(hra,
      col = dist.col.hra,
      border = 'grey48', lwd = .25,
      main = "")
+for(poly in which(hra@data$ImpactArea)){
+  points <- hra@polygons[[poly]]@Polygons[[1]]@coords
+  polygon(points[,1], points[,2],
+          border = 'white',
+          lwd = 2)
+}
 legend('bottomleft',
        title = 'Distribution',
        title.adj = 0,
@@ -2460,7 +2482,7 @@ title(paste0("Distribution of Cumulative COVID-19 Cases\n",
       adj = 0, cex.main = 1)
 
 title(paste0("\n",
-             "King County (as of Aug. 30, 2021)"),
+             "King County (as of Oct. 18, 2021)"),
       font.main = 1, outer = FALSE,
       adj = 0, cex.main = 1)
 dev.off()
@@ -2479,10 +2501,10 @@ hosp.int.hra <- classIntervals(covid_hra_tmp$Hospitalizations,
                                n = 9)
 
 breaks <- hosp.int.hra$brks
-breaks <- c(0, 25, 50,
-            75, 100,
+breaks <- c(0, 50, 75,
+            100,
             150, 200, 300, 400,
-            450)
+            500)
 ## Get color based on RColorBrwere palette for 
 ## each area
 
@@ -2507,6 +2529,12 @@ plot(hra,
      col = hosp.col.hra,
      border = 'grey48', lwd = .25,
      main = "")
+for(poly in which(hra@data$ImpactArea)){
+  points <- hra@polygons[[poly]]@Polygons[[1]]@coords
+  polygon(points[,1], points[,2],
+          border = 'white',
+          lwd = 2)
+}
 legend('bottomleft',
        title = 'Hospitalizations',
        title.adj = 0,
@@ -2522,7 +2550,7 @@ title(paste0("Cumulative COVID-19 Hospitalizations\n",
       adj = 0, cex.main = 1)
 
 title(paste0("\n",
-             "King County (as of Aug. 30, 2021)"),
+             "King County (as of Oct. 18, 2021)"),
       font.main = 1, outer = FALSE,
       adj = 0, cex.main = 1)
 dev.off()
@@ -2535,7 +2563,7 @@ prev.int.hra <- classIntervals(covid_hra_tmp$HospPrev,
 breaks <- prev.int.hra$brks
 breaks <- c(0, .0005, .001,
             .002, .003, .004,
-            .005, .006, .007, .0085)
+            .005, .006, .0075, .01)
 prev.pal <- brewer.pal(n = 9,  name = "YlGnBu")
 
 covid_hra_tmp <- covid_hra_tmp[match(covid_hra_tmp$Location_Name,
@@ -2557,6 +2585,12 @@ plot(hra,
      col = prev.col.hra,
      border = 'grey48', lwd = .25,
      main = "")
+for(poly in which(hra@data$ImpactArea)){
+  points <- hra@polygons[[poly]]@Polygons[[1]]@coords
+  polygon(points[,1], points[,2],
+          border = 'white',
+          lwd = 2)
+}
 legend('bottomleft',
        title = 'Prevalence',
        title.adj = 0,
@@ -2572,7 +2606,7 @@ title(paste0("Prevalence of Cumulative COVID-19 Hospitalizations\n",
       adj = 0, cex.main = 1)
 
 title(paste0("\n",
-             "King County (as of Aug. 30, 2021)"),
+             "King County (as of Oct. 18, 2021)"),
       font.main = 1, outer = FALSE,
       adj = 0, cex.main = 1)
 
@@ -2584,9 +2618,10 @@ dist.int.hra <- classIntervals(covid_hra_tmp$HospDist,
                                n = 9)
 
 breaks <- dist.int.hra$brks
-breaks <- c(0, .01, .015, .02,
+breaks <- c(0, .005, .01,
+            .015, .02,
             .025, .03, 
-            .04, .05, .055)
+            .045,  .0625)
 
 dist.pal <- brewer.pal(n = 9,  name = "YlGnBu")
 
@@ -2609,6 +2644,12 @@ plot(hra,
      col = dist.col.hra,
      border = 'grey48', lwd = .25,
      main = "")
+for(poly in which(hra@data$ImpactArea)){
+  points <- hra@polygons[[poly]]@Polygons[[1]]@coords
+  polygon(points[,1], points[,2],
+          border = 'white',
+          lwd = 2)
+}
 legend('bottomleft',
        title = 'Distribution',
        title.adj = 0,
@@ -2624,7 +2665,7 @@ title(paste0("Distribution of Cumulative COVID-19 Hospitalizations\n",
       adj = 0, cex.main = 1)
 
 title(paste0("\n",
-             "King County (as of Aug. 30, 2021)"),
+             "King County (as of Oct. 18, 2021)"),
       font.main = 1, outer = FALSE,
       adj = 0, cex.main = 1)
 
@@ -2645,7 +2686,7 @@ breaks <- death.int.hra$brks
 breaks <- c(0, 5, 15,
             30,
             40, 50, 60, 75, 90,
-            100)
+            108)
 ## Get color based on RColorBrwere palette for 
 ## each area
 
@@ -2670,6 +2711,12 @@ plot(hra,
      col = death.col.hra,
      border = 'grey48', lwd = .25,
      main = "")
+for(poly in which(hra@data$ImpactArea)){
+  points <- hra@polygons[[poly]]@Polygons[[1]]@coords
+  polygon(points[,1], points[,2],
+          border = 'white',
+          lwd = 2)
+}
 legend('bottomleft',
        title = 'Deaths',
        title.adj = 0,
@@ -2685,7 +2732,7 @@ title(paste0("Cumulative COVID-19 Deaths\n",
       adj = 0, cex.main = 1)
 
 title(paste0("\n",
-             "King County (as of Aug. 30, 2021)"),
+             "King County (as of Oct. 18, 2021)"),
       font.main = 1, outer = FALSE,
       adj = 0, cex.main = 1)
 
@@ -2701,7 +2748,7 @@ prev.int.hra <- classIntervals(covid_hra_tmp$DeathPrev,
 breaks <- prev.int.hra$brks
 breaks <- c(0, .00025, .0005,
             .00075, .001,
-            .00125, .0015, .002, .005, .0085)
+            .00125, .0015, .002, .0025, .003)
 prev.pal <- brewer.pal(n = 9,  name = "YlGnBu")
 
 covid_hra_tmp <- covid_hra_tmp[match(covid_hra_tmp$Location_Name,
@@ -2723,6 +2770,12 @@ plot(hra,
      col = prev.col.hra,
      border = 'grey48', lwd = .25,
      main = "")
+for(poly in which(hra@data$ImpactArea)){
+  points <- hra@polygons[[poly]]@Polygons[[1]]@coords
+  polygon(points[,1], points[,2],
+          border = 'white',
+          lwd = 2)
+}
 legend('bottomleft',
        title = 'Prevalence',
        title.adj = 0,
@@ -2738,7 +2791,7 @@ title(paste0("Prevalence of Cumulative COVID-19 Deaths\n",
       adj = 0, cex.main = 1)
 
 title(paste0("\n",
-             "King County (as of Aug. 30, 2021)"),
+             "King County (as of Oct. 18, 2021)"),
       font.main = 1, outer = FALSE,
       adj = 0, cex.main = 1)
 dev.off()
@@ -2774,6 +2827,12 @@ plot(hra,
      col = dist.col.hra,
      border = 'grey48', lwd = .25,
      main = "")
+for(poly in which(hra@data$ImpactArea)){
+  points <- hra@polygons[[poly]]@Polygons[[1]]@coords
+  polygon(points[,1], points[,2],
+          border = 'white',
+          lwd = 2)
+}
 legend('bottomleft',
        title = 'Distribution',
        title.adj = 0,
@@ -2789,7 +2848,7 @@ title(paste0("Distribution of Cumulative COVID-19 Deaths\n",
       adj = 0, cex.main = 1)
 
 title(paste0("\n",
-             "King County (as of Aug. 30, 2021)"),
+             "King County (as of Oct. 18, 2021)"),
       font.main = 1, outer = FALSE,
       adj = 0, cex.main = 1)
 dev.off()
@@ -2798,7 +2857,7 @@ dev.off()
 ## 65+ / < 14 ####
 
 for(year in c(2010, 2012, 2015,
-              2017, 2020)){
+              2017, 2020)[5]){
   
   load(paste0('../Data/pop_', 
               year, '_OFM.rda'))  
@@ -2840,6 +2899,10 @@ for(year in c(2010, 2012, 2015,
               5000, 7500, 10000,
               15000, 21000)
   
+  pop.int.hra <- classIntervals(hra_age_pop$PopOver65,
+                                style = 'jenks',
+                                n = 9)
+  pop.col.hra <- findColours(pop.int.hra, pop.pal)
   #### Over 65 ####
   jpeg(paste0("../PopPlots/", 
               year, "/OFM_Ages/OFM_",
@@ -2854,6 +2917,12 @@ for(year in c(2010, 2012, 2015,
          col = pop.col.hra,
          border = 'grey48', lwd = .25,
          main = "")
+    for(poly in which(hra@data$ImpactArea)){
+      points <- hra@polygons[[poly]]@Polygons[[1]]@coords
+      polygon(points[,1], points[,2],
+              border = 'white',
+              lwd = 2)
+    }
     legend('bottomleft',
            title = 'Population',
            title.adj = 0,
@@ -2900,6 +2969,12 @@ for(year in c(2010, 2012, 2015,
          col = pop.col.hra,
          border = 'grey48', lwd = .25,
          main = "")
+    for(poly in which(hra@data$ImpactArea)){
+      points <- hra@polygons[[poly]]@Polygons[[1]]@coords
+      polygon(points[,1], points[,2],
+              border = 'white',
+              lwd = 2)
+    }
     legend('bottomleft',
            title = 'Population',
            title.adj = 0,
@@ -2946,6 +3021,12 @@ for(year in c(2010, 2012, 2015,
          col = pop.col.hra,
          border = 'grey48', lwd = .25,
          main = "")
+    for(poly in which(hra@data$ImpactArea)){
+      points <- hra@polygons[[poly]]@Polygons[[1]]@coords
+      polygon(points[,1], points[,2],
+              border = 'white',
+              lwd = 2)
+    }
     legend('bottomleft',
            title = 'Population',
            title.adj = 0,
@@ -3016,6 +3097,12 @@ for(year in c(2010, 2012, 2015,
          col = prev.col.hra,
          border = 'grey48', lwd = .25,
          main = "")
+    for(poly in which(hra@data$ImpactArea)){
+      points <- hra@polygons[[poly]]@Polygons[[1]]@coords
+      polygon(points[,1], points[,2],
+              border = 'white',
+              lwd = 2)
+    }
     legend('bottomleft',
            title = 'Prevalence',
            title.adj = 0,
@@ -3058,6 +3145,12 @@ for(year in c(2010, 2012, 2015,
          col = prev.col.hra,
          border = 'grey48', lwd = .25,
          main = "")
+    for(poly in which(hra@data$ImpactArea)){
+      points <- hra@polygons[[poly]]@Polygons[[1]]@coords
+      polygon(points[,1], points[,2],
+              border = 'white',
+              lwd = 2)
+    }
     legend('bottomleft',
            title = 'Prevalence',
            title.adj = 0,
@@ -3121,6 +3214,12 @@ for(year in c(2010, 2012, 2015,
          col = prev.col.hra,
          border = 'grey48', lwd = .25,
          main = "")
+    for(poly in which(hra@data$ImpactArea)){
+      points <- hra@polygons[[poly]]@Polygons[[1]]@coords
+      polygon(points[,1], points[,2],
+              border = 'white',
+              lwd = 2)
+    }
     legend('bottomleft',
            title = 'Distribution',
            title.adj = 0,
@@ -3163,6 +3262,12 @@ for(year in c(2010, 2012, 2015,
          col = prev.col.hra,
          border = 'grey48', lwd = .25,
          main = "")
+    for(poly in which(hra@data$ImpactArea)){
+      points <- hra@polygons[[poly]]@Polygons[[1]]@coords
+      polygon(points[,1], points[,2],
+              border = 'white',
+              lwd = 2)
+    }
     legend('bottomleft',
            title = 'Distribution',
            title.adj = 0,
@@ -3262,6 +3367,12 @@ for(year in c(2010, 2012, 2015,
            col = pop.col.hra,
            border = 'grey48', lwd = .25,
            main = "")
+      for(poly in which(hra@data$ImpactArea)){
+        points <- hra@polygons[[poly]]@Polygons[[1]]@coords
+        polygon(points[,1], points[,2],
+                border = 'white',
+                lwd = 2)
+      }
       legend('bottomleft',
              title = 'Population',
              title.adj = 0,
@@ -3308,6 +3419,12 @@ for(year in c(2010, 2012, 2015,
            col = pop.col.hra,
            border = 'grey48', lwd = .25,
            main = "")
+      for(poly in which(hra@data$ImpactArea)){
+        points <- hra@polygons[[poly]]@Polygons[[1]]@coords
+        polygon(points[,1], points[,2],
+                border = 'white',
+                lwd = 2)
+      }
       legend('bottomleft',
              title = 'Population',
              title.adj = 0,
@@ -3378,6 +3495,12 @@ for(year in c(2010, 2012, 2015,
            col = prev.col.hra,
            border = 'grey48', lwd = .25,
            main = "")
+      for(poly in which(hra@data$ImpactArea)){
+        points <- hra@polygons[[poly]]@Polygons[[1]]@coords
+        polygon(points[,1], points[,2],
+                border = 'white',
+                lwd = 2)
+      }
       legend('bottomleft',
              title = 'Prevalence',
              title.adj = 0,
@@ -3422,6 +3545,12 @@ for(year in c(2010, 2012, 2015,
            col = prev.col.hra,
            border = 'grey48', lwd = .25,
            main = "")
+      for(poly in which(hra@data$ImpactArea)){
+        points <- hra@polygons[[poly]]@Polygons[[1]]@coords
+        polygon(points[,1], points[,2],
+                border = 'white',
+                lwd = 2)
+      }
       legend('bottomleft',
              title = 'Prevalence',
              title.adj = 0,
@@ -3485,6 +3614,12 @@ for(year in c(2010, 2012, 2015,
            col = prev.col.hra,
            border = 'grey48', lwd = .25,
            main = "")
+      for(poly in which(hra@data$ImpactArea)){
+        points <- hra@polygons[[poly]]@Polygons[[1]]@coords
+        polygon(points[,1], points[,2],
+                border = 'white',
+                lwd = 2)
+      }
       legend('bottomleft',
              title = 'Distribution',
              title.adj = 0,
@@ -3529,6 +3664,12 @@ for(year in c(2010, 2012, 2015,
            col = prev.col.hra,
            border = 'grey48', lwd = .25,
            main = "")
+      for(poly in which(hra@data$ImpactArea)){
+        points <- hra@polygons[[poly]]@Polygons[[1]]@coords
+        polygon(points[,1], points[,2],
+                border = 'white',
+                lwd = 2)
+      }
       legend('bottomleft',
              title = 'Distribution',
              title.adj = 0,
@@ -3603,7 +3744,7 @@ jpeg(paste0("../COVIDPlots/Barplot_Race_",
   
   title(paste0("\n",
                "King County, ",
-               race, "(as of Aug. 30, 2021)"),
+               race, "(as of Oct. 18, 2021)"),
         font.main = 1, outer = FALSE,
         adj = 0, cex.main = 1)
 }
@@ -3663,7 +3804,7 @@ for(city in cities){
     
     title(paste0("\n",
                  city, ", ",
-                 race, "(as of Aug. 30, 2021)"),
+                 race, "(as of Oct. 18, 2021)"),
           font.main = 1, outer = FALSE,
           adj = 0, cex.main = 1)
   }

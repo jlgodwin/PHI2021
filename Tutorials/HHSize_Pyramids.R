@@ -47,9 +47,9 @@ hh_tract <- readRDS(paste0('../household_size/',
 # hh_hra_smoothed <- readRDS(paste0('../household_size/',
 #                                   'Report_estimates/',
 #                                   'average_hh_size_renters_hra.RDS'))
-# hh_kc_preds <- readRDS(paste0('../household_size/',
-#                               'Report_estimates/',
-#                               'housing_indicators_kc_preds.rds'))
+hh_kc_preds <- readRDS(paste0('../household_size/',
+                              'Report_estimates/',
+                              'housing_indicators_kc_preds.rds'))
 
 ## Census tracts ####
 
