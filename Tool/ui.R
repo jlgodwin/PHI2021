@@ -114,13 +114,23 @@ ui <- dashboardPage(
         h1(
           HTML("Exploring King County"),
           br(),
+          align = "left"
+        ),
+        br(),
+        h2(
           HTML("Our Population & Households"),
           align = "left"
         ),
         br(),
         
-        h2(HTML("Project Overview")),
-        p(HTML("Population & Housing Trends in King County:\n Growth and Vulnerabilities")),
+        h2(
+          HTML("Project Overview"),
+          align = "left"
+        ),
+        
+        p(HTML("<b>Population & Housing Trends in King County:</b>"),
+        br(),
+        HTML("Growth and Vulnerabilities")),
         br(),
         
         p(HTML("For an overview of our project, download this <a target='_blank' href='./docs/uw_forecast_2045_slide_deck.pdf'>slide deck</a>. For more information about our methodology, please read our  <a target='_blank' href='http://population-dynamics-lab.csde.washington.edu:8080/kc_forecast_2045/docs/uw_forecast_2045_technical_report.pdf'>technical report</a>. Visit our <a class='clickable_text' onclick='openTab(\"guide_tab\");' style='cursor:pointer;'>User Guide</a> for directions on using our <a class='clickable_text' onclick='openTab(\"viz_tab\");' style='cursor:pointer;'>interactive map</a>.")),
