@@ -15,10 +15,10 @@ library(shinyBS)
 source("./00_utils.R")
 # Updated as of 9.9
 ui <- dashboardPage(
-  title = "Exploring Our Future - King County Forecasts to 2045",
+  title = "Exploring King County: Our Population & Households",
   
   header = dashboardHeader(
-    title = "King County Forecasts to 2045",
+    title = "Exploring King County: Our Population & Households",
     titleWidth = 330
   ),
   
@@ -133,7 +133,7 @@ ui <- dashboardPage(
         HTML("Growth and Vulnerabilities")),
         br(),
         
-        p(HTML("For an overview of our project, download this <a target='_blank' href='./docs/uw_forecast_2045_slide_deck.pdf'>slide deck</a>. For more information about our methodology, please read our  <a target='_blank' href='http://population-dynamics-lab.csde.washington.edu:8080/kc_forecast_2045/docs/uw_forecast_2045_technical_report.pdf'>technical report</a>. Visit our <a class='clickable_text' onclick='openTab(\"guide_tab\");' style='cursor:pointer;'>User Guide</a> for directions on using our <a class='clickable_text' onclick='openTab(\"viz_tab\");' style='cursor:pointer;'>interactive map</a>.")),
+        p(HTML("For an overview of our project, download this <a target='_blank' href='./docs/PHI2021_Pop_and_Housing.pdf'>slide deck</a>. For more information about our methodology, please read our  <a target='_blank' href='http://population-dynamics-lab.csde.washington.edu:8080/kc_forecast_2045/docs/uw_forecast_2045_technical_report.pdf'>technical report</a>. Visit our <a class='clickable_text' onclick='openTab(\"guide_tab\");' style='cursor:pointer;'>User Guide</a> for directions on using our <a class='clickable_text' onclick='openTab(\"viz_tab\");' style='cursor:pointer;'>interactive map</a>.")),
         br(),
   
         p(HTML("Please contact <a target='_blank' href='mailto:csde@uw.edu'>csde@uw.edu</a> if you have any questions."))

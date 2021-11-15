@@ -4,46 +4,46 @@ library(shiny)
 # check if required files exist; if not, download the files and save locally
 # Updated as of 9.9
 # King County census tract GIS data
-if (!file.exists("./data/kc_tract.json")) {
+if (!file.exists("./Data/kc_tract.json")) {
     download_kc_tract()
-    while (!file.exists("./data/kc_tract.json")) {
+    while (!file.exists("./Data/kc_tract.json")) {
         Sys.sleep(1)
     }
 }
 
 # King County public clinics GIS data
-if (!file.exists("./data/kc_public_clinics.json")) {
+if (!file.exists("./Data/kc_public_clinics.json")) {
     download_kc_public_clinics()
-    while (!file.exists("./data/kc_public_clinics.json")) {
+    while (!file.exists("./Data/kc_public_clinics.json")) {
         Sys.sleep(1)
     }
     
 }
 
 # King County school sites GIS data
-if (!file.exists("./data/kc_schools.json")) {
+if (!file.exists("./Data/kc_schools.json")) {
     download_kc_schools()
-    while (!file.exists("./data/kc_schools.json")) {
+    while (!file.exists("./Data/kc_schools.json")) {
         Sys.sleep(1)
     }
     
 }
 
 # load census tract GIS data
-kc_tract_spdf <- readOGR("./data/kc_tract.json")
+kc_tract_spdf <- readOGR("./Data/kc_tract.json")
 
 # load health reporting area GIS data
-kc_hra_spdf <- readOGR("./data/kc_hra.json")
+kc_hra_spdf <- readOGR("./Data/kc_hra.json")
 
 # load transit line data
-kc_tl_2040 <- readOGR("./data/kc_tl_2040.json")
+kc_tl_2040 <- readOGR("./Data/kc_tl_2040.json")
 while (!exists("kc_tl_2040")) {
     Sys.sleep(1)
 }
 
 # load tract-level projections
 tract_proj <- read.csv(
-    file = "./data/tract_age5_race_sex_proj_2000_2045.csv",
+    file = "./Data/tract_age5_race_sex_proj_2000_2045.csv",
     colClasses = c("GEOID" = "character")
 )
 while (!exists("tract_proj")) {
@@ -52,7 +52,7 @@ while (!exists("tract_proj")) {
 
 # ARA_ load tract-level Median Income
 tract_inc <- read.csv(
-    file = "./data/med_inc_tract.csv",
+    file = "./Data/med_inc_tract.csv",
     colClasses = c("GEOID" = "character", "value" = "double")
 )
 while (!exists("tract_inc")) {
@@ -61,7 +61,7 @@ while (!exists("tract_inc")) {
 
 # ARA_edu: load tract-level Education
 tract_edu <- read.csv(
-    file = "./data/tract_edu_attainmentv2.csv",
+    file = "./Data/tract_edu_attainmentv2.csv",
     colClasses = c("GEOID" = "character", "value" = "double")
 )
 while (!exists("tract_edu")) {
@@ -70,7 +70,7 @@ while (!exists("tract_edu")) {
 
 # ARA_rent: Choose variable
 tract_burden <- read.csv(
-    file = "./data/tract_rent_burden_pop.csv",
+    file = "./Data/tract_rent_burden_pop.csv",
     colClasses = c("GEOID" = "character", "value" = "double")
 )
 while (!exists("tract_burden")) {
@@ -80,7 +80,7 @@ while (!exists("tract_burden")) {
 
 # ARA_rent: Choose variable
 tract_RO <- read.csv(
-    file = "./data/tract_RO_population.csv",
+    file = "./Data/tract_RO_population.csv",
     colClasses = c("GEOID" = "character", "value" = "double")
 )
 while (!exists("tract_RO")) {
@@ -88,18 +88,18 @@ while (!exists("tract_RO")) {
 }
 
 tract_transp <- read.csv(
-    file = "./data/tract_transp_age.csv", 
+    file = "./Data/tract_transp_age.csv", 
     colClasses = c("GEOID" = "character", "value" = "double")
 )
 
 tract_med_rent <- read.csv(
-    file = "./data/med_rent_tract.csv", 
+    file = "./Data/med_rent_tract.csv", 
     colClasses = c("GEOID" = "character", "value" = "double")
 )
 
 # load HRA-level projections
 hra_proj <- read.csv(
-    file = "./data/hra_age5_race_sex_proj_2000_2045.csv"
+    file = "./Data/hra_age5_race_sex_proj_2000_2045.csv"
 )
 while (!exists("hra_proj")) {
     Sys.sleep(1)
@@ -438,22 +438,22 @@ server <- function(input, output, session) {
     # render the initial basemap and the public facility layers
     output$map <- renderLeaflet({
         # load community rail station GIS data
-        kc_cr_station_2040 <- readOGR("./data/kc_cr_station_2040.json")
+        kc_cr_station_2040 <- readOGR("./Data/kc_cr_station_2040.json")
         
         # load light rail station GIS data
-        kc_lr_station_2040 <- readOGR("./data/kc_lr_station_2040.json")
+        kc_lr_station_2040 <- readOGR("./Data/kc_lr_station_2040.json")
         
         # load public clinics GIS data
-        kc_public_clinics <- readOGR("./data/kc_public_clinics.json")
+        kc_public_clinics <- readOGR("./Data/kc_public_clinics.json")
         
         # load Women, Infant and Children Services GIS data
-        kc_wic <- readOGR("./data/kc_wic.json")
+        kc_wic <- readOGR("./Data/kc_wic.json")
         
         # load Community Health Centers GIS data
-        kc_chc <- readOGR("./data/kc_chc.json")
+        kc_chc <- readOGR("./Data/kc_chc.json")
         
         # load school sites data
-        kc_schools <- readOGR("./data/kc_schools.json")
+        kc_schools <- readOGR("./Data/kc_schools.json")
         
         # replace code with the corresponding site type name
         kc_schools <- list(

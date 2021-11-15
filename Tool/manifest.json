@@ -4795,10 +4795,43 @@
       "checksum": "05765c332e459e0c5ff5378f25f3e8da"
     },
     "server.R": {
-      "checksum": "68e99eda1d601f1d3ffda867e01cc9c5"
+      "checksum": "8ecd22be175c3dbbaffa65511c5a7d6b"
+    },
+    "SupportingMaterial/.DS_Store": {
+      "checksum": "fa8f1e3231fa12e922d9697885b46f6f"
+    },
+    "SupportingMaterial/csde_logo.gif": {
+      "checksum": "78b5761cfa1de73cdf41e431fe95a5d8"
+    },
+    "SupportingMaterial/custom.css": {
+      "checksum": "73cfce12cbef1456243442a8d0b05c32"
+    },
+    "SupportingMaterial/docs/PHI2021_Pop_and_Housing.pdf": {
+      "checksum": "1f11589e584f2edde5e0e410b0641534"
+    },
+    "SupportingMaterial/docs/uw_forecast_2045_slide_deck.pdf": {
+      "checksum": "bcf853c7d9e2b66a62a84947d85a763a"
+    },
+    "SupportingMaterial/docs/uw_forecast_2045_technical_report.pdf": {
+      "checksum": "91f39e087ed9dfce25e49ba2d630633e"
+    },
+    "SupportingMaterial/docs/uw_forecast_2045_user_guide.pdf": {
+      "checksum": "2c709192d178abd9de1cd9bb0db24c52"
+    },
+    "SupportingMaterial/percentage_explanation.png": {
+      "checksum": "e9cfc0a3eabdec4738a1bc2a40e33a05"
+    },
+    "SupportingMaterial/phi_viz_guide.mp4": {
+      "checksum": "c302365689b0c83c83b988f2cb4acfe8"
+    },
+    "SupportingMaterial/pop_patch.js": {
+      "checksum": "5e80d3264751a671428491875f38de2a"
+    },
+    "SupportingMaterial/uw_logo.png": {
+      "checksum": "9b88de24ba631131d269e895d88e105f"
     },
     "ui.R": {
-      "checksum": "488f303c0679feae92053789821e6272"
+      "checksum": "47b4ccc3d4abe24e6058b841d2d3129a"
     }
   },
   "users": null
