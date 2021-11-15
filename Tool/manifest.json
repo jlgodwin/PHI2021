@@ -4734,11 +4734,53 @@
     }
   },
   "files": {
+    "00_utils.R": {
+      "checksum": "964beec9fac45f4a6b5ef0303c8f9982"
+    },
+    "Data/.DS_Store": {
+      "checksum": "194577a7e20bdcc7afbb718f502c134c"
+    },
+    "Data/hra_age5_race_sex_proj_2000_2045.csv": {
+      "checksum": "92f71de741adf499f06cd06551c1cf74"
+    },
+    "Data/hra_race_projections.csv": {
+      "checksum": "c4dc2431587b6c3858a83c201fec1cc2"
+    },
+    "Data/kc_chc.json": {
+      "checksum": "95ab3855d67016db4218b47b28097fae"
+    },
+    "Data/kc_cr_station_2040.json": {
+      "checksum": "aa33f25e180e12536640e5c5d817db0e"
+    },
+    "Data/kc_hra.json": {
+      "checksum": "bb108172d1f8f496bfa7dd8019e6fbd2"
+    },
+    "Data/kc_lr_station_2040.json": {
+      "checksum": "665d395641927d9468a86c886273c869"
+    },
+    "Data/kc_public_clinics.json": {
+      "checksum": "bbf1e97e608a41cc23c99133d18a49c3"
+    },
+    "Data/kc_schools.json": {
+      "checksum": "02ad860979ecac930b06562d0845cd42"
+    },
+    "Data/kc_tl_2040.json": {
+      "checksum": "34a2c1f4e2e8a807e9762330105995f1"
+    },
+    "Data/kc_tract.json": {
+      "checksum": "2aa00f69d5dbc94b6c3fff4080ab8c94"
+    },
+    "Data/kc_wic.json": {
+      "checksum": "54512818d38b92b9796588675e4cc1f7"
+    },
     "Data/med_inc_tract.csv": {
       "checksum": "ff7195723da3862001e8cc64f1149ff4"
     },
     "Data/med_rent_tract.csv": {
       "checksum": "56d016805c7859d8da4a15af3d689edb"
+    },
+    "Data/tract_age5_race_sex_proj_2000_2045.csv": {
+      "checksum": "1e2f3b0093af7f55dd09a1cf69601312"
     },
     "Data/tract_edu_attainmentv2.csv": {
       "checksum": "d43f026fe93f9c67f5a431a3c0b687b8"

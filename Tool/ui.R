@@ -112,13 +112,13 @@ ui <- dashboardPage(
         tags$style(type='text/css', "p {font-size: 16px !important} li {font-size: 16px !important}"),
         
         h1(
-          HTML("Exploring our Future - King County Forecasts to 2045"),
+          HTML("Exploring King County: Our Population & Households"),
           align = "center"
         ),
         br(),
         
         h2(HTML("Project Overview")),
-        p(HTML("Exploring our Future – King County Forecasts to 2045 provides small area population projections at the Census tract and Health Reporting Area levels for King County by age, race and ethnicity, and sex. These projections are for each five-year interval from 2020-2045. To view our estimates, visit our interactive map.")),
+        p(HTML("Population & Housing Trends in King County:\n Growth and Vulnerabilities")),
         br(),
         
         p(HTML("For an overview of our project, download this <a target='_blank' href='./docs/uw_forecast_2045_slide_deck.pdf'>slide deck</a>. For more information about our methodology, please read our  <a target='_blank' href='http://population-dynamics-lab.csde.washington.edu:8080/kc_forecast_2045/docs/uw_forecast_2045_technical_report.pdf'>technical report</a>. Visit our <a class='clickable_text' onclick='openTab(\"guide_tab\");' style='cursor:pointer;'>User Guide</a> for directions on using our <a class='clickable_text' onclick='openTab(\"viz_tab\");' style='cursor:pointer;'>interactive map</a>.")),

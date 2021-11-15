@@ -345,10 +345,10 @@ merge_df_spdf <- function(df, spdf) {
 download_kc_tract <- function() {
     # Census Tract data source from King County GIS Open Data API
     # https://gis-kingcounty.opendata.arcgis.com/datasets/2010-census-tracts-for-king-county-conflated-to-parcels-major-waterbodies-erased-tracts10-shore-area?geometry=-125.956%2C46.738%2C-118.151%2C48.040
-    kc_tract_spdf <- readLines("https://gisdata.kingcounty.gov/arcgis/rest/services/OpenDataPortal/census___base/MapServer/887/query?where=1%3D1&outFields=GEO_ID_TRT&outSR=4326&f=json")
-    kc_tract_spdf <- readOGR(kc_tract_spdf, verbose = FALSE)
-    colnames(kc_tract_spdf@data)[1] <- "GEOID"
-    writeOGR(kc_tract_spdf, dsn = "./data/kc_tract.json", layer = "kc_tract", driver="GeoJSON", verbose = FALSE)
+    #kc_tract_spdf <- readLines("https://gisdata.kingcounty.gov/arcgis/rest/services/OpenDataPortal/census___base/MapServer/887/query?where=1%3D1&outFields=GEO_ID_TRT&outSR=4326&f=json")
+    #kc_tract_spdf <- readOGR(kc_tract_spdf, verbose = FALSE)
+    #colnames(kc_tract_spdf@data)[1] <- "GEOID"
+    #writeOGR(kc_tract_spdf, dsn = "./Data/kc_tract.json", layer = "kc_tract", driver="GeoJSON", verbose = FALSE)
     
 }
 
@@ -356,7 +356,7 @@ download_kc_public_clinics <- function() {
     # Public Health Clinics data source from King County GIS Open Data API
     # https://gis-kingcounty.opendata.arcgis.com/datasets/public-health-clinics-ph-clinics-point?geometry=-124.257%2C47.186%2C-120.241%2C47.835
     kc_public_clinics <- readLines("https://gisdata.kingcounty.gov/arcgis/rest/services/OpenDataPortal/pubsafe___base/MapServer/178/query?where=1%3D1&outFields=NAME,ADDRESS,ZIPCODE&outSR=4326&f=json")
-    write(kc_public_clinics, file = "./data/kc_public_clinics.json")
+    write(kc_public_clinics, file = "./Data/kc_public_clinics.json")
 }
 
 download_kc_schools <- function() {
@@ -376,7 +376,7 @@ download_kc_schools <- function() {
                 CODE==666 ~ "School - K thru 12"
             )
         )
-    writeOGR(kc_schools, dsn = "./data/kc_schools.json", layer = "kc_schools", driver="GeoJSON", verbose = FALSE)
+    writeOGR(kc_schools, dsn = "./Data/kc_schools.json", layer = "kc_schools", driver="GeoJSON", verbose = FALSE)
 }
 
 # Source of the function
