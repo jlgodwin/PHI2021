@@ -112,8 +112,10 @@ ui <- dashboardPage(
         tags$style(type='text/css', "p {font-size: 16px !important} li {font-size: 16px !important}"),
         
         h1(
-          HTML("Exploring King County: Our Population & Households"),
-          align = "center"
+          HTML("Exploring King County"),
+          br(),
+          HTML("Our Population & Households"),
+          align = "left"
         ),
         br(),
         
