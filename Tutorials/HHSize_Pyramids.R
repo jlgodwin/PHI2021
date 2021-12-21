@@ -139,6 +139,8 @@ pop.cols <- brewer.pal(n = 5,
 
 pop.pyrs <- list()
 
+
+
 ## Pyramids ####
 for(year in c(2010, 2014, 2019)){
   
