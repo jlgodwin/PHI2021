@@ -4,46 +4,46 @@ library(shiny)
 # check if required files exist; if not, download the files and save locally
 # Updated as of 9.9
 # King County census tract GIS data
-if (!file.exists("./Data/kc_tract.json")) {
+if (!file.exists("./data/kc_tract.json")) {
     download_kc_tract()
-    while (!file.exists("./Data/kc_tract.json")) {
+    while (!file.exists("./data/kc_tract.json")) {
         Sys.sleep(1)
     }
 }
 
 # King County public clinics GIS data
-if (!file.exists("./Data/kc_public_clinics.json")) {
+if (!file.exists("./data/kc_public_clinics.json")) {
     download_kc_public_clinics()
-    while (!file.exists("./Data/kc_public_clinics.json")) {
+    while (!file.exists("./data/kc_public_clinics.json")) {
         Sys.sleep(1)
     }
     
 }
 
 # King County school sites GIS data
-if (!file.exists("./Data/kc_schools.json")) {
+if (!file.exists("./data/kc_schools.json")) {
     download_kc_schools()
-    while (!file.exists("./Data/kc_schools.json")) {
+    while (!file.exists("./data/kc_schools.json")) {
         Sys.sleep(1)
     }
     
 }
 
 # load census tract GIS data
-kc_tract_spdf <- readOGR("./Data/kc_tract.json")
+kc_tract_spdf <- readOGR("./data/kc_tract.json")
 
 # load health reporting area GIS data
-kc_hra_spdf <- readOGR("./Data/kc_hra.json")
+kc_hra_spdf <- readOGR("./data/kc_hra.json")
 
 # load transit line data
-kc_tl_2040 <- readOGR("./Data/kc_tl_2040.json")
+kc_tl_2040 <- readOGR("./data/kc_tl_2040.json")
 while (!exists("kc_tl_2040")) {
     Sys.sleep(1)
 }
 
 # load tract-level projections
 tract_proj <- read.csv(
-    file = "./Data/tract_age5_race_sex_proj_2000_2045.csv",
+    file = "./data/tract_age5_race_sex_proj_2000_2045.csv",
     colClasses = c("GEOID" = "character")
 )
 while (!exists("tract_proj")) {
@@ -52,7 +52,7 @@ while (!exists("tract_proj")) {
 
 # ARA_ load tract-level Median Income
 tract_inc <- read.csv(
-    file = "./Data/med_inc_tract.csv",
+    file = "./data/med_inc_tract.csv",
     colClasses = c("GEOID" = "character", "value" = "double")
 )
 while (!exists("tract_inc")) {
@@ -61,7 +61,7 @@ while (!exists("tract_inc")) {
 
 # ARA_edu: load tract-level Education
 tract_edu <- read.csv(
-    file = "./Data/tract_edu_attainmentv2.csv",
+    file = "./data/tract_edu_attainmentv2.csv",
     colClasses = c("GEOID" = "character", "value" = "double")
 )
 while (!exists("tract_edu")) {
@@ -70,17 +70,21 @@ while (!exists("tract_edu")) {
 
 # ARA_rent: Choose variable
 tract_burden <- read.csv(
-    file = "./Data/tract_rent_burden_pop.csv",
+    file = "./data/tract_rent_burden_pop.csv",
     colClasses = c("GEOID" = "character", "value" = "double")
 )
 while (!exists("tract_burden")) {
     Sys.sleep(1)
 }
 
+hra_burden <- read.csv(
+    file = "./data/burden_hra.csv",
+    colClasses = c("GEOID" = "character", "value" = "double")
+)
 
 # ARA_rent: Choose variable
 tract_RO <- read.csv(
-    file = "./Data/tract_RO_population.csv",
+    file = "./data/tract_RO_population.csv",
     colClasses = c("GEOID" = "character", "value" = "double")
 )
 while (!exists("tract_RO")) {
@@ -88,18 +92,18 @@ while (!exists("tract_RO")) {
 }
 
 tract_transp <- read.csv(
-    file = "./Data/tract_transp_age.csv", 
+    file = "./data/tract_transp_age.csv", 
     colClasses = c("GEOID" = "character", "value" = "double")
 )
 
 tract_med_rent <- read.csv(
-    file = "./Data/med_rent_tract.csv", 
+    file = "./data/med_rent_tract.csv", 
     colClasses = c("GEOID" = "character", "value" = "double")
 )
 
 # load HRA-level projections
 hra_proj <- read.csv(
-    file = "./Data/hra_age5_race_sex_proj_2000_2045.csv"
+    file = "./data/hra_age5_race_sex_proj_2000_2045.csv"
 )
 while (!exists("hra_proj")) {
     Sys.sleep(1)
@@ -256,8 +260,14 @@ server <- function(input, output, session) {
             }
             
         } else {
+            if(var_reactive() == "Rent Burden"){
+                selected_df<- hra_burden %>%
+                    filter(Year %in% year_reactive())
+            }
+            else if (var_reactive() == "population"){
             selected_df <- hra_proj %>%
                 filter(Year %in% year_reactive())
+            }
             
         } 
 
@@ -269,24 +279,26 @@ server <- function(input, output, session) {
                     value = round(value / sum(value) * 10^4) / 10^2
                 ) %>%
                 ungroup() 
-        } else if (measure_reactive() == "Distribution"){
-            selected_df <- selected_df %>%
-                # group_by(Race, Sex, Age5, )
-                mutate(
-                    value = round(value / sum(value) * 10^4) / 10^2
-                ) %>%
-                ungroup()
-        }
+        } 
+        # else if (measure_reactive() == "Distribution"){
+        #     selected_df <- selected_df %>%
+        #         # group_by(Race, Sex, Age5, )
+        #         mutate(
+        #             value = round(value / sum(value) * 10^4) / 10^2
+        #         ) %>%
+        #         ungroup()
+        # }
         
 #ARA: These filter by user-inputted variable specific demographics
-        if (geo_reactive()) {
+       
             if (var_reactive() == "Population"){
                 selected_df <- selected_df %>%
                     filter(Sex %in% sex_reactive(),
                            Race %in% race_reactive(),
                            Age5 %in% age_reactive())%>%
                     group_by(GEOID) %>%
-                    summarize(value = sum(value))
+                    summarize(value = sum(value),
+                              moe = sum(moe))
                 
             }
             else if (var_reactive() == "Education Level"){
@@ -295,7 +307,8 @@ server <- function(input, output, session) {
                            Sex %in% sex_reactive(),
                            Race %in% race_reactive()) %>%
                     group_by(GEOID) %>%
-                    summarize(value = sum(value))
+                    summarize(value = sum(value),
+                              moe = sum(moe))
                 
             }            
             else if (var_reactive() == "Rent Burden"){
@@ -303,26 +316,67 @@ server <- function(input, output, session) {
                     
                     filter(short_label %in% rent_reactive())%>%
                     group_by(GEOID) %>%
-                    summarize(value = sum(value))
+                    summarize(value = sum(value),
+                              moe = sum(moe)) 
                 
             }
             else if (var_reactive() == "Household Size") {
                 selected_df <- selected_df %>%
                     filter(short_label %in% tenure_reactive()) %>%
                     group_by(GEOID) %>%
-                    summarize(value = sum(value))
+                    summarize(value = sum(value),
+                              moe = sum(moe))
             }
             #Need to Add Race to csv in order to filter by it/maybe add median agee too or just establish another pipeline for an age-specific csv
             else if (var_reactive() == "Methods of Transportation to Work - Median Age"){
                 selected_df <- selected_df %>%
-                    filter(short_label %in% transp_reactive())
+                    filter(short_label %in% transp_reactive())  %>%
+                    group_by(GEOID) %>%
+                    summarize(value = sum(value),
+                              moe = sum(moe))
             }
-        } else {
+         
+        #HRA Var Reactives go here
+        else if (var_reactive() == "Rent Burden"){
             selected_df <- selected_df %>%
-                filter(Year %in% year_reactive())%>%
+                filter(short_label %in% rent_reactive())%>%
                 group_by(GEOID) %>%
-                summarize(value = sum(value))
+                summarize(value = sum(value),
+                          moe = sum(moe))
+            
+        }
+        
+        if (measure_reactive() == "Value") {
+            selected_df <- selected_df %>%
+                mutate(
+                    SE = moe/qnorm(.95)
+                ) %>%
+                ungroup() 
         } 
+        else if (measure_reactive() == "Count") {
+            selected_df <- selected_df %>%
+                mutate(
+                    SE = moe/qnorm(.95)
+                ) %>%
+                ungroup() 
+        }
+        else if (measure_reactive() == "Prevalence") {
+            selected_df <- selected_df %>%
+                mutate(
+                    moe = round(moe / sum(moe) * 10^4) / 10^2,
+                    SE = round(moe/qnorm(.95) * 10^4) / 10^2
+                ) %>%
+                ungroup() 
+        }
+        else if (measure_reactive() == "Distribution"){
+            selected_df <- selected_df %>%
+                mutate(
+                    value = round(value / sum(value) * 10^4) / 10^2,
+                    moe = round(moe / sum(moe) * 10^4) / 10^2,
+                    SE = round(moe/qnorm(.95) * 10^4) / 10^2
+                ) %>%
+                ungroup()
+        }
         
         
         # if "Prevalence" and the whole population are selected, the calculation
@@ -398,32 +452,38 @@ server <- function(input, output, session) {
                 "HRA Name: "
             ),
             "<strong>%s</strong><br/>",
+
             # ARA_ Created branches to account for possibility of other measures and created diff popup displays forr diff vars
             if(input$measure_type == "Count"){
                 
-                    "Number of Individuals: <strong>%g</strong>"
+                    "Number of Individuals: <strong>%g</strong><br/>"
                 
             } 
-            
             else if (input$measure_type == "Value"){
                 if (var_reactive() == "Median Income"){
-                    "Median Income: $<strong>%g</strong>"
+                    "Median Income: $<strong>%g</strong><br/>"
                 }
                 
-                if (var_reactive() == "Methods of Transportation to Work - Median Age"){
-                    "Median Age: <strong>%g</strong>"
+                else if (var_reactive() == "Methods of Transportation to Work - Median Age"){
+                    "Median Age: <strong>%g</strong><br/>"
                 }
                 
                 else if (var_reactive() == "Median Gross Rent"){
-                    "Median Gross Rent: $<strong>%g</strong>"
+                    "Median Gross Rent: $<strong>%g</strong><br/>"
                 }
-                
+
             }
             
             else if (input$measure_type == "Prevalence"){
-                "Prevalence: <strong>%g %%</strong>"
+                "Prevalence: <strong>%g %%</strong><br/>"
             }
-
+            
+            else if (input$measure_type == "Distribution"){
+                "Distribution: <strong>%g %%</strong><br/>"
+            }
+            ,
+            "SE: <strong>%f</strong>"
+            
         )
     })
     
@@ -438,22 +498,22 @@ server <- function(input, output, session) {
     # render the initial basemap and the public facility layers
     output$map <- renderLeaflet({
         # load community rail station GIS data
-        kc_cr_station_2040 <- readOGR("./Data/kc_cr_station_2040.json")
+        kc_cr_station_2040 <- readOGR("./data/kc_cr_station_2040.json")
         
         # load light rail station GIS data
-        kc_lr_station_2040 <- readOGR("./Data/kc_lr_station_2040.json")
+        kc_lr_station_2040 <- readOGR("./data/kc_lr_station_2040.json")
         
         # load public clinics GIS data
-        kc_public_clinics <- readOGR("./Data/kc_public_clinics.json")
+        kc_public_clinics <- readOGR("./data/kc_public_clinics.json")
         
         # load Women, Infant and Children Services GIS data
-        kc_wic <- readOGR("./Data/kc_wic.json")
+        kc_wic <- readOGR("./data/kc_wic.json")
         
         # load Community Health Centers GIS data
-        kc_chc <- readOGR("./Data/kc_chc.json")
+        kc_chc <- readOGR("./data/kc_chc.json")
         
         # load school sites data
-        kc_schools <- readOGR("./Data/kc_schools.json")
+        kc_schools <- readOGR("./data/kc_schools.json")
         
         # replace code with the corresponding site type name
         kc_schools <- list(
@@ -854,7 +914,8 @@ server <- function(input, output, session) {
                     label = sprintf(
                         popup_text_reactive(),
                         sp$GEOID,
-                        sp$value
+                        sp$value,
+                        sp$SE
                     ) %>%
                         lapply(htmltools::HTML),
                     labelOptions = labelOptions(
@@ -915,7 +976,8 @@ server <- function(input, output, session) {
                     label = sprintf(
                         popup_text_reactive(),
                         sp$GEOID,
-                        sp$value
+                        sp$value,
+                        sp$SE
                     ) %>%
                         lapply(htmltools::HTML),
                     labelOptions = labelOptions(
@@ -952,379 +1014,380 @@ server <- function(input, output, session) {
     
     
     #-----------------plot----------
-    clicked_geo <- reactiveValues(df = NULL)
-
-    # if not clicking on a polygon, remove the clicked polygon info
-    observeEvent(input$map_click,
-                 {
-                     print(paste("MAP", input$map_click))
-                     clicked_geo$df <- NULL
-                 },
-                 priority = 100
-    )
-
-    # if clicking on a polygon, save the clicked polygon info
-    observeEvent(input$map_shape_click,
-                 {
-                     print(paste("MAP SHAPE", input$map_shape_click))
-                     if (!is.null(input$map_shape_click$id)) {
-                        if (geo_reactive()) {
-                            clicked_geo$df <- tract_proj %>%
-                                filter(GEOID == input$map_shape_click$id)
-                        } else {
-                            clicked_geo$df <- hra_proj %>%
-                                filter(GEOID == input$map_shape_click$id)
-                        }
-                    }
-                 },
-                 priority = 99
-    )
-
-    # generate a dataframe for the line chart
-    df_reactive <- reactive({
-        # used the clicked polygon
-        df <- clicked_geo$df
-
-        # if no polygon is clicked, use the county total data
-        if (is.null(df)) {
-            if (geo_reactive()) {
-                df <- tract_proj
-            } else {
-                df <- hra_proj
-            }
-        }
-# ARA: trying to comment out GEOID selection here so I can execute dist calc
- df <- df %>%
-     select(-GEOID)
-
-        # calculate the data based on user input; similar to the process in sp_reactive()
-        if (measure_reactive() == "Count") {
-            df <- df %>%
-                group_by(Year, Age5, Sex, Race) %>%
-                summarize(value = sum(value))
-        } else if (measure_reactive() == "Prevalence") {
-
-            df <- df %>%
-                group_by(Year, Age5, Sex, Race) %>%
-                summarize(value = sum(value)) %>%
-                group_by(Year) %>%
-                mutate(
-                    Prevalence = round(value / sum(value) * 100, 2)
-                ) %>%
-                select(-value)
-             colnames(df)[6] <- "value"
-        }
-
-        df <- df %>%
-            filter(
-                Age5 %in% age_reactive(),
-                Sex %in% sex_reactive()
-            ) %>%
-            group_by(Year, Race) %>%
-            summarize(value = sum(value))
-
-        # add rows for the total population of all race and ethnicity categories
-        df <- rbind(
-            df %>%
-                mutate(Race = "Total") %>%
-                group_by(Year, Race) %>%
-                summarize(value = sum(value)) %>%
-                arrange(Year),
-            df %>%
-                arrange(Race, Year)
-        )
-
-        df
-    })
-
-
-    output$plot <- renderPlotly({
-        df <- df_reactive()
-
-        yr = as.integer(year_reactive())
-
-
-        P <- plot_ly(
-            type = "scatter",
-            mode = "lines"
-        ) %>%
-            # add the vertical dash line at 2020
-            layout(
-                yaxis = list(rangemode = "tozero"),
-                shapes = list(
-                    list(
-                        type = "line",
-                        y0 = 0,
-                        y1 = 1,
-                        yref = "paper",
-                        x0 = 2020,
-                        x1 = 2020,
-                        line = list(
-                            dash = "dash",
-                            width = 2,
-                            color = "black"
-                        )
-                    )
-                )
-            )
-
-        # pre-define the colors for drawing lines for different race and ethnicity categories
-        col_pal <- c(
-            c(
-                "rgba(1,1,1,1)",
-                "rgba(127,201,127,1)",
-                "rgba(190,174,212,1)",
-                "rgba(253,192,134,1)",
-                "rgba(255,255,153,1",
-                "rgba(56,108,176,1)",
-                "rgba(240,2,127,1)",
-                "rgba(191,91,23,1)"
-            )
-        )
-
-        index <- NULL
-        races <- unique(df$Race)
-
-        selected_race <- "Total"
-
-        if (length(race_reactive()) != 7) {
-            selected_race <- race_reactive()
-        }
-
-        # draw the lines for the unselected race and ethnicity categories and hide them first
-        for (i in 1:length(races)) {
-            curr_race <- races[i]
-
-            if (curr_race != selected_race) {
-                pop <- filter(df, Race == curr_race)$value
-
-                P <- add_trace(
-                    P,
-                    x = ~ unique(df$Year),
-                    y = pop,
-                    name = curr_race,
-                    line = list(
-                        color = col_pal[i],
-                        width = 2
-                    ),
-                    visible = "legendonly"
-                )
-            } else {
-                index <- i
-            }
-        }
-
-        temp_yval <- filter(filter(df, Race == selected_race), Year == yr)[["value"]]
-
-        # draw the line for the selected race/ethnicity
-        P <- add_trace(
-            P,
-            x = ~ unique(df$Year),
-            y = ~ filter(df, Race == selected_race)$value,
-            name = selected_race,
-            line = list(
-                color = col_pal[index],
-                width = 4
-            )
-        )
-
-        # add titles
-        P <- layout(
-            P,
-            title = ifelse(
-                is.null(clicked_geo$df),
-                "County-Level Population of the Selected Groups",
-                paste0(
-                    "Population of the Selected Groups, Selected ",
-                    ifelse(
-                        geo_reactive(),
-                        "Tract (GEOID: ",
-                        "HRA ("
-                    ),
-                    clicked_geo$df$GEOID[1],
-                    ")"
-                )
-            ),
-            xaxis = list(
-                title = "Year",
-                tickformat = "K"
-            ),
-            yaxis = list(
-                title = ifelse(
-                    measure_reactive() == "Count",
-                    "Population",
-                    "Population (%)"
-                )
-            )
-        )
-
-        P
-    })
-
-    # generate a button for going back to the county-level data if a polygon is clicked
-    output$reset_chart_button <- renderUI(
-        if (!is.null(clicked_geo$df)) {
-            actionButton(
-                inputId = "reset_line_chart",
-                label = "Go Back to County-Level Data"
-            )
-        }
-    )
-
-    # generate a button for quickly selecting all age groups when not all age groups are selected
-    output$all_age_button <- renderUI(
-        if (length(age_reactive()) != 18) {
-            actionButton(
-                inputId = "all_age",
-                label = "Select All Age Groups"
-            )
-        }
-    )
-
-    # if "Select All Age Groups" button is clicked, update the input
-    observeEvent(input$all_age, {
-        updateSliderTextInput(
-            session,
-            inputId = "age",
-            label = "Age Range",
-            choices = c(seq(0, 85, 5), "85+"),
-            selected = c("0", "85+")
-        )
-    })
-
-    # if "Go Back to County-Level Data" button is clicked, set the clicked polygon to NULL
-    observeEvent(input$reset_line_chart, {
-        clicked_geo$df <- NULL
-    })
-
-    # define the helper text the visualizations
-    selected_charac_html_text <- reactiveValues()
-
-    observe({
-        sex <- "female and male"
-        if (length(sex_reactive()) == 1) {
-            sex <- tolower(sex_reactive())
-        }
-
-        race <- "population of all racial and ethnic groups"
-
-        if (length(race_reactive()) == 1 ) {
-            race <- paste0(race_reactive(), " population")
-        }
-
-        age <- "NA"
-        lower <- "NA"
-        upper <- "NA"
-
-        l = length(age_reactive())
-        if (l != 0) {
-            lower <- str_split(age_reactive()[1], "-")[[1]][1]
-            upper <- age_reactive()[l]
-            if (upper == "85+") {
-                age <- paste0(
-                    "[",
-                    lower,
-                    "-85+)"
-                )
-            } else {
-                upper <- as.integer(str_split(age_reactive()[l], "-")[[1]][2]) + 1
-                age <- paste0(
-                    "[",
-                    lower,
-                    "-",
-                    upper,
-                    ")"
-                )
-            }
-        }
-
-
-        selected_charac_html_text$map <- paste0(
-            "Currently displaying <strong>population ",
-            tolower(measure_reactive()), "s",
-            "</strong> for the <strong>",
-            sex, " ", race,
-            "</strong> aged <strong>",
-            age,
-            "</strong> for the year <strong>",
-            year_reactive(),
-            "</strong> at the <strong>",
-            ifelse(
-                geo_reactive(),
-                "census tract",
-                "HRA"
-            ),
-            "</strong> level."
-        )
-
-        selected_charac_html_text$plot <- paste0(
-            "Currently displaying <strong>population ",
-            tolower(measure_reactive()), "s",
-            "</strong> for the <strong>",
-            sex, " ", race,
-            "</strong> aged <strong>",
-            age,
-            "</strong>."
-        )
-
-        if (length(age_reactive()) == 18) {
-            selected_charac_html_text$age <- "All age groups are selected"
-        } else {
-            if (upper == "85+") {
-                selected_charac_html_text$age <- paste0(
-                    "Selected Age Range: ",
-                    age,
-                    "</br>(i.e. ",
-                    lower,
-                    " ≤ Selected Ages)"
-                )
-            } else {
-                selected_charac_html_text$age <- paste0(
-                    "Selected Age Range: ",
-                    age,
-                    "</br>(i.e. ",
-                    lower,
-                    " ≤ Selected Ages < ",
-                    upper,
-                    ")"
-                )
-            }
-
-        }
-    })
-
-    observe({
-        addTooltip(
-            session,
-            id = "age",
-            title = selected_charac_html_text$age,
-            placement = "top",
-            options = list(html = TRUE)
-        )
-    })
-
-    observe({
-        addTooltip(
-            session,
-            id = "map",
-            title = selected_charac_html_text$map,
-            placement = "right",
-            options = list(html = TRUE)
-        )
-    })
-
-    observe({
-        addTooltip(
-            session,
-            id = "plot",
-            title = selected_charac_html_text$plot,
-            placement = "right",
-            options = list(html = TRUE)
-        )
-    })
+#     clicked_geo <- reactiveValues(df = NULL)
+# 
+#     # if not clicking on a polygon, remove the clicked polygon info
+#     observeEvent(input$map_click,
+#                  {
+#                      print(paste("MAP", input$map_click))
+#                      clicked_geo$df <- NULL
+#                  },
+#                  priority = 100
+#     )
+# 
+#     # if clicking on a polygon, save the clicked polygon info
+#     observeEvent(input$map_shape_click,
+#                  {
+#                      print(paste("MAP SHAPE", input$map_shape_click))
+#                      if (!is.null(input$map_shape_click$id)) {
+#                         if (geo_reactive()) {
+#                             clicked_geo$df <- tract_proj %>%
+#                                 filter(GEOID == input$map_shape_click$id)
+#                         } else {
+#                             clicked_geo$df <- hra_proj %>%
+#                                 filter(GEOID == input$map_shape_click$id)
+#                         }
+#                     }
+#                  },
+#                  priority = 99
+#     )
+# 
+#     # generate a dataframe for the line chart
+#     df_reactive <- reactive({
+#         # used the clicked polygon
+#         df <- clicked_geo$df
+# 
+#         # if no polygon is clicked, use the county total data
+#         if (is.null(df)) {
+#             if (geo_reactive()) {
+#                 df <- tract_proj
+#             } else {
+#                 df <- hra_proj
+#             }
+#         }
+# # ARA: trying to comment out GEOID selection here so I can execute dist calc
+#  df <- df %>%
+#      select(-GEOID)
+# 
+#         # calculate the data based on user input; similar to the process in sp_reactive()
+#         if (measure_reactive() == "Count") {
+#             df <- df %>%
+#                 group_by(Year, Age5, Sex, Race) %>%
+#                 summarize(value = sum(value))
+#         } else if (measure_reactive() == "Prevalence") {
+# 
+#             df <- df %>%
+#                 group_by(Year, Age5, Sex, Race) %>%
+#                 summarize(value = sum(value)) %>%
+#                 group_by(Year) %>%
+#                 mutate(
+#                     Prevalence = round(value / sum(value) * 100, 2)
+#                 ) %>%
+#                 select(-value)
+#              colnames(df)[6] <- "value"
+#         }
+# 
+#         df <- df %>%
+#             filter(
+#                 Age5 %in% age_reactive(),
+#                 Sex %in% sex_reactive()
+#             ) %>%
+#             group_by(Year, Race) %>%
+#             summarize(value = sum(value))
+# 
+#         # add rows for the total population of all race and ethnicity categories
+#         df <- rbind(
+#             df %>%
+#                 mutate(Race = "Total") %>%
+#                 group_by(Year, Race) %>%
+#                 summarize(value = sum(value)) %>%
+#                 arrange(Year),
+#             df %>%
+#                 arrange(Race, Year)
+#         )
+# 
+#         df
+#     })
+# 
+# 
+#     output$plot <- renderPlotly({
+#         df <- df_reactive()
+# 
+#         yr = as.integer(year_reactive())
+# 
+# 
+#         P <- plot_ly(
+#             type = "scatter",
+#             mode = "lines"
+#         ) %>%
+#             # add the vertical dash line at 2020
+#             layout(
+#                 yaxis = list(rangemode = "tozero"),
+#                 shapes = list(
+#                     list(
+#                         type = "line",
+#                         y0 = 0,
+#                         y1 = 1,
+#                         yref = "paper",
+#                         x0 = 2020,
+#                         x1 = 2020,
+#                         line = list(
+#                             dash = "dash",
+#                             width = 2,
+#                             color = "black"
+#                         )
+#                     )
+#                 )
+#             )
+# 
+#         # pre-define the colors for drawing lines for different race and ethnicity categories
+#         col_pal <- c(
+#             c(
+#                 "rgba(1,1,1,1)",
+#                 "rgba(127,201,127,1)",
+#                 "rgba(190,174,212,1)",
+#                 "rgba(253,192,134,1)",
+#                 "rgba(255,255,153,1",
+#                 "rgba(56,108,176,1)",
+#                 "rgba(240,2,127,1)",
+#                 "rgba(191,91,23,1)"
+#             )
+#         )
+# 
+#         index <- NULL
+#         races <- unique(df$Race)
+# 
+#         selected_race <- "Total"
+# 
+#         if (length(race_reactive()) != 7) {
+#             selected_race <- race_reactive()
+#         }
+# 
+#         # draw the lines for the unselected race and ethnicity categories and hide them first
+#         for (i in 1:length(races)) {
+#             curr_race <- races[i]
+# 
+#             if (curr_race != selected_race) {
+#                 pop <- filter(df, Race == curr_race)$value
+# 
+#                 P <- add_trace(
+#                     P,
+#                     x = ~ unique(df$Year),
+#                     y = pop,
+#                     name = curr_race,
+#                     line = list(
+#                         color = col_pal[i],
+#                         width = 2
+#                     ),
+#                     visible = "legendonly"
+#                 )
+#             } else {
+#                 index <- i
+#             }
+#         }
+# 
+#         temp_yval <- filter(filter(df, Race == selected_race), Year == yr)[["value"]]
+# 
+#         # draw the line for the selected race/ethnicity
+#         P <- add_trace(
+#             P,
+#             x = ~ unique(df$Year),
+#             y = ~ filter(df, Race == selected_race)$value,
+#             name = selected_race,
+#             line = list(
+#                 color = col_pal[index],
+#                 width = 4
+#             )
+#         )
+# 
+#         # add titles
+#         P <- layout(
+#             P,
+#             title = ifelse(
+#                 is.null(clicked_geo$df),
+#                 "County-Level Population of the Selected Groups",
+#                 paste0(
+#                     "Population of the Selected Groups, Selected ",
+#                     ifelse(
+#                         geo_reactive(),
+#                         "Tract (GEOID: ",
+#                         "HRA ("
+#                     ),
+#                     clicked_geo$df$GEOID[1],
+#                     ")"
+#                 )
+#             ),
+#             xaxis = list(
+#                 title = "Year",
+#                 tickformat = "K"
+#             ),
+#             yaxis = list(
+#                 title = ifelse(
+#                     measure_reactive() == "Count",
+#                     "Population",
+#                     "Population (%)"
+#                 )
+#             )
+#         )
+# 
+#         P
+#     })
+# 
+#     # generate a button for going back to the county-level data if a polygon is clicked
+#     output$reset_chart_button <- renderUI(
+#         if (!is.null(clicked_geo$df)) {
+#             actionButton(
+#                 inputId = "reset_line_chart",
+#                 label = "Go Back to County-Level Data"
+#             )
+#         }
+#     )
+# 
+#     # generate a button for quickly selecting all age groups when not all age groups are selected
+#     output$all_age_button <- renderUI(
+#         if (length(age_reactive()) != 18) {
+#             actionButton(
+#                 inputId = "all_age",
+#                 label = "Select All Age Groups"
+#             )
+#         }
+#     )
+# 
+#     # if "Select All Age Groups" button is clicked, update the input
+#     observeEvent(input$all_age, {
+#         updateSliderTextInput(
+#             session,
+#             inputId = "age",
+#             label = "Age Range",
+#             choices = c(seq(0, 85, 5), "85+"),
+#             selected = c("0", "85+")
+#         )
+#     })
+# 
+#     # if "Go Back to County-Level Data" button is clicked, set the clicked polygon to NULL
+#     observeEvent(input$reset_line_chart, {
+#         clicked_geo$df <- NULL
+#     })
+# 
+#     # define the helper text the visualizations
+#     selected_charac_html_text <- reactiveValues()
+# 
+#     observe({
+#         sex <- "female and male"
+#         if (length(sex_reactive()) == 1) {
+#             sex <- tolower(sex_reactive())
+#         }
+# 
+#         race <- "population of all racial and ethnic groups"
+# 
+#         if (length(race_reactive()) == 1 ) {
+#             race <- paste0(race_reactive(), " population")
+#         }
+# 
+#         age <- "NA"
+#         lower <- "NA"
+#         upper <- "NA"
+# 
+#         l = length(age_reactive())
+#         if (l != 0) {
+#             lower <- str_split(age_reactive()[1], "-")[[1]][1]
+#             upper <- age_reactive()[l]
+#             if (upper == "85+") {
+#                 age <- paste0(
+#                     "[",
+#                     lower,
+#                     "-85+)"
+#                 )
+#             } else {
+#                 upper <- as.integer(str_split(age_reactive()[l], "-")[[1]][2]) + 1
+#                 age <- paste0(
+#                     "[",
+#                     lower,
+#                     "-",
+#                     upper,
+#                     ")"
+#                 )
+#             }
+#         }
+# 
+# 
+#         selected_charac_html_text$map <- paste0(
+#             "Currently displaying <strong> ",
+#             tolower(var_reactive()), " ",
+#             tolower(measure_reactive()), "s",
+#             "</strong> for the <strong>",
+#             sex, " ", race,
+#             "</strong> aged <strong>",
+#             age,
+#             "</strong> for the year <strong>",
+#             year_reactive(),
+#             "</strong> at the <strong>",
+#             ifelse(
+#                 geo_reactive(),
+#                 "census tract",
+#                 "HRA"
+#             ),
+#             "</strong> level."
+#         )
+# 
+#         selected_charac_html_text$plot <- paste0(
+#             "Currently displaying <strong>population ",
+#             tolower(measure_reactive()), "s",
+#             "</strong> for the <strong>",
+#             sex, " ", race,
+#             "</strong> aged <strong>",
+#             age,
+#             "</strong>."
+#         )
+# 
+#         if (length(age_reactive()) == 18) {
+#             selected_charac_html_text$age <- "All age groups are selected"
+#         } else {
+#             if (upper == "85+") {
+#                 selected_charac_html_text$age <- paste0(
+#                     "Selected Age Range: ",
+#                     age,
+#                     "</br>(i.e. ",
+#                     lower,
+#                     " ≤ Selected Ages)"
+#                 )
+#             } else {
+#                 selected_charac_html_text$age <- paste0(
+#                     "Selected Age Range: ",
+#                     age,
+#                     "</br>(i.e. ",
+#                     lower,
+#                     " ≤ Selected Ages < ",
+#                     upper,
+#                     ")"
+#                 )
+#             }
+# 
+#         }
+#     })
+# 
+#     observe({
+#         addTooltip(
+#             session,
+#             id = "age",
+#             title = selected_charac_html_text$age,
+#             placement = "top",
+#             options = list(html = TRUE)
+#         )
+#     })
+# 
+#     observe({
+#         addTooltip(
+#             session,
+#             id = "map",
+#             title = selected_charac_html_text$map,
+#             placement = "right",
+#             options = list(html = TRUE)
+#         )
+#     })
+# 
+#     observe({
+#         addTooltip(
+#             session,
+#             id = "plot",
+#             title = selected_charac_html_text$plot,
+#             placement = "right",
+#             options = list(html = TRUE)
+#         )
+#     })
 
 
     # preload the visualization once the website is opened
     outputOptions(output, "map", suspendWhenHidden = FALSE)
-    outputOptions(output, "plot", suspendWhenHidden = FALSE)
+    # outputOptions(output, "plot", suspendWhenHidden = FALSE)
 }

@@ -128,18 +128,18 @@ ui <- dashboardPage(
         ),
         
         p(HTML("<b>Population & Housing Trends in King County:</b>"),
-        br(),
-        HTML("Growth and Vulnerabilities")),
+          br(),
+          HTML("Growth and Vulnerabilities")),
         br(),
         
         p(HTML("For an overview of our project, download this <a target='_blank' href='./PHI2021_Pop_and_Housing.pdf'>slide deck</a>.",
-        "For more information about our work, please read our technical report. You can find the legacy tool",
-       "and documentation for the population projections to 2045 developed by the 2020 PHI Applied Research Fellows at " ,
-       "https://rsc.csde.washington.edu/kc_forecast_2045/."#,
-        #"Visit our <a class='clickable_text' onclick='openTab(\"guide_tab\");' style='cursor:pointer;'>User Guide</a> for directions on using our <a class='clickable_text' onclick='openTab(\"viz_tab\");' style='cursor:pointer;'>interactive map</a>."
-                                                               )),
+               "For more information about our work, please read our technical report. You can find the legacy tool",
+               "and documentation for the population projections to 2045 developed by the 2020 PHI Applied Research Fellows at " ,
+               "https://rsc.csde.washington.edu/kc_forecast_2045/."#,
+               #"Visit our <a class='clickable_text' onclick='openTab(\"guide_tab\");' style='cursor:pointer;'>User Guide</a> for directions on using our <a class='clickable_text' onclick='openTab(\"viz_tab\");' style='cursor:pointer;'>interactive map</a>."
+        )),
         br(),
-  
+        
         p(HTML("Please contact <a target='_blank' href='mailto:csde@uw.edu'>csde@uw.edu</a> if you have any questions."))
         
       ),
@@ -261,7 +261,7 @@ ui <- dashboardPage(
                     selected = "Census Tract"
                   )
                 ),
-               
+                
                 #ARA: Added variable box
                 
                 box(
@@ -276,83 +276,102 @@ ui <- dashboardPage(
                 ),
                 
                 #ARA_edu: Added Edu box
-                
-                box(
-                  width = NULL,
-                  radioButtons(
-                    inputId = "edu",
-                    label = "Education Level",
-                    choices = c("Less than high school diploma", "High school graduate (includes equivalency)", "Some college or associate's degree", "Bachelor's degree or higher"),
-                    selected = "Less than high school diploma"
+                conditionalPanel(
+                  condition = "input.var == 'Education Level'",
+                  box(
+                    width = NULL,
+                    radioButtons(
+                      inputId = "edu",
+                      label = "Education Level",
+                      choices = c("Less than high school diploma", "High school graduate (includes equivalency)", "Some college or associate's degree", "Bachelor's degree or higher"),
+                      selected = "Less than high school diploma"
+                    )
                   )
                 ),     
                 
                 #ARA_edu: Added Edu box
-                box(
-                  width = NULL,
-                  radioButtons(
-                    inputId = "burden",
-                    label = "Burden Level",
-                    choices = c("Low Burden", "Highly Burdened", "Severely Burdened"),
-                    selected = "Low Burden"
+                conditionalPanel(
+                  condition = "input.var == 'Burden Level'",
+                  box(
+                    width = NULL,
+                    radioButtons(
+                      inputId = "burden",
+                      label = "Burden Level",
+                      choices = c("Low Burden", "Highly Burdened", "Severely Burdened"),
+                      selected = "Low Burden"
+                    )
                   )
-                ),     
-                box(
-                  width = NULL,
-                  radioButtons(
-                    inputId = "race",
-                    label = "Race and Ethnicity",
-                    choices = c("All", "American Indian and Alaska Native (AIAN)", "Asian", "Black", "Hispanic", "Native Hawaiian or Other Pacific Islander (NHOPI)", "Two or More Races", "White"),
-                    selected = "All"
-                  )
-                ),
-                
-                box(
-                  width = NULL,
-                  
-                  radioButtons(
-                    inputId = "tenure",
-                    label = "Tenure",
-                    choices = c("Owner occupied", "Renter occupied"),
-                    selected = "Owner occupied"
+                ), 
+                conditionalPanel(
+                  condition = "input.var == 'Education Level'",
+                  box(
+                    width = NULL,
+                    radioButtons(
+                      inputId = "race",
+                      label = "Race and Ethnicity",
+                      choices = c("All", "American Indian and Alaska Native (AIAN)", "Asian", "Black", "Hispanic", "Native Hawaiian or Other Pacific Islander (NHOPI)", "Two or More Races", "White"),
+                      selected = "All"
+                    )
                   )
                 ),
-                
-                box(
-                  width = NULL,
-                  radioButtons(
-                    inputId = "mode_transp",
-                    label = "Methods of Transportation",
-                    choices = c("Drove Alone", "Carpooled", "Public Transportation", "Walked", "Taxi/Motorcycle/Bike/Other", "Worked from Home"),
-                    selected = "Drove Alone"
+                conditionalPanel(
+                  condition = "input.var == 'Household Size'",
+                  box(
+                    width = NULL,
                     
+                    radioButtons(
+                      inputId = "tenure",
+                      label = "Tenure",
+                      choices = c("Owner occupied", "Renter occupied"),
+                      selected = "Owner occupied"
+                    )
                   )
                 ),
                 
-                box(
-                  width = NULL,
-                  
-                  sliderTextInput(
-                    inputId = "age",
-                    label = "Age Range",
-                    choices = c(seq(0, 85, 5), "85+"),
-                    selected = c("0", "85+"),
-                    grid = TRUE
-                  ),
-                  
-                  tags$head(tags$style("#age_warning{color: red;
+                conditionalPanel(
+                  condition = "input.var == 'Methods of Transportation to Work - Median Age'",
+                  box(
+                    width = NULL,
+                    radioButtons(
+                      inputId = "mode_transp",
+                      label = "Methods of Transportation",
+                      choices = c("Drove Alone", "Carpooled", "Public Transportation", "Walked", "Taxi/Motorcycle/Bike/Other", "Worked from Home"),
+                      selected = "Drove Alone"
+                      
+                    )
+                  )
+                ),
+                
+                conditionalPanel(
+                  condition = "input.var == 'Population'",
+                  box(
+                    width = NULL,
+                    
+                    sliderTextInput(
+                      inputId = "age",
+                      label = "Age Range",
+                      choices = c(seq(0, 85, 5), "85+"),
+                      selected = c("0", "85+"),
+                      grid = TRUE
+                    ),
+               
+                
+                    tags$head(tags$style("#age_warning{color: red;
                                  font-size: 18px;
                                  font-style: bold;
                                  }"
+                    )
+                    
+                    ),
+                    
+                    textOutput("age_warning"),
+                    
+                    uiOutput("all_age_button")
                   )
-                  ),
-                  
-                  textOutput("age_warning"),
-                  
-                  uiOutput("all_age_button")
-                ),
-                
-                
+              ),
+              
+              conditionalPanel(
+                condition = "input.var == 'Population'",
                 box(
                   width = NULL,
                   height = 120,
@@ -363,9 +382,12 @@ ui <- dashboardPage(
                     choices = c("Female", "Male", "Both"),
                     selected = "Both"
                   )
-                ),
-                
-                #ARA: I made the years 1 year sequences bc somee of the data isn't avail every year
+                )
+              ),
+              
+              #ARA: I made the years 1 year sequences bc somee of the data isn't avail every year
+              conditionalPanel(
+                condition = "input.var == 'Population'",
                 box(
                   width = NULL,
                   
@@ -385,83 +407,84 @@ ui <- dashboardPage(
                       html = TRUE
                     )
                   )
+                )
+              ),
+              
+              box(
+                width = NULL,
+                height = 110,
+                
+                radioButtons(
+                  inputId = "measure_type",
+                  label = "Measure",
+                  choices = c("Count", "Prevalence", "Distribution", "Value"),
+                  selected = "Value"
                 ),
                 
-                box(
-                  width = NULL,
-                  height = 110,
-                  
-                  radioButtons(
-                    inputId = "measure_type",
-                    label = "Measure",
-                    choices = c("Count", "Prevalence", "Distribution", "Value"),
-                    selected = "Value"
-                  ),
-                  
-                  #ARA: Confused by thisi part
-                  radioTooltip(
-                    id = "measure_type",
-                    choice = "Prevalence",
-                    title = "<img src=\"Prevalence_explanation.png\"/>",
-                    placement = "top",
-                    options = list(
-                      html = TRUE
-                    )
+                #ARA: Confused by thisi part
+                radioTooltip(
+                  id = "measure_type",
+                  choice = "Prevalence",
+                  title = "<img src=\"Prevalence_explanation.png\"/>",
+                  placement = "top",
+                  options = list(
+                    html = TRUE
                   )
                 )
-                
               )
+              
             )
           )
         )
-        
+      )
+      
+    ),
+    
+    tabItem(
+      tabName = "guide_tab",
+      # id = "guide_tab",
+      # value = "guide_tab",
+      
+      h1(
+        HTML("User Guide"),
+        align = "center"
       ),
+      br(),
+      p(HTML("The interactive mapping tool can be used to explore anticipated changes in King County’s population over time by sex age, race and ethnicity, within census tracts and health reporting areas. For example, this tool allows you to see how King County’s population is expected to grow until 2045 if current trends in fertility, mortality, and migration continue. To explore this tool, click the <i>Interactive Map</i> tab on the left side of this page.")),
+      br(),
       
-      tabItem(
-        tabName = "guide_tab",
-        # id = "guide_tab",
-        # value = "guide_tab",
-        
-        h1(
-          HTML("User Guide"),
-          align = "center"
-        ),
-        br(),
-        p(HTML("The interactive mapping tool can be used to explore anticipated changes in King County’s population over time by sex age, race and ethnicity, within census tracts and health reporting areas. For example, this tool allows you to see how King County’s population is expected to grow until 2045 if current trends in fertility, mortality, and migration continue. To explore this tool, click the <i>Interactive Map</i> tab on the left side of this page.")),
-        br(),
-        
-        p(HTML("<a target='_blank' href='./docs/uw_forecast_2045_user_guide.pdf'>Click here to view the user guide in PDF</a>")),
-        
-        
-        # h3("Walkthrough Video"),
-        # tags$video(id = "video", src = 'phi_viz_guide.mp4',  type = 'video/mp4', controls = 'controls', onloadstart="this.volume=0.3", width="100%"),
-        # br(),
-        # br(),
-        # br(),
-
-        h3("Limitations"),
-        p(HTML("Although population projections aim to provide important estimates for planners, service providers, researchers, and the general public, they are only a reflection of what the population <i>could</i> look like if current population trends continue. They are not determinative of the future. Further, small area projections can be more uncertain and so less predictive than projections for larger areas and populations, and less accurate for the distant future. Like all forecasts, our projections reflect a number of assumptions about expected populations dynamics in King County over the forecast period.")),
-        br(),
-        
-        h3("Methods"),
-        p(HTML("The projections presented here use the <a target='_blank' href='https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2822904/'>Hamilton Perry method</a> with smoothing (a variant of the cohort-component method) based on OFM’s 5-year age data by race, ethnicity, and sex at state, county, & tract level for 2015 and 2010. Projections were compared with OFM state-level population projections by sex, age, race and ethnicity from 2020 to 2045 and OFM county-level population projections by sex and age from 2020 to 2045. For more information on the methods and assumptions that are used to create these projections, please refer to the <a target='_blank' href='http://population-dynamics-lab.csde.washington.edu:8080/kc_forecast_2045/docs/uw_forecast_2045_technical_report.pdf'>Technical Report</a>.")),
-        br()
-        
+      p(HTML("<a target='_blank' href='./docs/uw_forecast_2045_user_guide.pdf'>Click here to view the user guide in PDF</a>")),
+      
+      
+      # h3("Walkthrough Video"),
+      # tags$video(id = "video", src = 'phi_viz_guide.mp4',  type = 'video/mp4', controls = 'controls', onloadstart="this.volume=0.3", width="100%"),
+      # br(),
+      # br(),
+      # br(),
+      
+      h3("Limitations"),
+      p(HTML("Although population projections aim to provide important estimates for planners, service providers, researchers, and the general public, they are only a reflection of what the population <i>could</i> look like if current population trends continue. They are not determinative of the future. Further, small area projections can be more uncertain and so less predictive than projections for larger areas and populations, and less accurate for the distant future. Like all forecasts, our projections reflect a number of assumptions about expected populations dynamics in King County over the forecast period.")),
+      br(),
+      
+      h3("Methods"),
+      p(HTML("The projections presented here use the <a target='_blank' href='https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2822904/'>Hamilton Perry method</a> with smoothing (a variant of the cohort-component method) based on OFM’s 5-year age data by race, ethnicity, and sex at state, county, & tract level for 2015 and 2010. Projections were compared with OFM state-level population projections by sex, age, race and ethnicity from 2020 to 2045 and OFM county-level population projections by sex and age from 2020 to 2045. For more information on the methods and assumptions that are used to create these projections, please refer to the <a target='_blank' href='http://population-dynamics-lab.csde.washington.edu:8080/kc_forecast_2045/docs/uw_forecast_2045_technical_report.pdf'>Technical Report</a>.")),
+      br()
+      
+    ),
+    
+    
+    # Acknowledgement tab
+    tabItem(
+      tabName = "ack",
+      
+      h1(
+        "Acknowledgements",
+        align = "center"
       ),
+      br(),
       
       
-      # Acknowledgement tab
-      tabItem(
-        tabName = "ack",
-        
-        h1(
-          "Acknowledgements",
-          align = "center"
-        ),
-        br(),
-        
-        
-        p(HTML("This research was funded by the Population Health Initiative at the University of Washington. Partial support for this research also came from Shanahan Endowment Fellowship and a Eunice Kennedy Shriver National Institute of Child Health and Human Development research infrastructure grant, P2C HD042828, to the Center for Studies in Demography & Ecology at the University of Washington."),
+      p(HTML("This research was funded by the Population Health Initiative at the University of Washington. Partial support for this research also came from Shanahan Endowment Fellowship and a Eunice Kennedy Shriver National Institute of Child Health and Human Development research infrastructure grant, P2C HD042828, to the Center for Studies in Demography & Ecology at the University of Washington."),
         br(),
         br(),
         
