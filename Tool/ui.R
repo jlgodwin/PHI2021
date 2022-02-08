@@ -105,7 +105,7 @@ ui <- dashboardPage(
       ")),
     
     tabItems(
-      # Introduction tab
+      # Introduction tab ####
       tabItem(
         tabName = "intro",
         
@@ -182,14 +182,16 @@ ui <- dashboardPage(
             
             fluidRow(
               #----------viz------
+              
+              ## Map Column ####
               column(
-                width = 9,
+                width = 8,
                 
                 tabBox(
                   width = NULL,
                   height = 560,
                   
-                  # tab for the map
+                  # tab for the map ####
                   tabPanel(
                     # loading spinner when loading new data based on user input
                     shinyjs::useShinyjs(),
@@ -205,7 +207,7 @@ ui <- dashboardPage(
                     
                   ),
                   
-                  # tab for the data attriubtion info
+                  # tab for the data attriubtion info ####
                   tabPanel(
                     title = "Data Attribution",
                     id = "data_attribution_tab",
@@ -226,9 +228,10 @@ ui <- dashboardPage(
                       tags$li(HTML("<a target='_blank' href='https://icons8.com/icon/17941/city-railway-station'>City Railway Station icon by Icons8</a>"))
                     )
                   )
+                  # end tab for data attrib ####
                 ),
                 
-                # line chart
+                # line chart ####
                 box(
                   width = NULL,
                   plotlyOutput(
@@ -246,80 +249,118 @@ ui <- dashboardPage(
                   uiOutput("reset_chart_button")
                   
                 )
+                # end line chart ####
               ),
               
               #----------options--------
               column(
-                width = 3,
+                width = 4,
+                
+                ## Geo Box ####
                 box(
                   width = NULL,
-                  
-                  radioButtons(
+                  selectInput(
                     inputId = "geo_level",
                     label = "Geographic Level",
                     choices = c("Census Tract", "Health Reporting Area (HRA)"),
                     selected = "Census Tract"
                   )
                 ),
-                
-                #ARA: Added variable box
+                ## Measure Box ####
+                #JLG: Moved measure box
                 
                 box(
                   width = NULL,
-                  radioButtons(
+                  
+                  selectInput(
+                    inputId = "measure_type",
+                    label = "Measure",
+                    choices = c("Count", "Prevalence", "Distribution", "Value"),
+                    selected = "Value"
+                  )
+                  ),
+                
+                #ARA: Added variable box
+                ## Variable Box ####
+                box(
+                  width = NULL,
+                  selectInput(
                     inputId = "var",
                     label = "Variable",
-                    choices = c("Education Level", "Median Income", "Population", "Rent Burden", "Household Size", "Methods of Transportation to Work - Median Age", "Median Gross Rent"),
+                    choices = c("Education Level", "Median Income",
+                                "Population", "Rent Burden",
+                                "Household Size",
+                                "Methods of Transportation to Work - Median Age",
+                                "Median Gross Rent"),
                     # "Apartments", "Number of Units", "Number of Bedrooms"),
-                    selected = "Methods of Transportation to Work - Median Age"
+                    selected = "Median Income"
                   )
                 ),
+              ## End first Column ####
+       
                 
-                #ARA_edu: Added Edu box
+                ## Edu Box####
+                #ARA_edu: Added Edu 
                 conditionalPanel(
                   condition = "input.var == 'Education Level'",
                   box(
                     width = NULL,
-                    radioButtons(
+                    selectInput(
                       inputId = "edu",
                       label = "Education Level",
-                      choices = c("Less than high school diploma", "High school graduate (includes equivalency)", "Some college or associate's degree", "Bachelor's degree or higher"),
+                      choices = c("Less than high school diploma", 
+                                  "High school graduate (includes equivalency)", 
+                                  "Some college or associate's degree",
+                                  "Bachelor's degree or higher"),
                       selected = "Less than high school diploma"
                     )
                   )
-                ),     
+                ),  
                 
-                #ARA_edu: Added Edu box
+                ## Race Box ####
                 conditionalPanel(
-                  condition = "input.var == 'Burden Level'",
+                  condition = paste0("input.var == 'Education Level'",
+                                     "| input.var == 'Population'"),
                   box(
                     width = NULL,
-                    radioButtons(
-                      inputId = "burden",
-                      label = "Burden Level",
-                      choices = c("Low Burden", "Highly Burdened", "Severely Burdened"),
-                      selected = "Low Burden"
-                    )
-                  )
-                ), 
-                conditionalPanel(
-                  condition = "input.var == 'Education Level'",
-                  box(
-                    width = NULL,
-                    radioButtons(
+                    selectInput(
                       inputId = "race",
                       label = "Race and Ethnicity",
-                      choices = c("All", "American Indian and Alaska Native (AIAN)", "Asian", "Black", "Hispanic", "Native Hawaiian or Other Pacific Islander (NHOPI)", "Two or More Races", "White"),
+                      choices = c("All", 
+                                  "American Indian and Alaska Native (AIAN)",
+                                  "Asian", "Black", 
+                                  "Hispanic", 
+                                  "Native Hawaiian or Other Pacific Islander (NHOPI)", 
+                                  "Two or More Races", "White"),
                       selected = "All"
                     )
                   )
                 ),
+                
+                ## Burden Box ####
+                #JLG: Added Burden box
+                conditionalPanel(
+                  condition = "input.var == 'Burden Level'",
+                  box(
+                    width = NULL,
+                    selectInput(
+                      inputId = "burden",
+                      label = "Burden Level",
+                      choices = c("Low Burden", 
+                                  "Highly Burdened", 
+                                  "Severely Burdened"),
+                      selected = "Low Burden"
+                    )
+                  )
+                ), 
+                
+                ## HH Size Box ####
                 conditionalPanel(
                   condition = "input.var == 'Household Size'",
                   box(
                     width = NULL,
                     
-                    radioButtons(
+                    selectInput(
                       inputId = "tenure",
                       label = "Tenure",
                       choices = c("Owner occupied", "Renter occupied"),
@@ -328,11 +369,12 @@ ui <- dashboardPage(
                   )
                 ),
                 
+                ## Transpo Box ####
                 conditionalPanel(
                   condition = "input.var == 'Methods of Transportation to Work - Median Age'",
                   box(
                     width = NULL,
-                    radioButtons(
+                    selectInput(
                       inputId = "mode_transp",
                       label = "Methods of Transportation",
                       choices = c("Drove Alone", "Carpooled", "Public Transportation", "Walked", "Taxi/Motorcycle/Bike/Other", "Worked from Home"),
@@ -342,6 +384,7 @@ ui <- dashboardPage(
                   )
                 ),
                 
+                ## Age Box ####
                 conditionalPanel(
                   condition = "input.var == 'Population'",
                   box(
@@ -359,9 +402,7 @@ ui <- dashboardPage(
                     tags$head(tags$style("#age_warning{color: red;
                                  font-size: 18px;
                                  font-style: bold;
-                                 }"
-                    )
-                    
+                                 }")
                     ),
                     
                     textOutput("age_warning"),
@@ -370,13 +411,14 @@ ui <- dashboardPage(
                   )
               ),
               
+              ## Sex Box ####
               conditionalPanel(
                 condition = "input.var == 'Population'",
                 box(
                   width = NULL,
                   height = 120,
                   
-                  radioButtons(
+                  selectInput(
                     inputId = "sex",
                     label = "Sex",
                     choices = c("Female", "Male", "Both"),
@@ -384,6 +426,8 @@ ui <- dashboardPage(
                   )
                 )
               ),
+              
+              ## Year Box ####
               
               #ARA: I made the years 1 year sequences bc somee of the data isn't avail every year
               conditionalPanel(
@@ -409,37 +453,30 @@ ui <- dashboardPage(
                   )
                 )
               ),
+              ## End Year Box ####
               
-              box(
-                width = NULL,
-                height = 110,
-                
-                radioButtons(
-                  inputId = "measure_type",
-                  label = "Measure",
-                  choices = c("Count", "Prevalence", "Distribution", "Value"),
-                  selected = "Value"
-                ),
                 
                 #ARA: Confused by thisi part
-                radioTooltip(
-                  id = "measure_type",
-                  choice = "Prevalence",
-                  title = "<img src=\"Prevalence_explanation.png\"/>",
-                  placement = "top",
-                  options = list(
-                    html = TRUE
-                  )
-                )
-              )
+                # radioTooltip(
+                #   id = "measure_type",
+                #   choice = "Prevalence",
+                #   title = "<img src=\"Prevalence_explanation.png\"/>",
+                #   placement = "top",
+                #   options = list(
+                #     html = TRUE
+                #   )
+                # )
               
+              )
+              ## End Second Column ####
             )
+            ## End fluidRow
           )
         )
       )
       
     ),
-    
+     ## Tab Guide ####
     tabItem(
       tabName = "guide_tab",
       # id = "guide_tab",
@@ -473,7 +510,7 @@ ui <- dashboardPage(
     ),
     
     
-    # Acknowledgement tab
+    ## Acknowledgement tab ####
     tabItem(
       tabName = "ack",
       
@@ -488,6 +525,7 @@ ui <- dashboardPage(
         br(),
         br(),
         
+        ### Participants ####
         p(
           "This research was supported by the following individuals:",
           tags$ul(
@@ -515,6 +553,7 @@ ui <- dashboardPage(
         ),
         
         br(),
+        ### Packages ####
         p(
           "The following R packages are used:",
           tags$ul(
@@ -532,8 +571,10 @@ ui <- dashboardPage(
             tags$li("shinyBS")
           )
         )
+        ### End Packages ####
       )
     )
+    ## End Acknowledgments ####
   )
 )
-)
+
