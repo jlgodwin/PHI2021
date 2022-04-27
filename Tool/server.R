@@ -117,9 +117,9 @@ server <- function(input, output, session) {
     })
     
     race_reactive <- reactive({
-        if (input$race == "American Indian and Alaska Native (AIAN)") {
+        if (input$race == "American Indian and\nAlaska Native (AIAN)") {
             "AIAN"
-        } else if (input$race == "Native Hawaiian or Other Pacific Islander (NHOPI)") {
+        } else if (input$race == "Native Hawaiian or\nOther Pacific Islander (NHOPI)") {
             "NHOPI"
         } else if (input$race == "All") {
             c("AIAN", "Asian", "Black", "Hispanic", "NHOPI", "Two or More Races", "White")
@@ -221,7 +221,8 @@ server <- function(input, output, session) {
     sp_reactive <- reactive({
         # selected geographic level and then selected age groups
         # ARA_: conditional branch to differentiate selected df based off of var selection
-        # ARA_: I added demographic filters as it originally defaulted to do it later on but not evrey var holds demographic info
+        # ARA_: I added demographic filters as it originally defaulted 
+        ## to do it later on but not evrey var holds demographic info
         if (geo_reactive()) {
             if(var_reactive() == "Median Income"){
                 selected_df <- tract_inc %>%
@@ -264,7 +265,7 @@ server <- function(input, output, session) {
                 selected_df<- hra_burden %>%
                     filter(Year %in% year_reactive())
             }
-            else if (var_reactive() == "population"){
+            else if (var_reactive() == "Population"){
             selected_df <- hra_proj %>%
                 filter(Year %in% year_reactive())
             }
@@ -280,14 +281,6 @@ server <- function(input, output, session) {
                 ) %>%
                 ungroup() 
         } 
-        # else if (measure_reactive() == "Distribution"){
-        #     selected_df <- selected_df %>%
-        #         # group_by(Race, Sex, Age5, )
-        #         mutate(
-        #             value = round(value / sum(value) * 10^4) / 10^2
-        #         ) %>%
-        #         ungroup()
-        # }
         
 #ARA: These filter by user-inputted variable specific demographics
        
@@ -310,7 +303,8 @@ server <- function(input, output, session) {
                     summarize(value = sum(value),
                               moe = sum(moe))
                 
-            }            
+            }           
+        #ARA FIX: for HRA, might need to group by HRA 
             else if (var_reactive() == "Rent Burden"){
                 selected_df <- selected_df %>%
                     
@@ -330,21 +324,23 @@ server <- function(input, output, session) {
             #Need to Add Race to csv in order to filter by it/maybe add median agee too or just establish another pipeline for an age-specific csv
             else if (var_reactive() == "Methods of Transportation to Work - Median Age"){
                 selected_df <- selected_df %>%
-                    filter(short_label %in% transp_reactive())  %>%
-                    group_by(GEOID) %>%
+                    filter(short_label %in% transp_reactive()) %>% 
+                    group_by(GEOID) %>% 
                     summarize(value = sum(value),
                               moe = sum(moe))
             }
          
-        #HRA Var Reactives go here
-        else if (var_reactive() == "Rent Burden"){
-            selected_df <- selected_df %>%
-                filter(short_label %in% rent_reactive())%>%
-                group_by(GEOID) %>%
-                summarize(value = sum(value),
-                          moe = sum(moe))
-            
-        }
+        # #HRA Var Reactives go here
+        # else if (var_reactive() == "Rent Burden"){
+        #     selected_df <- selected_df %>%
+        #         filter(short_label %in% rent_reactive())%>%
+        #         group_by(GEOID) %>%
+        #         summarize(value = sum(value),
+        #                   moe = sum(moe))
+        #     
+        # }
+        # 
+        
         
         if (measure_reactive() == "Value") {
             selected_df <- selected_df %>%
@@ -363,7 +359,7 @@ server <- function(input, output, session) {
         else if (measure_reactive() == "Prevalence") {
             selected_df <- selected_df %>%
                 mutate(
-                    moe = round(moe / sum(moe) * 10^4) / 10^2,
+                    moe = round(moe / sum(moe) * 10^4) / 10^2, ## QUESTION?
                     SE = round(moe/qnorm(.95) * 10^4) / 10^2
                 ) %>%
                 ungroup() 
@@ -443,7 +439,6 @@ server <- function(input, output, session) {
             "Distribution (%)"
         }
     })
-    
     popup_text_reactive <- reactive({
         paste0(
             ifelse(
@@ -453,7 +448,7 @@ server <- function(input, output, session) {
             ),
             "<strong>%s</strong><br/>",
 
-            # ARA_ Created branches to account for possibility of other measures and created diff popup displays forr diff vars
+            # ARA_ Created branches to account for possibility of other measures and created diff popup displays for diff vars
             if(input$measure_type == "Count"){
                 
                     "Number of Individuals: <strong>%g</strong><br/>"
