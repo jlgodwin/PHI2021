@@ -256,6 +256,24 @@ ui <- dashboardPage(
               column(
                 width = 4,
                 
+                #ARA: Added variable box
+                ## Variable Box ####
+                box(
+                  width = NULL,
+                  selectInput(
+                    inputId = "var",
+                    label = "Variable",
+                    choices = c("Education Level", "Median Income",
+                                "Population", "Rent Burden",
+                                "Household Size",
+                                
+                                ## Change to remove Median Age soon
+                                "Methods of Transportation to Work",
+                                "Median Gross Rent"),
+                    # "Apartments", "Number of Units", "Number of Bedrooms"),
+                    selected = "Population"
+                  )
+                ),
                 ## Geo Box ####
                 box(
                   width = NULL,
@@ -267,35 +285,49 @@ ui <- dashboardPage(
                   )
                 ),
                 ## Measure Box ####
-                #JLG: Moved measure box
-                
-                box(
-                  width = NULL,
-                  
-                  selectInput(
-                    inputId = "measure_type",
-                    label = "Measure",
-                    choices = c("Count", "Prevalence", "Distribution", "Value"),
-                    selected = "Value"
-                  )
-                  ),
-                
-                #ARA: Added variable box
-                ## Variable Box ####
-                box(
-                  width = NULL,
-                  selectInput(
-                    inputId = "var",
-                    label = "Variable",
-                    choices = c("Education Level", "Median Income",
-                                "Population", "Rent Burden",
-                                "Household Size",
-                                "Methods of Transportation to Work - Median Age",
-                                "Median Gross Rent"),
-                    # "Apartments", "Number of Units", "Number of Bedrooms"),
-                    selected = "Median Income"
+                #JLG: Moved measure box, made conditional
+                conditionalPanel(
+                  condition = paste0("input.var == 'Median Gross Rent'",
+                                     "| input.var == 'Median Income'"),
+                  box(
+                    width = NULL,
+                    selectInput(
+                      inputId = "measure_type",
+                      label = "Measure",
+                      choices = c("Value"),
+                      selected = "Value"
+                    )
                   )
                 ),
+                
+                conditionalPanel(
+                  condition = "input.var == 'Methods of Transportation to Work'",
+                  box(
+                    width = NULL,
+                    selectInput(
+                      inputId = "measure_type",
+                      label = "Measure",
+                      choices = c("Value"),
+                      selected = "Value"
+                    )
+                  )
+                ),
+          
+                conditionalPanel(
+                  condition = paste0("input.var != 'Methods of Transportation to Work'",
+                                     "& input.var != 'Median Gross Rent'",
+                                     "& input.var != 'Median Income'"),
+                  box(
+                    width = NULL,
+                    selectInput(
+                      inputId = "measure_type",
+                      label = "Measure",
+                      choices = c("Count", "Prevalence", "Distribution"),
+                      selected = "Count"
+                    )
+                  )
+                ),
+                
               ## End first Column ####
        
                 
@@ -354,7 +386,7 @@ ui <- dashboardPage(
                   )
                 ), 
                 
-                ## HH Size Box ####
+                ## HH Tenure Box ####
                 conditionalPanel(
                   condition = "input.var == 'Household Size'",
                   box(
@@ -368,10 +400,25 @@ ui <- dashboardPage(
                     )
                   )
                 ),
+              
+              ## Household Size Box ####
+              conditionalPanel(
+                condition = "input.var == 'Household Size'",
+                box(
+                  width = NULL,
+                  selectInput(
+                    inputId = "size",
+                    label = "Household Size", 
+                    choices = paste0(1:4, c(rep("",3), "+")),
+                    selected = "1",
+                    multiple = FALSE
+                  )
+                )
+              ),
                 
                 ## Transpo Box ####
                 conditionalPanel(
-                  condition = "input.var == 'Methods of Transportation to Work - Median Age'",
+                  condition = "input.var == 'Methods of Transportation to Work'",
                   box(
                     width = NULL,
                     selectInput(
@@ -438,8 +485,9 @@ ui <- dashboardPage(
                   selectInput(
                     inputId = "year",
                     label = "Year",
-                    choices = seq(2000,2045,1),
-                    selected = 2019
+                    choices = paste0(seq(2000,2045,5), "-",
+                                     seq(2004,2049,5)),
+                    selected = "2015-2019"
                   ),
                   
                   # bstooltip for the helper window
