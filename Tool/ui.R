@@ -266,7 +266,7 @@ ui <- dashboardPage(
                     choices = c("Education Level", "Median Income",
                                 "Population", "Rent Burden",
                                 "Household Size",
-                                
+                                "Smoothed Household Size",
                                 ## Change to remove Median Age soon
                                 "Methods of Transportation to Work",
                                 "Median Gross Rent"),
@@ -275,13 +275,29 @@ ui <- dashboardPage(
                   )
                 ),
                 ## Geo Box ####
-                box(
-                  width = NULL,
-                  selectInput(
-                    inputId = "geo_level",
-                    label = "Geographic Level",
-                    choices = c("Census Tract", "Health Reporting Area (HRA)"),
-                    selected = "Census Tract"
+                conditionalPanel(
+                  condition = "input.var != 'Smoothed Household Size'",
+                  box(
+                    width = NULL,
+                    selectInput(
+                      inputId = "geo_level",
+                      label = "Geographic Level",
+                      choices = c("Census Tract", "Health Reporting Area (HRA)"),
+                      selected = "Census Tract"
+                    )
+                  )
+                ),
+                
+                conditionalPanel(
+                  condition = "input.var == 'Smoothed Household Size'",
+                  box(
+                    width = NULL,
+                    selectInput(
+                      inputId = "geo_level",
+                      label = "Geographic Level",
+                      choices = c("Health Reporting Area (HRA)"),
+                      selected = "Health Reporting Area (HRA)"
+                    )
                   )
                 ),
                 ## Measure Box ####
@@ -328,10 +344,38 @@ ui <- dashboardPage(
                   )
                 ),
                 
-              ## End first Column ####
-       
+                ## Year Box ####
                 
-                ## Edu Box####
+                #ARA: I made the years 1 year sequences bc somee of the data isn't avail every year
+                conditionalPanel(
+                  condition = "input.var == 'Population'",
+                  box(
+                    width = NULL,
+                    
+                    selectInput(
+                      inputId = "year",
+                      label = "Year",
+                      choices = paste0(seq(2000,2045,5), "-",
+                                       seq(2004,2049,5)),
+                      selected = "2015-2019"
+                    ),
+                    
+                    # bstooltip for the helper window
+                    bsTooltip(
+                      id = "year",
+                      title = "<strong>Our population forecasts start from 2020</strong>; population data before 2020 are OFM estimates.",
+                      placement = "top",
+                      options = list(
+                        html = TRUE
+                      )
+                    )
+                  )
+                ),
+                ### End Year Box ####
+                
+
+               ## Sub Groups #### 
+                ### Edu Box####
                 #ARA_edu: Added Edu 
                 conditionalPanel(
                   condition = "input.var == 'Education Level'",
@@ -349,7 +393,7 @@ ui <- dashboardPage(
                   )
                 ),  
                 
-                ## Race Box ####
+                ### Race Box ####
                 conditionalPanel(
                   condition = paste0("input.var == 'Education Level'",
                                      "| input.var == 'Population'"),
@@ -369,7 +413,7 @@ ui <- dashboardPage(
                   )
                 ),
                 
-                ## Burden Box ####
+                ### Burden Box ####
                 #JLG: Added Burden box
                 conditionalPanel(
                   condition = "input.var == 'Burden Level'",
@@ -386,7 +430,7 @@ ui <- dashboardPage(
                   )
                 ), 
                 
-                ## HH Tenure Box ####
+                ### HH Tenure Box ####
                 conditionalPanel(
                   condition = "input.var == 'Household Size'",
                   box(
@@ -401,7 +445,7 @@ ui <- dashboardPage(
                   )
                 ),
               
-              ## Household Size Box ####
+              ### Household Size Box ####
               conditionalPanel(
                 condition = "input.var == 'Household Size'",
                 box(
@@ -416,7 +460,7 @@ ui <- dashboardPage(
                 )
               ),
                 
-                ## Transpo Box ####
+                ### Transpo Box ####
                 conditionalPanel(
                   condition = "input.var == 'Methods of Transportation to Work'",
                   box(
@@ -431,7 +475,7 @@ ui <- dashboardPage(
                   )
                 ),
                 
-                ## Age Box ####
+                ### Age Box ####
                 conditionalPanel(
                   condition = "input.var == 'Population'",
                   box(
@@ -458,7 +502,7 @@ ui <- dashboardPage(
                   )
               ),
               
-              ## Sex Box ####
+              ### Sex Box ####
               conditionalPanel(
                 condition = "input.var == 'Population'",
                 box(
@@ -474,35 +518,7 @@ ui <- dashboardPage(
                 )
               ),
               
-              ## Year Box ####
-              
-              #ARA: I made the years 1 year sequences bc somee of the data isn't avail every year
-              conditionalPanel(
-                condition = "input.var == 'Population'",
-                box(
-                  width = NULL,
-                  
-                  selectInput(
-                    inputId = "year",
-                    label = "Year",
-                    choices = paste0(seq(2000,2045,5), "-",
-                                     seq(2004,2049,5)),
-                    selected = "2015-2019"
-                  ),
-                  
-                  # bstooltip for the helper window
-                  bsTooltip(
-                    id = "year",
-                    title = "<strong>Our population forecasts start from 2020</strong>; population data before 2020 are OFM estimates.",
-                    placement = "top",
-                    options = list(
-                      html = TRUE
-                    )
-                  )
-                )
-              ),
-              ## End Year Box ####
-              
+            
                 
                 #ARA: Confused by thisi part
                 # radioTooltip(
@@ -516,7 +532,7 @@ ui <- dashboardPage(
                 # )
               
               )
-              ## End Second Column ####
+              ## End Sub Groups ####
             )
             ## End fluidRow
           )

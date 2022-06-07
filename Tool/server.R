@@ -160,7 +160,8 @@ server <- function(input, output, session) {
     
     ## straight_pipe_hh ####
     straight_pipe_hh <- reactive({
-        input$var == "Household Size" && geo_reactive() == FALSE
+        input$var == "Household Size" &&
+            input$geo_level == "Health Reporting Area (HRA)"
     })
     
     
@@ -168,9 +169,21 @@ server <- function(input, output, session) {
     measure_reactive <- reactive({
         input$measure_type
     })
+    
+    pal_reactive <- reactive({
+        measure <- input$measure_type
+        if(measure == "Count"){
+            pal <- "Blues"
+        }else{
+            pal <- "YlGnBu"
+        }
+        pal
+    })
+    
     ## year_reactive ####
     year_reactive <- reactive({
-        if(input$var == "Population"){
+        var <- input$var == "Population"
+        if(var){
             as.numeric(strsplit(input$year, "-")[[1]][1])
         }
     })
@@ -263,9 +276,10 @@ server <- function(input, output, session) {
     })
     
     ## all_selected ####
-    # return TRUE if "Prevalence" and the whole population are selected; this is for generating the warning message
+    # return TRUE if "Prevalence" and the whole population are selected; 
+    # this is for generating the warning message
     all_selected <- reactive({
-        measure_reactive() == "Prevalence" &&
+        input$measure_type == "Prevalence" &&
             length(sex_reactive()) == 2 &&
             length(age_reactive()) == 18 &&
             length(race_reactive()) == 7
@@ -290,108 +304,112 @@ server <- function(input, output, session) {
         }
     })
     
+    ## geo_year_df_reactive ####
     
-    ## sp_reactive ####
-    # generate an sp object with population data and related geographic data based on user input
-    sp_reactive <- reactive({
-        # selected geographic level and then selected age groups
-        # ARA_: conditional branch to differentiate selected df based off of var selection
-        # ARA_: I added demographic filters as it originally defaulted 
-        ## to do it later on but not evrey var holds demographic info
-        ## geo_reactive == TRUE when Tract_level
+    # selected geographic level and then selected age groups
+    # ARA_: conditional branch to differentiate selected df based off of var selection
+    # ARA_: I added demographic filters as it originally defaulted 
+    ## to do it later on but not evrey var holds demographic info
+    ## geo_reactive == TRUE when Tract_level
+    
+    geo_df_reactive <- reactive({
         
-        
+        var <- input$var
+        geo <- (input$geo_level == "Census Tract")
         ### Population ####
-        if (var_reactive() == "Population"){
-            if (geo_reactive()) {
-                selected_df <- tract_proj %>%
-                    mutate(moe = 0) %>%
-                    filter(Year %in% year_reactive())
+        if (var == "Population"){
+            if (geo) {
+                geo_df <- tract_proj %>%
+                    mutate(moe = 0)
             }else{
-                selected_df <- hra_proj %>%
-                    mutate(moe = 0) %>%
-                    filter(Year %in% year_reactive()) 
+                geo_df <- hra_proj %>%
+                    mutate(moe = 0) 
             }
             
         }
         ## Median Income ####
-        else if(var_reactive() == "Median Income"){
-            if (geo_reactive()) {
-                selected_df <- tract_inc %>%
-                    filter(Year %in% year_reactive())
+        else if(var == "Median Income"){
+            if (geo) {
+                geo_df <- tract_inc 
             }else{
                 
             }
         }
         ## Education ####
-        else if (var_reactive() == "Education Level"){
-            if(geo_reactive()){
-                selected_df <- tract_edu %>%
-                    filter(Year %in% year_reactive())
+        else if (var == "Education Level"){
+            if(geo){
+                geo_df <- tract_edu 
             }else{
                 
             }                
         }   
         ## Rent Burden ####
-        else if (var_reactive() == "Rent Burden"){
-            if(geo_reactive()){
-                selected_df <- tract_burden %>%
-                    filter(Year %in% year_reactive())
+        else if (var == "Rent Burden"){
+            if(geo){
+                geo_df <- tract_burden
             }else{
-                selected_df <- hra_burden %>%
-                    filter(Year %in% year_reactive())
+                geo_df <- hra_burden 
             }                
         }
         ## Household Size ####
-        else if (var_reactive() == "Household Size") {
-            if(geo_reactive()){
-                selected_df <- tract_RO %>%
-                    filter(Year %in% year_reactive())
+        else if (var == "Household Size") {
+            if(geo){
+                geo_df <- tract_RO 
             }else{
                 
             }
         }
         ## Transportation & Age ####
-        else if (var_reactive() == "Methods of Transportation to Work") {
-            if(geo_reactive()){
-                selected_df <- tract_transp %>%
-                    filter(Year %in% year_reactive())
+        else if (var == "Methods of Transportation to Work") {
+            if(geo){
+                geo_df <- tract_transp 
             }else{
                 
             }
         }
         ## Median Rent ####
-        else if (var_reactive() == "Median Gross Rent"){
-            if(geo_reactive()){
-                selected_df <- tract_med_rent %>%
-                    filter(Year %in% year_reactive())
+        else if (var == "Median Gross Rent"){
+            if(geo){
+                geo_df <- tract_med_rent 
             }else{
                 
             }
         }
         
         
-        
+        ### Rename geo_year_df for HH Smoothed ####
+        # relies on measure_reactive value
         if(straight_pipe_hh()) {
-            if(measure_reactive() == "Count"){
-                names(selected_df)[9] <- 'value'
-                names(selected_df)[10] <- 'upper'
-                names(selected_df)[11] <- 'lower'
+            if(input$measure_type == "Count"){
+                names(geo_df)[9] <- 'value'
+                names(geo_df)[10] <- 'upper'
+                names(geo_df)[11] <- 'lower'
                 
-            } else if (measure_reactive() == "Prevalence"){
-                names(selected_df)[3] <- 'value'
-                names(selected_df)[4] <- 'upper'
-                names(selected_df)[5] <- 'lower'
-            } else if (measure_reactive() == "Distribution"){
-                names(selected_df)[13] <- 'value'
-                names(selected_df)[14] <- 'upper'
-                names(selected_df)[15] <- 'lower'
+            } else if (input$measure_type == "Prevalence"){
+                names(geo_df)[3] <- 'value'
+                names(geo_df)[4] <- 'upper'
+                names(geo_df)[5] <- 'lower'
+            } else if (input$measure_type  == "Distribution"){
+                names(geo_df)[13] <- 'value'
+                names(geo_df)[14] <- 'upper'
+                names(geo_df)[15] <- 'lower'
             }
-        }
+        }    
         
-        ### ARA:Prevalences ####
-        if (measure_reactive() == "Prevalence" && !straight_pipe_hh()) {
-            selected_df <- selected_df %>%
+        geo_df
+    })
+    
+    geo_year_df_reactive <- reactive({
+        
+        geo_df <- geo_df_reactive() 
+        year <- year_reactive()
+        measure <- measure_reactive()
+        
+        geo_year_df <- geo_df %>% 
+            filter(Year %in% year)
+        
+        if (measure == "Prevalence" && !straight_pipe_hh()) {
+            geo_year_df <- geo_year_df %>%
                 group_by(GEOID) %>%
                 mutate(
                     prev_total = sum(value),
@@ -400,11 +418,19 @@ server <- function(input, output, session) {
                 ) %>%
                 ungroup() 
         } 
-        ### Demographic Filters ####      
-        #ARA: These filter by user-inputted variable specific demographics
-        #### Population ####
-        if (var_reactive() == "Population"){
-            selected_df <- selected_df %>%
+        
+        geo_year_df
+    })
+    
+    ## selected_df_reactive ####
+    ### Variable Filters ####      
+    #ARA: These filter by user-inputted variable specific demographics
+    #### Population ####
+    selected_df_reactive <- reactive({
+        geo_year_df <- geo_year_df_reactive()
+        var <- var_reactive()
+        if (var == "Population"){
+            selected_df <- geo_year_df %>%
                 filter(Sex %in% sex_reactive(),
                        Race %in% race_reactive(),
                        Age %in% age_reactive())%>%
@@ -414,8 +440,8 @@ server <- function(input, output, session) {
             
         }
         #### Education ####
-        else if (var_reactive() == "Education Level"){
-            selected_df <- selected_df %>%
+        else if (var == "Education Level"){
+            selected_df <- geo_year_df %>%
                 filter(short_label %in% edu_reactive(),
                        Sex %in% sex_reactive(),
                        Race %in% race_reactive()) %>%
@@ -426,8 +452,8 @@ server <- function(input, output, session) {
         }           
         #ARA FIX: for HRA, might need to group by HRA 
         #### Rent Burden ####
-        else if (var_reactive() == "Rent Burden"){
-            selected_df <- selected_df %>%
+        else if (var == "Rent Burden"){
+            selected_df <- geo_year_df %>%
                 
                 filter(short_label %in% rent_reactive())%>%
                 group_by(GEOID) %>%
@@ -437,15 +463,15 @@ server <- function(input, output, session) {
         }
         #### straight pipe hh ####
         else if (straight_pipe_hh()){
-            selected_df <- selected_df %>%
+            selected_df <- geo_year_df %>%
                 filter(hh_size %in% size_reactive(),
                        tenure %in% tenure_reactive())%>%
                 group_by(GEOID) %>%
                 summarize(value = sum(value))
         } 
         #### Household Size ####
-        else if (var_reactive() == "Household Size") {
-            selected_df <- selected_df %>%
+        else if (var == "Household Size") {
+            selected_df <- geo_year_df %>%
                 filter(short_label %in% tenure_reactive()) %>%
                 group_by(GEOID) %>%
                 summarize(value = sum(value),
@@ -453,8 +479,8 @@ server <- function(input, output, session) {
         }
         #### Transportation & Age ####
         #Need to Add Race to csv in order to filter by it/maybe add median agee too or just establish another pipeline for an age-specific csv
-        else if (var_reactive() == "Methods of Transportation to Work"){
-            selected_df <- selected_df %>%
+        else if (var == "Methods of Transportation to Work"){
+            selected_df <- geo_year_df %>%
                 filter(short_label %in% transp_reactive()) %>% 
                 group_by(GEOID) # %>% 
             # summarize(value = sum(value),
@@ -462,28 +488,40 @@ server <- function(input, output, session) {
         }
         
         #HRA Var Reactives go here
-        else if (var_reactive() == "Rent Burden"){
-            selected_df <- selected_df %>%
+        else if (var == "Rent Burden"){
+            selected_df <- geo_year_df %>%
                 filter(short_label %in% rent_reactive())%>%
                 group_by(GEOID) %>%
                 summarize(value = sum(value),
                           moe = sum(moe))
             
         }
-        # 
-        
+        selected_df
+    })
+    # 
+    
+    ## measure_df_reactive ####
+    
+    measure_df_reactive <- reactive({
+        selected_df <- selected_df_reactive()
+ 
+        measure <- input$measure_type
         ### Measures ####
         if(!straight_pipe_hh()) {
-            if (measure_reactive() == "Value") {
-                selected_df <- selected_df %>%
+            ## Measures for HH Size Smoothed 
+            # I think this means we need Prevalence to be default
+            # measure for HH size smoothed? 
+            
+            if (measure == "Value") {
+                measure_df <- selected_df %>%
                     mutate(
                         value = round(value, 1),
                         SE = round(moe/qnorm(.95), 1)
                     ) %>%
                     ungroup() 
             } 
-            else if (measure_reactive() == "Count") {
-                selected_df <- selected_df %>%
+            else if (measure == "Count") {
+                measure_df <- selected_df %>%
                     mutate(
                         value = round(value, 0),
                         SE = round(moe/qnorm(.95), 0)
@@ -491,8 +529,8 @@ server <- function(input, output, session) {
                     ungroup() 
             }
             
-            else if (measure_reactive() == "Prevalence") {
-                selected_df <- selected_df %>%
+            else if (measure == "Prevalence") {
+                measure_df <- selected_df %>%
                     group_by(GEOID) %>%
                     mutate(
                         value  = round(value * 10^4) / 10^2,
@@ -500,8 +538,8 @@ server <- function(input, output, session) {
                     ) %>%
                     ungroup() 
             }
-            else if (measure_reactive() == "Distribution"){
-                selected_df <- selected_df %>%
+            else if (measure  == "Distribution"){
+                measure_df <- selected_df %>%
                     mutate(
                         moe = round(moe / sum(value) *10^4) / 10^2,
                         value = round(value / sum(value) * 10^4) / 10^2,
@@ -511,7 +549,14 @@ server <- function(input, output, session) {
             }
         } 
         
+    })
+    ## sp_reactive ####
+    # generate an sp object with population data 
+    # # and related geographic data based on user input
+    sp_reactive <- reactive({
         
+        measure_df <- measure_df_reactive()        
+        geo <- geo_reactive()
         # if "Prevalence" and the whole population are selected, the calculation
         # will not always be 100% but have some small variances (around 0.5%)
         # the code belowe changes them all to 100% to avoid confusion
@@ -523,111 +568,94 @@ server <- function(input, output, session) {
         # }
         ### Add to Spatial Data ####
         # merge the dataframe with the corresponding geographic level GIS data and return
-        if (geo_reactive()) {
-            merge_df_spdf(selected_df, kc_tract_spdf)
+        if (geo) {
+            merge_df_spdf(measure_df, kc_tract_spdf)
         } else {
-            merge_df_spdf(selected_df, kc_hra_spdf)
+            merge_df_spdf(measure_df, kc_hra_spdf)
         }
     })
     
-    ## Legend ####
+    ## Legend Titles ####
     #ARA_ Added branch for creating legend for other variables
     legend_title_reactive <- reactive({
-        if (input$measure_type == "Count") {
-            if(var_reactive() == "Population"){
+        var <- var_reactive()
+        measure <- measure_reactive()
+        if (measure == "Count") {
+            if(var == "Population"){
                 "Population"
             }
             
-            else if(var_reactive() == "Education Level"){
+            else if(var == "Education Level"){
                 "Educational Attainment"
             }
-            else if(var_reactive() == "Rent Burden"){
+            else if(var == "Rent Burden"){
                 "Renters According to Burden"
             }
             
-            else if(var_reactive() == "Household Size"){
+            else if(var == "Household Size"){
                 "Households by Size and Tenure"
             }
             
             
         }
-        else if(input$measure_type == "Value"){
-            if(var_reactive() == "Median Income"){
+        else if(measure == "Value"){
+            if(var == "Median Income"){
                 "Median Income (Dollars)"
             }
             
-            else if (var_reactive() == "Methods of Transportation to Work"){
+            else if (var == "Methods of Transportation to Work"){
                 "Median Age"
             }
             
-            else if (var_reactive() == "Median Gross Rent"){
+            else if (var == "Median Gross Rent"){
                 "Median Gross Rent (Dollars)"
             }
             
         }
-        else if (input$measure_type == "Prevalence") {
+        else if (measure == "Prevalence") {
             "Prevalence (%)"
         }
         
-        else if (input$measure_type == "Distribution"){
+        else if (measure == "Distribution"){
             "Distribution (%)"
         }
     })
     
     ## Popup/Rollover Text ####
     popup_text_reactive <- reactive({
-        paste0(
-            ifelse(
-                geo_reactive(),
-                "Tract GEOID: ",
-                "HRA Name: "
-            ),
-            "<strong>%s</strong><br/>",
-            
-            # ARA_ Created branches to account for possibility of other measures and created diff popup displays for diff vars
-            if(input$measure_type == "Count"){
-                
-                "Number of Individuals: <strong>%g</strong><br/>"
-                
-            } 
-            else if (input$measure_type == "Value"){
-                if (straight_pipe_hh()) {
-                    "Number of Households: <strong>%g</strong><br/>"
-                }
-                
-                if (var_reactive() == "Median Income"){
-                    "Median Income: $<strong>%g</strong><br/>"
-                }
-                
-                else if (var_reactive() == "Methods of Transportation to Work"){
-                    "Median Age: <strong>%g</strong><br/>"
-                }
-                
-                else if (var_reactive() == "Median Gross Rent"){
-                    "Median Gross Rent: $<strong>%g</strong><br/>"
-                }
-                
+        var <- input$var
+        geo_logical <- input$geo_level == "Census Tract"
+        measure <- input$measure_type
+        geo_prefix <- ifelse(geo_logical,
+                             "Tract No.: ", "HRA: ")
+        measure_prefix <- "No. Individuals: "
+        if (measure == "Prevalence"){
+            measure_prefix <- "Prevalence: "
+        }else if (measure == "Distribution"){
+            measure_prefix <- "Distribution: "
+        }else if (measure  == "Value"){
+            if (straight_pipe_hh()) {
+                measure_prefix <-  "No. Households: "
+            }else if (var == "Median Income"){
+                measure_prefix <-  "Median Income: $"
+            }else if (var == "Methods of Transportation to Work"){
+                measure_prefix <-  "Median Age: "
+            }else if (var == "Median Gross Rent"){
+                measure_prefix <-   "Median Gross Rent: $"
             }
-            
-            else if (input$measure_type == "Prevalence"){
-                "Prevalence: <strong>%g %%</strong><br/>"
-            }
-            
-            else if (input$measure_type == "Distribution"){
-                "Distribution: <strong>%g %%</strong><br/>"
-            }
-            ,
-            if(straight_pipe_hh()){
-                "(<strong>%g</strong>, "
-            } else {
-                "SE: <strong>%g</strong>"
-            }
-            ,
-            if (straight_pipe_hh()){
-                "<strong>%g</strong>)"
-            }
-            
-        )
+        }
+        
+        uncertainty <- "SE: <strong>%g</strong>"
+        
+        if(straight_pipe_hh()){
+            uncertainty <- "(<strong>%g</strong>, <strong>%g</strong>)"
+        } 
+
+        paste0(geo_prefix,
+               "<strong>%s</strong><br/>", # GEOID
+               measure_prefix,
+               "<strong>%g</strong><br/>", # value
+               uncertainty)
     })
     
     # Output ####
@@ -1010,38 +1038,56 @@ server <- function(input, output, session) {
     })
     
     # this function updates the map based on user input
+    # Begin observe() ####
     observe({
         shinyjs::showElement(id = 'loading')
         
-        sp <- sp_reactive()
-        proxy_map <- leafletProxy(
-            "map",
-            data = sp
-        ) %>%
-            # clear the existing shapes and legend
-            clearShapes() %>%
-            clearControls() %>%
-            # since polyline will also be removed by the clearShape() function
-            # add the layer again here
-            addPolylines(
-                data = kc_tl_2040,
-                group = "Transit Lines (2040)",
-                color = "#62AC55",
-                weight = 3,
-                opacity = 0.2,
-                popup = sprintf(
-                    "Transit Line Name: <strong>%s</strong>",
-                    kc_tl_2040$Name
-                ) %>%
-                    lapply(htmltools::HTML),
-                options = pathOptions(pane = "layer2")
-            )
+        var <- var_reactive()
+        geo <- geo_reactive()
+        measure <- measure_reactive()
+        year <- year_reactive()
         
-        ## Polygon Colors ####
-        #ARA: ALL SELECTED
+        geo_df <- geo_df_reactive()
+        geo_year_df <- geo_year_df_reactive()
+        selected_df <- selected_df_reactive()
+        measure_df <- measure_df_reactive()
+        
+        ## sp_reactive() ####
+        sp <- sp_reactive()
+        
+        popup <- popup_text_reactive()
+        pal <- pal_reactive()
+        # proxy_map ####
+        
+        # proxy_map <- leafletProxy(
+        #     "map",
+        #     data = sp
+        # ) %>%
+        #     # clear the existing shapes and legend
+        #     clearShapes() %>%
+        #     clearControls() %>%
+        #     # since polyline will also be removed by the clearShape() function
+        #     # add the layer again here
+        #     addPolylines(
+        #         data = kc_tl_2040,
+        #         group = "Transit Lines (2040)",
+        #         color = "#62AC55",
+        #         weight = 3,
+        #         opacity = 0.2,
+        #         popup = sprintf(
+        #             "Transit Line Name: <strong>%s</strong>",
+        #             kc_tl_2040$Name
+        #         ) %>%
+        #             lapply(htmltools::HTML),
+        #         options = pathOptions(pane = "layer2")
+        #     )
+        
+        
+        # Create all_selected ####
         all_selected <- FALSE
         # if (all_selected()) {
         if (1>2) {
+            ## Example map ####
             proxy_map <- proxy_map %>%
                 addPolygons(
                     layerId = ~GEOID,
@@ -1058,8 +1104,9 @@ server <- function(input, output, session) {
                         color = "white", weight = 2,
                         bringToFront = TRUE
                     ),
+                    ### Pop up sprintf() call ####
                     label = sprintf(
-                        popup_text_reactive(),
+                        popup,
                         sp$GEOID,
                         sp$value,
                         sp$SE
@@ -1083,46 +1130,38 @@ server <- function(input, output, session) {
                     position = "bottomright"
                 )
         } else {
+            ## Map ####
+            ### Polygon Colors ####
             #define the color palette for filling the polygons based on population
             #ARA_ changed N from 5 to 2
             #ARA_ Added unique quant length for quantile 
-            unique_quant_length <- length(unique(quantile(sp@data$value, seq(0,1,.2), na.rm = TRUE)))
+            unique_quant_length <- length(unique(quantile(sp@data$value,
+                                                          seq(0,1,.2), na.rm = TRUE)))
+      
             if(unique_quant_length < 6){
-                if(measure_reactive() == "Prevalence" | measure_reactive() == "Distribution"){
+                #### Less than quintiles ####
+                ## Continuous vars
+               
                     col_pal <- colorQuantile(
-                        palette = "YlGnBu",
+                        palette = pal,
                         domain = sp@data$value,
                         n = 2,
                         na.color = NA
                     )
-                } else {
-                    col_pal <- colorQuantile(
-                        palette = "Blues",
-                        domain = sp@data$value,
-                        n = 2,
-                        na.color = NA
-                    )
-                }
+              
                 # calculate the values displayed in the legend
                 legend_values <- quantile(sp@data$value, type = 5, 
                                           probs = seq(0, 1, .5),
                                           names = FALSE, na.rm = TRUE)
             } else {
-                if(measure_reactive() == "Prevalence" | measure_reactive() == "Distribution"){
-                    col_pal <- colorQuantile(
-                        palette = "YlGnBu",
-                        domain = sp@data$value,
-                        n = 5,
-                        na.color = NA
-                    )
-                } else {
-                    col_pal <- colorQuantile(
-                        palette = "Blues",
+                ### Quintiles ####
+               col_pal <- colorQuantile(
+                        palette = pal,
                         domain = sp@data$value,
                         n = 5,
                         na.color = NA
                     ) 
-                }
+                
                 # calculate the values displayed in the legend
                 legend_values <- quantile(sp@data$value, type = 5, 
                                           probs = seq(0, 1, .2),
@@ -1133,6 +1172,7 @@ server <- function(input, output, session) {
             ## Update map, sprintf() for rollover ####
             # add the new population data to the map
             if(straight_pipe_hh()){
+                ### HH Size (Smoothed) ####
                 proxy_map <- proxy_map %>%
                     addPolygons(
                         layerId = ~GEOID,
@@ -1147,10 +1187,11 @@ server <- function(input, output, session) {
                             bringToFront = TRUE
                         ),
                         label = sprintf(
-                            popup_text_reactive(),
+                            popup,
                             sp$GEOID,
                             sp$value,
-                            sp$SE
+                            sp$lower,
+                            sp$upper
                         ) %>%
                             lapply(htmltools::HTML),
                         labelOptions = labelOptions(
@@ -1179,7 +1220,30 @@ server <- function(input, output, session) {
                         position = "bottomright"
                     )
             }else{
-                proxy_map <- proxy_map %>%
+                
+                ## Not HH Size (Smoothed) ####
+                proxy_map <- leafletProxy(
+                    "map",
+                    data = sp
+                ) %>%
+                    # clear the existing shapes and legend
+                    clearShapes() %>%
+                    clearControls() %>%
+                    # since polyline will also be removed by the clearShape() function
+                    # add the layer again here
+                    addPolylines(
+                        data = kc_tl_2040,
+                        group = "Transit Lines (2040)",
+                        color = "#62AC55",
+                        weight = 3,
+                        opacity = 0.2,
+                        popup = sprintf(
+                            "Transit Line Name: <strong>%s</strong>",
+                            kc_tl_2040$Name
+                        ) %>%
+                            lapply(htmltools::HTML),
+                        options = pathOptions(pane = "layer2")
+                    ) %>%
                     addPolygons(
                         layerId = ~GEOID,
                         color = "#606060",
@@ -1193,11 +1257,10 @@ server <- function(input, output, session) {
                             bringToFront = TRUE
                         ),
                         label = sprintf(
-                            popup_text_reactive(),
+                            popup,
                             sp$GEOID,
                             sp$value,
-                            sp$lower,
-                            sp$upper
+                            sp$SE
                         ) %>%
                             lapply(htmltools::HTML),
                         labelOptions = labelOptions(
