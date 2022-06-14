@@ -271,7 +271,7 @@ ui <- dashboardPage(
                                 "Methods of Transportation to Work",
                                 "Median Gross Rent"),
                     # "Apartments", "Number of Units", "Number of Bedrooms"),
-                    selected = "Population"
+                    selected = "Education Level"
                   )
                 ),
                 ## Geo Box ####
@@ -303,6 +303,21 @@ ui <- dashboardPage(
                 ## Measure Box ####
                 #JLG: Moved measure box, made conditional
                 conditionalPanel(
+                  condition = paste0("input.var != 'Methods of Transportation to Work'",
+                                     "& input.var != 'Median Gross Rent'",
+                                     "& input.var != 'Median Income'"),
+                  box(
+                    width = NULL,
+                    selectInput(
+                      inputId = "measure_type",
+                      label = "Measure",
+                      choices = c("Count", "Prevalence", "Distribution"),
+                      selected = "Count"
+                    )
+                  )
+                ),
+                
+                conditionalPanel(
                   condition = paste0("input.var == 'Median Gross Rent'",
                                      "| input.var == 'Median Income'"),
                   box(
@@ -329,21 +344,7 @@ ui <- dashboardPage(
                   )
                 ),
           
-                conditionalPanel(
-                  condition = paste0("input.var != 'Methods of Transportation to Work'",
-                                     "& input.var != 'Median Gross Rent'",
-                                     "& input.var != 'Median Income'"),
-                  box(
-                    width = NULL,
-                    selectInput(
-                      inputId = "measure_type",
-                      label = "Measure",
-                      choices = c("Count", "Prevalence", "Distribution"),
-                      selected = "Count"
-                    )
-                  )
-                ),
-                
+
                 ## Year Box ####
                 
                 #ARA: I made the years 1 year sequences bc somee of the data isn't avail every year
@@ -359,7 +360,6 @@ ui <- dashboardPage(
                                        seq(2004,2049,5)),
                       selected = "2015-2019"
                     ),
-                    
                     # bstooltip for the helper window
                     bsTooltip(
                       id = "year",
@@ -371,6 +371,39 @@ ui <- dashboardPage(
                     )
                   )
                 ),
+                    
+                conditionalPanel(
+                  condition = paste0("input.var == 'Education Level'",
+                                     "| input.var == 'Rent Burden'"),
+                  box(
+                    width = NULL,
+                    
+                    selectInput(
+                      inputId = "year",
+                      label = "Year",
+                      choices = paste0(seq(2005,2015,5), "-",
+                                       seq(2009,2019,5)),
+                      selected = "2015-2019"
+                    )
+                  )
+                ),
+                
+                conditionalPanel(
+                  condition = "input.var == 'Household Size'",
+                  box(
+                    width = NULL,
+                    
+                    selectInput(
+                      inputId = "year",
+                      label = "Year",
+                      choices = paste0(c(2005, 2010, 2013), "-",
+                                       c(2009,2015,2018)),
+                      selected = "2015-2018"
+                    )
+                  )
+                ),
+                
+                
                 ### End Year Box ####
                 
 

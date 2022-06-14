@@ -172,9 +172,9 @@ server <- function(input, output, session) {
     
     pal_reactive <- reactive({
         measure <- input$measure_type
-        if(measure == "Count"){
-            pal <- "Blues"
-        }else{
+        pal <- "Blues"
+        
+        if(measure != "Count"){
             pal <- "YlGnBu"
         }
         pal
@@ -182,9 +182,13 @@ server <- function(input, output, session) {
     
     ## year_reactive ####
     year_reactive <- reactive({
-        var <- input$var == "Population"
-        if(var){
+        var <- input$var
+        if(var == "Population"){
             as.numeric(strsplit(input$year, "-")[[1]][1])
+        }else if(var %in% c("Education Level", "Rent Burden")){
+            as.numeric(strsplit(input$year, "-")[[1]][2])
+        }else if(var == "Household Size"){
+            as.numeric(strsplit(input$year, "-")[[1]][2])
         }
     })
     
