@@ -1289,7 +1289,7 @@ server <- function(input, output, session) {
                                            "th PCTL)")
                                 }
                             },
-                            title = legend_title,
+                            title = legend_title_reactive(),
                             position = "bottomright"
                         )
                 }

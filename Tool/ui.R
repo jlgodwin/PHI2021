@@ -12,7 +12,8 @@ library(shinydashboard)
 library(shinyWidgets)
 library(shinycssloaders)
 library(shinyBS)
-source("../00_utils.R")
+source("./00_utils.R")
+
 # Updated as of 9.9
 ui <- dashboardPage(
   title = "Exploring King County",

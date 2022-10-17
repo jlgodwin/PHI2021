@@ -201,7 +201,7 @@ message("Read Tract-level bedrooms \n")
 tract_bedrooms <- read.csv(
     file = "./data/Bedrooms_tract.csv", 
     colClasses = c("GEOID" = "character", "value" = "double"))
-tract_bedrooms$Bedrooms <- as.numeric(tract_bedrooms$Bedrooms)
+tract_bedrooms$Bedrooms <- as.numeric(as.factor(tract_bedrooms$Bedrooms)) - 1
 tract_bedrooms <- tract_bedrooms %>% 
     rename("short_label" = "Bedrooms")
 
@@ -526,23 +526,23 @@ server <- function(input, output, session) {
         geo_df
     })
     
-    # #geo_year_df_reactive <- reactive({
-    #     
-    #    # geo_df <- geo_df_reactive() 
-    #     year <- year_reactive()
-    #     measure <- measure_reactive()
-    #     
-    #     geo_year_df <- geo_df %>% 
-    #         filter(Year %in% year) %>%
-    #         group_by(GEOID) %>%
-    #         mutate(
-    #             prev_total = sum(value)
-    #         ) %>%
-    #         ungroup() 
-    #     
-    #     
-    #     geo_year_df
-    # })
+    geo_year_df_reactive <- reactive({
+
+        geo_df <- geo_df_reactive()
+        year <- year_reactive()
+        measure <- measure_reactive()
+
+        geo_year_df <- geo_df %>%
+            filter(Year %in% year) %>%
+            group_by(GEOID) %>%
+            mutate(
+                prev_total = sum(value)
+            ) %>%
+            ungroup()
+
+
+        geo_year_df
+    })
     
     ## selected_df_reactive ####
     ### Variable Filters ####      
@@ -550,16 +550,17 @@ server <- function(input, output, session) {
     #### Population ####
     selected_df_reactive <- reactive({
         geo_df <- geo_df_reactive()
+        geo_year_df <- geo_year_df_reactive()
         var <- var_reactive()
         year <- year_reactive()
         
-        geo_year_df <- geo_df %>% 
-            filter(Year %in% year) %>%
-            group_by(GEOID) %>%
-            mutate(
-                prev_total = sum(value)
-            ) %>%
-            ungroup() 
+        # geo_year_df <- geo_df %>% 
+        #     filter(Year %in% year) %>%
+        #     group_by(GEOID) %>%
+        #     mutate(
+        #         prev_total = sum(value)
+        #     ) %>%
+        #     ungroup() 
         
         
         if (var == "Population"){
@@ -697,7 +698,7 @@ server <- function(input, output, session) {
                     ungroup() %>% 
                     group_by(GEOID) %>% 
                     mutate(
-                        # prev_total = unique(prev_total),
+                        prev_total = unique(prev_total),
                         value = round(value, 0),
                         SE = round(moe/qnorm(.95), 0)
                     ) %>%
@@ -793,7 +794,7 @@ server <- function(input, output, session) {
         measure <- input$measure_type
         geo_prefix <- ifelse(geo_logical,
                              "Tract No.: ", "HRA: ")
-        measure_prefix <- 
+        measure_prefix <- "No. Individuals: "
         if (measure == "Count"){
             measure_prefix <- "No. Individuals: "
         }else if (measure == "Prevalence"){
@@ -1258,7 +1259,7 @@ server <- function(input, output, session) {
         
         
         geo_df <- geo_df_reactive()
-        #geo_year_df <- geo_year_df_reactive()
+        geo_year_df <- geo_year_df_reactive()
         selected_df <- selected_df_reactive()
         measure_df <- measure_df_reactive()
         
@@ -1410,10 +1411,12 @@ server <- function(input, output, session) {
                                     }
                                     
                                     upper <- as.integer(cuts)[-1]
-                                    paste0(lower, " - ", upper, " (", seq(0, 100, length.out = n)[-n], "th PCTL)")
+                                    paste0(lower, " - ", upper, " (",
+                                           seq(0, 100, length.out = n)[-n],
+                                           "th PCTL)")
                                 }
                             },
-                            title = year, #legend_title troubleshoot year
+                            title = legend_title_reactive(), #legend_title troubleshoot year
                             position = "bottomright"
                         )
                 }else{
@@ -1469,7 +1472,7 @@ server <- function(input, output, session) {
                                            "th PCTL)")
                                 }
                             },
-                            title = year, #change to legend_title
+                            title = legend_title_reactive(), #change to legend_title
                             position = "bottomright"
                         )
                 }
@@ -1861,3 +1864,4 @@ server <- function(input, output, session) {
     outputOptions(output, "map", suspendWhenHidden = FALSE)
     # outputOptions(output, "plot", suspendWhenHidden = FALSE)
 }
+
