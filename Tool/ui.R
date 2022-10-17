@@ -12,7 +12,7 @@ library(shinydashboard)
 library(shinyWidgets)
 library(shinycssloaders)
 library(shinyBS)
-source("./00_utils.R")
+source("../00_utils.R")
 # Updated as of 9.9
 ui <- dashboardPage(
   title = "Exploring King County",
@@ -263,15 +263,14 @@ ui <- dashboardPage(
                   selectInput(
                     inputId = "var",
                     label = "Variable",
-                    choices = c("Education Level", "Median Income",
-                                "Population", "Rent Burden",
+                    choices = c("Population", "Education Level", 
+                                "Median Income", "Rent Burden",
                                 "Household Size",
-                                "Smoothed Household Size",
-                                ## Change to remove Median Age soon
                                 "Methods of Transportation to Work",
-                                "Median Gross Rent"),
-                    # "Apartments", "Number of Units", "Number of Bedrooms"),
-                    selected = "Education Level"
+                                "Median Gross Rent", "Number of Bedrooms",
+                                "Number of Occupants per Room"),
+                    # "Apartments", "Number of Units", "Smoothed Household Size"),
+                    selected = "Population"
                   )
                 ),
                 ## Geo Box ####
@@ -301,7 +300,6 @@ ui <- dashboardPage(
                   )
                 ),
                 ## Measure Box ####
-                #JLG: Moved measure box, made conditional
                 conditionalPanel(
                   condition = paste0("input.var != 'Methods of Transportation to Work'",
                                      "& input.var != 'Median Gross Rent'",
@@ -319,20 +317,9 @@ ui <- dashboardPage(
                 
                 conditionalPanel(
                   condition = paste0("input.var == 'Median Gross Rent'",
-                                     "| input.var == 'Median Income'"),
-                  box(
-                    width = NULL,
-                    selectInput(
-                      inputId = "measure_type",
-                      label = "Measure",
-                      choices = c("Value"),
-                      selected = "Value"
-                    )
-                  )
-                ),
-                
-                conditionalPanel(
-                  condition = "input.var == 'Methods of Transportation to Work'",
+                                     "| input.var == 'Median Income'",
+                                     "| input.var == ",
+                                     "'Methods of Transportation to Work'"),
                   box(
                     width = NULL,
                     selectInput(
@@ -347,7 +334,7 @@ ui <- dashboardPage(
 
                 ## Year Box ####
                 
-                #ARA: I made the years 1 year sequences bc somee of the data isn't avail every year
+                #ARA: I made the years 1 year sequences bc some of the data isn't avail every year
                 conditionalPanel(
                   condition = "input.var == 'Population'",
                   box(
@@ -396,9 +383,52 @@ ui <- dashboardPage(
                     selectInput(
                       inputId = "year",
                       label = "Year",
-                      choices = paste0(c(2005, 2010, 2013), "-",
-                                       c(2009,2015,2018)),
-                      selected = "2015-2018"
+                      choices = c("2000", "2005-2009", "2010", "2010-2014", "2015-2019"),
+                      selected = "2015-2019"
+                    )
+                  )
+                ),
+                conditionalPanel(
+                  condition = "input.var == 'Number of Bedrooms'",
+                  box(
+                    width = NULL,
+                    
+                    selectInput(
+                      inputId = "year",
+                      label = "Year",
+                      choices = c("2000", "2002", "2005", "2007", 
+                                  "2010", "2012", "2015", "2017", "2020"),
+                      selected = "2020"
+                    )
+                  )
+                ),
+                conditionalPanel(
+                  condition = "input.var == 'Median Income'",
+                  box(
+                    width = NULL,
+                    
+                    selectInput(
+                      inputId = "year",
+                      label = "Year",
+                      choices = c("2009", "2010", "2011", "2012", "2013", 
+                                  "2014", "2015", "2016", "2017", "2018",
+                                  "2019"),
+                      selected = "2019"
+                    )
+                  )
+                ),
+                conditionalPanel(
+                  condition = paste0("input.var == 'Median Gross Rent'",
+                                     "| input.var == 'Number of Occupants per Room'",
+                                     "| input.var == 'Methods of Transportation to Work'"),
+                  box(
+                    width = NULL,
+                    
+                    selectInput(
+                      inputId = "year",
+                      label = "Year",
+                      choices = c("2005-2009", "2010-2014", "2015-2019"),
+                      selected = "2015-2019"
                     )
                   )
                 ),
@@ -429,7 +459,8 @@ ui <- dashboardPage(
                 ### Race Box ####
                 conditionalPanel(
                   condition = paste0("input.var == 'Education Level'",
-                                     "| input.var == 'Population'"),
+                                     "| input.var == 'Population'",
+                                     "| input.var == 'Number of Occupants per Room'"),
                   box(
                     width = NULL,
                     selectInput(
@@ -449,7 +480,7 @@ ui <- dashboardPage(
                 ### Burden Box ####
                 #JLG: Added Burden box
                 conditionalPanel(
-                  condition = "input.var == 'Burden Level'",
+                  condition = "input.var == 'Rent Burden'",
                   box(
                     width = NULL,
                     selectInput(
@@ -477,21 +508,69 @@ ui <- dashboardPage(
                     )
                   )
                 ),
+               
+               ### Household Size Box ####
+               conditionalPanel(
+                 condition = "input.var == 'Household Size'",
+                 box(
+                   width = NULL,
+                   selectInput(
+                     inputId = "size",
+                     label = "Household Size", 
+                     choices = paste0(1:7, c(rep("",6), "+")),
+                     selected = "1",
+                     multiple = FALSE
+                   )
+                 )
+               ),
               
-              ### Household Size Box ####
-              conditionalPanel(
-                condition = "input.var == 'Household Size'",
-                box(
-                  width = NULL,
-                  selectInput(
-                    inputId = "size",
-                    label = "Household Size", 
-                    choices = paste0(1:4, c(rep("",3), "+")),
-                    selected = "1",
-                    multiple = FALSE
-                  )
-                )
-              ),
+               ### Bedrooms Box ####
+               conditionalPanel(
+                 condition = "input.var == 'Number of Bedrooms'",
+                 box(
+                   width = NULL,
+                   
+                   selectInput(
+                     inputId = "bedrooms",
+                     label = "Bedrooms",
+                     choices = paste0(1:6, c(rep("", 5), "+")),
+                     selected = "1",
+                     multiple = FALSE
+                   )
+                 )
+               ),
+               
+               ### Residence Box ####
+               conditionalPanel(
+                 condition = "input.var == 'Number of Bedrooms'",
+                 box(
+                   width = NULL,
+                   
+                   selectInput(
+                     inputId = "residence",
+                     label = "Residence",
+                     choices = c("Duplex", "Single Family", "TownhousePlat",
+                                 "Triplex", "Vacant(Single-family)"),
+                     selected = "Single Family"
+                   )
+                 )
+               ),
+               
+               ### Occupants Box ####
+               conditionalPanel(
+                 condition = "input.var == 'Number of Occupants per Room'",
+                 box(
+                   width = NULL,
+                   
+                   selectInput(
+                     inputId = "occupants",
+                     label = "Occupants per Room",
+                     choices = c("One or less occupant per room", 
+                                 "More than one occupant per room"),
+                     selected = "More than one occupant per room"
+                   )
+                 )
+               ),
                 
                 ### Transpo Box ####
                 conditionalPanel(
@@ -501,13 +580,44 @@ ui <- dashboardPage(
                     selectInput(
                       inputId = "mode_transp",
                       label = "Methods of Transportation",
-                      choices = c("Drove Alone", "Carpooled", "Public Transportation", "Walked", "Taxi/Motorcycle/Bike/Other", "Worked from Home"),
+                      choices = c("Drove Alone", "Carpooled", 
+                                  "Public Transportation", "Walked", 
+                                  "Taxi/Motorcycle/Bike/Other", 
+                                  "Worked from Home"),
                       selected = "Drove Alone"
                       
                     )
                   )
                 ),
-                
+               
+               ### Income Box ####
+               conditionalPanel(
+                 condition = "input.var == 'Median Income'",
+                 box(
+                   width = NULL,
+                   selectInput(
+                     inputId = "median_income",
+                     label = "Median Income",
+                     choices = c("Median Income"),
+                     selected = "Median Income"
+                     
+                   )
+                 )
+               ),
+               ### Median Gross Rent Box ####
+               conditionalPanel(
+                 condition = "input.var == 'Median Gross Rent'",
+                 box(
+                   width = NULL,
+                   selectInput(
+                     inputId = "median_gross_rent",
+                     label = "Median Gross Rent",
+                     choices = c("Median Gross Rent"),
+                     selected = "Median Gross Rent"
+                     
+                   )
+                 )
+               ),
                 ### Age Box ####
                 conditionalPanel(
                   condition = "input.var == 'Population'",
@@ -645,7 +755,13 @@ ui <- dashboardPage(
             tags$li("Arti Shah"),
             tags$li("Meher Antia"),
             tags$li("Derek Fulwiler"),
-            tags$li("Takashi Inoue")
+            tags$li("Takashi Inoue"),
+            tags$li("Jenna Castillo"),
+            tags$li("Takashi Inoue"),
+            tags$li("Chris Govella"),
+            tags$li("Mary Jewell"),
+            tags$li("Oliver Tjalve"),
+            tags$li("Maxine Wright")
           )
         ),
         

@@ -1,0 +1,743 @@
+---
+title: "R: Spatial US Census Data"
+author: "Jessica Godwin"
+date: "June 23, 2022"
+output: 
+  pdf_document:
+        number_sections: true
+        toc: true
+linkcolor: 'blue'
+---
+
+# Setup
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "~/Dropbox/PHI-ARFP-2022/Slides/")
+
+if(FALSE){
+  setwd("~/Dropbox/PHI-ARFP-2022/Slides/")
+}
+
+## Libraries
+### Spatial
+library(rgdal)
+library(spdep)
+library(rgeos)
+library(raster)
+library(sf)
+
+### Survey stats
+library(survey)
+
+### Data wrangling
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(gridExtra)
+
+### Color tools
+library(RColorBrewer)
+library(classInt)
+
+## Census
+# install.packages('ipumsr')
+library(ipumsr)
+
+# install.packages('tidycensus')
+library(tidycensus)
+```
+
+# IPUMS and data downloads
+
+**Integrated Public Use Microdata Series (IPUMS)** began decades ago at the Minnesota Population Center where it remains headquartered today.
+* *Census microdata*, or individual level census information, 
+* Aggregates or 10\% or 5 \% samples,
+* Many people have contributed, but Steve Ruggles is main name
+* See literature uploaded to Literature/IPUMS for development of microdata series
+* Since expansion of microdata $\rightarrow$ surveys, GIS, DHS
+
+1.  Go to [IPUMS-NHGIS](https://www.nhgis.org/)
+2.  Click "Get Data".
+
+
+![IPUMS-NHGIS making extract, Step 1.](~/Dropbox/PHI-ARFP-2022/Slides/IPUMSNHGIS1.png)
+![IPUMS-NHGIS making extract, Step 2.](~/Dropbox/PHI-ARFP-2022/Slides/IPUMSNHGIS2.png)
+![IPUMS-NHGIS making extract, Step 3.](~/Dropbox/PHI-ARFP-2022/Slides/IPUMSNHGIS3.png)
+![IPUMS-NHGIS making extract, Step 4.](~/Dropbox/PHI-ARFP-2022/Slides/IPUMSNHGIS4.png)
+
+## `ipumsr`
+
+* **Upside**
+- `ipumsr` is a wonderful package created to make IPUMS data extra usable in `R`
+* **Downside**
+- format of data is more complicated than others you might have seen
+- [`ipumsr` vignette](https://cran.r-project.org/web/packages/ipumsr/vignettes/ipums.html) someone tweeted just this morning that I wish had existed when I had to figure this out for myself years ago
+- [`ipumsr` NHGIS vignette](https://cran.r-project.org/web/packages/ipumsr/vignettes/ipums-nhgis.html)
+- [MPC IPUMS-NHGIS Exercise 1](https://pop.umn.edu/sites/pop.umn.edu/files/nhgis_training_ex1_2017-01.pdf)
+
+##  Installation, loading, vignettes
+
+```{r ipums, eval = FALSE}
+vignette("ipums", package = "ipumsr")
+vignette("value-labels", package = "ipumsr")
+vignette("ipums-geography", package = "ipumsr")
+vignette("ipums-cps", package = "ipumsr")
+vignette("ipums-nhgis", package = "ipumsr")
+vignette("ipums-terra", package = "ipumsr")
+```
+
+
+# `tidycensus`
+
+  *  `R` Package by [Kyle Walker](https://github.com/walkerke).
+    *  Tidy for engaging with US Census and ACS data
+    * [Basic Use Vignette](https://walker-data.com/tidycensus/articles/basic-usage.html)
+    *  Get [Census API key](http://api.census.gov/data/key_signup.html)  
+  *  Book: [Analyzing US Census Data: Methods, Maps, and Models in R](https://walker-data.com/census-r/)
+ 
+
+```{r loadtidy}
+vignette("tidycensus")
+
+## Load API key ####
+source("./Census_APIKey.R")
+census_api_key(myKey) 
+
+### tidycensus shapefile cache ####
+options(tigris_use_cache = TRUE)
+
+?get_acs
+acs_var_df <- load_variables(2019, "acs5", cache = TRUE)
+```
+
+# GIS in R: `sf` and `sp`
+Note: the vignette entitled `"ipums-geography"` gives a rundown on the packages `sf` (`tidyverse`) and `sp`. I am less familiar with `sf` and the tutorial is `sf` heavy so I will focus on `sp`. You can find info on the `sp` package in the textbook
+
+Bivand, R. S., Pebesma, E. J., & Gomez-Rubio, V. (2008). *Applied spatial data analysis with R*. Springer.
+
+## The `SpatialPolygonsDataFrame`
+
+Use `rgdal::readOGR` to load the shapefiles.
+
+The classes of `sp` objects in `R` including `SpatialPolygons` and `SpatialPolygonsDataFrame` are a unique type of object that stores multiple objects within it using **slots**. **Slots** are accessed using the `@` symbol. 
+
+Typical slots:
+
+* `bbox`: the bounding box, a 2-D box in which the shape lies
+* `plotOrder`: the order in which the polygons are plotted
+* `polygons`: a list with length equal to the number of polygons (counties in the Ohio case) in your shape, with all the details necessary to draw that country
+* `data`: the `data.frame` attached to the shape
+
+Notice below when we look at the individual list items in the `county_2010@polygons` list, they all have a slot that says their `plotOrder` is 1. This is because for each individual polygon, i.e. `county_2010@polygons[[i]]` for `i in 1:nrow(county_2010@data)`, there is only ONE polygon stored in that list of information or if we enter the code `plot(county_2010@polygons[[i]])`, the first (and only) polygon to be drawn will be the $i^{th}$ county according to the ordering of the shapefile.
+
+
+Other object classes from `sp` include `SpatialPointsDataFrame`, `SpatialPixelsDataFrame`, `SpatialLinesDataFrame`.
+
+```{r loadmap}
+county_2010 <- readOGR(dsn = "./nhgis0002_shape/nhgis0002_shapefile_tl2010_us_county_2010",
+                       layer = "US_county_2010")
+## What slots does this object contain?
+
+slotNames(county_2010)
+
+## 2D boundaries for shapefile
+county_2010@bbox
+
+## plotting order for polygons
+county_2010@plotOrder[1:25]
+
+## polygon definitions do not print the
+## whole polygons slot ahh!!
+## notice below: slots within slots
+str(county_2010@polygons[[1]]@Polygons[[1]])
+slotNames(county_2010@polygons[[1]])
+
+## usually the centroid
+KingCo.idx <- which(county_2010@data$STATEFP10 == 53 &
+                      county_2010@data$NAME10 == "King")
+county_2010@polygons[[KingCo.idx]]@labpt
+plot(county_2010[KingCo.idx, ],axes = TRUE)
+points(x = county_2010@polygons[[KingCo.idx]]@labpt[1],
+       y = county_2010@polygons[[KingCo.idx]]@labpt[2],
+       pch = 19, col = 'blue')
+
+plot(county_2010[KingCo.idx,],axes = TRUE)
+text(x = county_2010@polygons[[KingCo.idx]]@labpt[1],
+     y = county_2010@polygons[[KingCo.idx]]@labpt[2],
+     labels = county_2010@data$NAME10[KingCo.idx])
+
+## area of polygon
+county_2010@polygons[[1]]@area
+county_2010@polygons[[nrow(county_2010@data)]]@area
+
+## polygon ID
+
+county_2010@polygons[[1]]@ID
+county_2010@polygons[[nrow(county_2010@data)]]@ID
+
+```
+
+Now let's look at the `data.frame` attached to our shapefile. The `summary()` call shows us that all the data is stored as `character` type objects.
+
+It appears `CNTYIDFP10` contains the county FIPS codes like the `fips` column of our data.
+
+It also appears we get a more-meaningful-to-us label for the polygons: the column `county_2010@data$NAME10` contains county names.
+
+```{r selectWA, echo = FALSE}
+dim(county_2010@data)
+head(county_2010@data)
+summary(county_2010@data)
+
+which(county_2010@data$NAME10 == "King")
+county_2010@data[which(county_2010@data$NAME10 == "King"), ]
+county_2010@data[which(county_2010@data$NAME10 == "Whatcom"), ]
+WA.state.idx <- 53
+WA_2010 <- county_2010[county_2010@data$STATEFP10 == WA.state.idx, ]
+dim(WA_2010)
+plot(WA_2010)
+rm(county_2010)
+```
+
+## The `sf` object
+
+```{r tidysf}
+kc_tracts <- get_acs("tract",
+                     table = "B01001",
+                     geometry = TRUE,
+                     year = 2019,
+                     survey = "acs5",
+                     state = "WA",
+                     county = "King",
+                     cache_table = TRUE) %>%
+  filter(variable == "B01001_001")
+
+names(kc_tracts)
+class(kc_tracts)
+head(kc_tracts)
+```
+
+## Coordinate Reference Systems (CRS)
+
+Why is this tilted? The coordinate reference system (CRS) or projection!
+
+```{r proj}
+proj4string(WA_2010)
+?proj4string
+WA_2010@proj4string
+?spTransform
+
+
+# EPSG <- make_EPSG() # create data frame of available EPSG codes
+# EPSG[grepl("WGS 84$", EPSG$note), ]
+
+WA_2010_transform <- spTransform(WA_2010, CRS("+init=epsg:4326"))
+par(mfrow=c(1,2))
+plot(WA_2010)
+plot(WA_2010_transform)
+rm(WA_2010)
+```
+
+
+## Assign tracts to HRAs: `sp::over()` 
+
+```{r over, message=FALSE, warning=FALSE}
+vignette("over")
+
+kc_tracts_poly <- kc_tracts %>% 
+  filter(!st_is_empty(geometry)) %>% 
+  st_geometry() %>%
+  as(., "Spatial")
+
+kc_tracts_poly <- gBuffer(kc_tracts_poly, byid = TRUE, width = 0)
+
+which_is_empty <- which(st_is_empty(kc_tracts$geometry))
+kc_tracts[which_is_empty, ]
+
+kc_tracts[which_is_empty, c("estimate", "moe")]
+
+kc_tracts <- kc_tracts[-which_is_empty, ]
+
+
+## HRA ####
+hra <- readOGR(dsn = "../Data",
+               layer = "HRA_2010Block_Clip")
+hra <- gBuffer(hra, byid = TRUE, width = 0)
+hra <- spTransform(hra,
+                   kc_tracts_poly@proj4string)
+
+
+## use sp::over() function
+tracts_to_hra <- over(kc_tracts_poly,
+                      hra, returnList = TRUE)
+n.tracts <- length(tracts_to_hra)
+  
+## find tracts wholly nested within an hra
+nested.idx <- unlist(lapply(tracts_to_hra,
+                            function(x){
+                              nrow(x) == 1
+                            }))
+  
+## and assign indicator for that tract
+kc_tracts$nested_in_hra <- 0
+kc_tracts$nested_in_hra[nested.idx] <- 1
+
+## Go through tracts 
+for(tract.idx in 1:n.tracts){
+  
+  ## Add empty columns to list elemnt from sp:over() output
+  ## for tract.idx element of tracts_to_hra
+  tracts_to_hra[[tract.idx]]$prop.area <- NA
+  tracts_to_hra[[tract.idx]]$total.area <- NA
+  tracts_to_hra[[tract.idx]]$total.minus.sum <- NA
+  
+  ## Add tract.idx for record keeping 
+  tracts_to_hra[[tract.idx]]$tract.idx <- tract.idx
+  
+  ## If tract is nested, then prop.area is 1 
+  if(nested.idx[tract.idx]){
+    # If nested, prop area in that HRA is 1
+    tracts_to_hra[[tract.idx]]$prop.area <- 1
+    
+    # Calculate polygon area with raster::area()
+    tracts_to_hra[[tract.idx]]$total.sum <-
+      tracts_to_hra[[tract.idx]]$total.area <-
+      raster::area(kc_tracts_poly[tract.idx,])
+    
+    tracts_to_hra[[tract.idx]]$total.minus.sum <-
+      (tracts_to_hra[[tract.idx]]$total.area - 
+         tracts_to_hra[[tract.idx]]$total.sum)/
+      (tracts_to_hra[[tract.idx]]$total.sum)
+  }else{
+    # If isn't nested, find HRAs it intersects
+    hras.for.tract <- tracts_to_hra[[tract.idx]]$FID_HRA_20
+    
+    # initialize empty vector to store the area
+    # of the intersection between tract.idx and HRAS
+    tract.areas <- rep(NA, length(hras.for.tract))
+    
+    for(hra.no in hras.for.tract){
+      # Which elemnt of hras.for.tract is hra.no
+      hra.idx <- match(hra.no, hras.for.tract)
+      
+      ## Calculate area of intersections
+      tract.areas[hra.idx] <- 
+        raster::area(raster::intersect(kc_tracts_poly[tract.idx, ],
+                                       hra[hra$FID_HRA_20 == hra.no, ]))
+    }
+    # Calculate proportion of each interestection
+    tracts_to_hra[[tract.idx]]$prop.area <-
+      tract.areas/sum(tract.areas)
+    # Calculate total area from intersection calls
+    tracts_to_hra[[tract.idx]]$total.sum <-
+      sum(tract.areas)
+    
+    # Calculate area of tract for double checking above
+    tracts_to_hra[[tract.idx]]$total.area <-
+      raster::area(kc_tracts_poly[tract.idx, ])
+    
+    
+    tracts_to_hra[[tract.idx]]$total.minus.sum <-
+      (tracts_to_hra[[tract.idx]]$total.area[1] - 
+         sum(tract.areas))/(sum(tract.areas))
+  }
+}
+## Rbind into a single data frame the 
+## modified over output
+
+transform.df <- do.call(rbind.data.frame,
+                        tracts_to_hra)
+
+## Add the GEOID to this dataframe
+transform.df$GEOID <- kc_tracts$GEOID[transform.df$tract.idx]
+
+tracts_to_hra <- transform.df
+
+kc_tracts <- kc_tracts %>%
+  left_join(transform.df %>%
+              dplyr::select(-COUNTY,
+                            -STATE,
+                            -CNTYN,
+                            -CNTY,
+                            -FIPS),
+            by = c("GEOID"  = "GEOID")) 
+
+```
+
+# Loading the Extract `data.frame`
+
+```{r loadIPUMS}
+WA_data <-  read.csv("nhgis0002_csv/nhgis0002_ts_nominal_county.csv",
+                     header = TRUE) %>% 
+  dplyr::filter(STATEFP == WA.state.idx)
+names(WA_data)
+head(WA_data)
+summary(WA_data)
+```
+
+We can use the downloaded codebook as pictured here to figure out what the variable represent.
+
+\begin{figure}[h]
+\centering
+\includegraphics{NHGIS}
+\caption{NHGIS Codebook for my extract.}
+\label{fig:nhgiscode}
+\end{figure}
+
+Our shapefile has `r base::nrow(WA_2010_transform@data)` polygons, they are indexed according to the row names of the `WA_2010_transform@data` `data.frame`. Let's load the data now. Our data have  `r base::nrow(WA_data)`= (`r sum(table(WA_data$YEAR, useNA="ifany") == base::nrow(WA_2010_transform@data))` time points x `r base::nrow(WA_2010_transform@data)` counties) + `r table(WA_data$YEAR, useNA="ifany")[table(WA_data$YEAR, useNA="ifany") != base::nrow(WA_2010_transform@data)]` for years `r names(table(WA_data$YEAR, useNA="ifany"))[table(WA_data$YEAR, useNA="ifany") != base::nrow(WA_2010_transform@data)]`. Since we want to plot $Y_i$ and not $Y_{ij}$ we need to collapse our data over subgroups within counties. 
+
+# Aggregating and cleaning data
+```{r agg}
+# in tidyverse, easiest way is
+# group_by() + summarise()
+WA_2010_tidy <- WA_data %>% 
+  group_by(STATEFP, COUNTYFP, YEAR) %>%
+  summarise(Total = sum(A00AA, na.rm = TRUE),
+            Male = sum(AV1AA, na.rm = TRUE),
+            Female = sum(AV1AB, na.rm = TRUE)) %>%
+  filter(YEAR == 2010)
+
+
+## Did you know? 
+## data.frames are lists?
+class(WA_2010_tidy)
+str(WA_2010_tidy)
+is.data.frame(WA_2010_tidy)
+is.list(WA_2010_tidy)
+lapply(WA_2010_tidy, function(x){
+  sum(is.na(x))
+})
+
+?aggregate
+WA_sum <- aggregate(cbind(A00AA, AV1AA, AV1AB) ~ 
+                      STATEFP + COUNTYFP + YEAR,
+                    data = WA_data,
+                    FUN = sum)
+
+head(WA_sum)
+
+WA_2010_base <- WA_sum[WA_sum$YEAR == 2010, ]
+names(WA_2010_base)[-c(1:3)] <- c("Total",
+                                  "Male", "Female")
+
+head(WA_2010_base)
+head(WA_2010_tidy)
+WA_2010_base$COUNTYFP
+WA_2010_tidy$COUNTYFP
+WA_2010_transform@data$COUNTYFP10
+```
+
+# Merging data
+We need to fix up the COUNTYFP columns so that they match those in the shapefiles. 
+
+```{r fixFIPS}
+doub.digit.idx <- which(nchar(WA_2010_base$COUNTYFP) == 2)
+WA_2010_base$COUNTYFP[doub.digit.idx] <- paste0("0",
+WA_2010_base$COUNTYFP[doub.digit.idx])
+WA_2010_base$COUNTYFP[-doub.digit.idx] <- 
+  paste0("00", WA_2010_base$COUNTYFP[-doub.digit.idx])
+
+WA_2010_tidy <- WA_2010_tidy %>%
+  mutate(COUNTYFP = ifelse(nchar(COUNTYFP) == 2,
+                           paste0("0",COUNTYFP),
+                           paste0("00", COUNTYFP)))
+head(WA_2010_base)
+head(WA_2010_tidy)
+```
+
+Also, to be in good practice, let's add some info from the shapefile to our data for our own benefit. First I'll show two ways to do this in base `R` using `merge()` or `match()`. Then `tidyverse` versions.
+
+Note the `sort = FALSE` argument in `merge()` allows the output to be returned according to the ordering of the merging variable in the `x` argument data frame, i.e. by `WA_2010_transform@data$COUNTYFP10` instead of by `WA_2010_base$COUNTYFP`.
+
+## base `R`
+```{r merge}
+# several ways to go about this, but in the end i want my data frame to
+# be in the same FIPS ordering as the shapefile
+
+# using merge()
+tmp1 <- merge(x = WA_2010_transform@data[, c("COUNTYFP10","NAME10")],
+              y = WA_2010_base,
+              by.x = 'COUNTYFP10',
+              by.y = 'COUNTYFP',
+              sort = FALSE)
+head(tmp1)
+
+# using match()
+tmp2 <- WA_2010_base[match(WA_2010_transform@data$COUNTYFP10,
+                           WA_2010_base$COUNTYFP), ]
+head(tmp2)
+
+tmp2$CountyName <- WA_2010_transform@data$NAME10[match(tmp2$COUNTYFP,
+    WA_2010_transform@data$COUNTYFP10)]
+
+head(tmp2)
+WA_2010_base <- tmp2
+
+rm(tmp1, tmp2)
+```
+
+## using `tidyverse`
+
+```{r mergetidy}
+?right_join
+?left_join
+tmp1 <- WA_2010_transform@data %>% 
+  dplyr::select(COUNTYFP10, NAME10) %>%
+  left_join(WA_2010_tidy,
+            by = c("COUNTYFP10" = "COUNTYFP"),
+            keep = FALSE)
+head(tmp1)
+WA_2010_tidy <- tmp1
+rm(tmp1)
+
+head(WA_2010_base$COUNTYFP)
+head(WA_2010_tidy$COUNTYFP)
+```
+
+# Making Maps
+To make the map there's another million ways to do this. Now that our data are sorted so that each row of `WA_2010_base` and `WA_2010_tidy` corresponds to each row of `WA_201_transform0@data` we can simply put the value we want to plot into a new column in `WA_2010_transform@data`.
+
+## Using `spplot()`
+```{r map_y, fig.cap = "\\label{fig:map_y}Map of population."}
+WA_2010_transform@data$Total <- WA_2010_base$Total
+WA_2010_transform@data$Male <- WA_2010_base$Male
+WA_2010_transform@data$Female <- WA_2010_base$Female
+
+# set number of bins of colors to use
+num_bins <- 10
+
+# choose a color palette
+display.brewer.all()
+plotting_color_palette_counts <- colorRampPalette(brewer.pal(8, "Greens"))(num_bins)
+
+## Plot with defaults
+
+spplot(WA_2010_transform, zcol = 'Total')
+
+## Fancier plot
+# set breakpoints for plotting
+# We will also plot expected counts in Part (b)
+# and we want these plots to have the same
+# numerical scales, so.
+quants <- quantile(WA_2010_transform@data$Total,
+                   seq(0, 1, length.out = num_bins + 1))
+quants[length(quants)] <- ceiling(quants[length(quants)])
+quants[1] <- floor(quants[1])
+quants <- round(quants)
+quants
+
+# create categories for colors (so we can read the scale for the plot)
+WA_2010_transform@data$Total_cut <- cut(WA_2010_transform@data$Total,
+                                        breaks = c(quants),
+                                        include.lowest = TRUE,
+                                        right = FALSE)
+
+# set margins
+par(mar = c(1, 1, 1, 1))
+
+# make the pretty plot
+spplot(WA_2010_transform, zcol = 'Total_cut',
+       colorkey = list(height = 1,
+                       labels = list(at = seq(0.5, length(quants) -0.5),
+                                     labels = quants)),
+       col.regions = colorRampPalette(plotting_color_palette_counts)(length(quants)))
+```
+
+Figure \ref{fig:map_y} presents a map of the observed counts.
+
+## Using `plot()`
+
+```{r map_y2, fig.cap = "\\label{fig:map_y2}Map of population, made with base plot."}
+
+Total.pal <- colorRampPalette(brewer.pal(8, "Greens"))(num_bins)
+Total.int <- classIntervals(WA_2010_base$Total, n = 10,
+                            style = 'fixed',
+                            fixedBreaks = quants)
+Total.int
+Total.col <- findColours(Total.int, Total.pal)
+Total.col
+
+plot(WA_2010_transform,
+     col = Total.col, # each element of Total.col will fill the
+     axes = FALSE,     # corresponding polygon identified
+     border = FALSE)   # by rows of WA_2010@data
+legend('bottomright',
+       bty = 'n',
+       ncol = 2,
+       border = Total.pal,
+       fill = Total.pal,
+       legend = names(attr(Total.col, 'table')),
+       cex = 0.45)
+# legend('bottom',
+#        bty = 'n',
+#        fill = Total.pal,
+#        legend = names(attr(Total.col, 'table')),
+#        cex = 0.35,
+#        horiz = TRUE)
+```
+Figure \ref{fig:map_y2} presents a map of the total population made using `plot()`.
+
+
+
+## By sex
+```{r mapbysex}
+quants <- quantile(c(WA_2010_base$Male,
+                     WA_2010_base$Female),
+                   seq(0, 1, length.out = num_bins + 1))
+quants[length(quants)] <- ceiling(quants[length(quants)])
+quants[1] <- floor(quants[1])
+quants <- round(quants)
+quants
+
+Male.pal <- colorRampPalette(brewer.pal(8, "Purples"))(num_bins)
+Female.pal <- colorRampPalette(brewer.pal(8, "Blues"))(num_bins)
+Male.int <- classIntervals(WA_2010_base$Male,
+                           n = 10,
+                           style = 'fixed',
+                           fixedBreaks = quants)
+Female.int <- classIntervals(WA_2010_base$Female,
+                             n = 10,
+                             style = 'fixed',
+                             fixedBreaks = quants)
+Male.col <- findColours(Male.int, Male.pal)
+Female.col <- findColours(Female.int, Female.pal)
+
+par(mfrow = c(1,2))
+plot(WA_2010_transform,
+     col = Male.col,
+     main = "Male",
+     axes = FALSE,    
+     border = FALSE)  
+legend('bottomright',
+       bty = 'n',
+       ncol = 2,
+       fill = Male.pal,
+       border = 'white',
+       legend = names(attr(Male.col, 'table')),
+       cex = 0.5)
+plot(WA_2010_transform,
+     col = Female.col,
+     main = "Female", 
+     axes = FALSE,     
+     border = FALSE)   
+legend('bottomright',
+       bty = 'n',
+       ncol = 2,
+       fill = Female.pal,
+       border = 'white',
+       legend = names(attr(Female.col, 'table')),
+       cex = 0.5)
+
+```
+
+## Using `ggplot()`
+
+```{r gg_plot}
+#### ggplot objects ####
+gg_total <- WA_2010_transform %>%
+  st_as_sf() %>%
+  ggplot() +
+  geom_sf(aes(fill = Total), size = .25) +
+  scale_fill_viridis_c(direction = -1,
+                       name = "Total",
+                       breaks = quants,
+                       labels = quants) + 
+  ggtitle("Population") +
+  theme_void()
+
+gg_total
+
+gg_male <- WA_2010_transform %>%
+  st_as_sf() %>%
+  ggplot() +
+  geom_sf(aes(fill = Male), size = .25) +
+  scale_fill_viridis_c(direction = -1,
+                       name = "Male",
+                       breaks = quants,
+                       labels = quants) + 
+  ggtitle("Population") +
+  theme_void()
+
+gg_male
+
+gg_female <- WA_2010_transform %>%
+  st_as_sf() %>%
+  ggplot() +
+  geom_sf(aes(fill = Male), size = .25) +
+  scale_fill_viridis_c(direction = -1,
+                       name = "Male",
+                       breaks = quants,
+                       labels = quants) + 
+  ggtitle("Population") +
+  theme_void()
+
+gg_female
+
+
+grid.arrange(gg_total, gg_male,
+             gg_female, ncol = 2)
+```
+
+## An important trick
+
+If shapefiles have many areas (like 100), drawing the image can be very memory intensive! To limit the amount of computing power being used, you can sandwich your plot code between one of the following:
+
+* `pdf()`
+* `jpeg()`
+* `png()`
+* `bmp()`
+* `tiff()`
+
+and `dev.off()`.
+
+```{r mappdf}
+
+if(!dir.exists("../Figs/")){
+  dir.create("../Figs/")
+}
+
+pdf("../Figs/WACountyPops_2010.pdf",
+    height = 8, width = 8)
+
+par(mfrow = c(2,2))
+plot(WA_2010_transform,
+     col = Male.col,
+     main = "Male",
+     axes = FALSE,    
+     border = FALSE)  
+plot(WA_2010_transform,
+     col = Female.col,
+     main = "Female", 
+     axes = FALSE,     
+     border = FALSE)   
+plot(WA_2010_transform,
+     col = Total.col,
+     main = "Total",
+     axes = FALSE,   
+     border = FALSE)  
+plot(NA,
+     xlim = c(0,1),
+     ylim = c(0,1),
+     xlab = "",
+     ylab = "",
+     axes = FALSE)
+legend('center',
+       bty = 'n',
+       ncol = 3,
+       cex = .7,
+       border = 'white',
+       fill = c(Total.pal,
+                Male.pal,
+                Female.pal),
+       legend = c(names(attr(Total.col, 'table')),
+                  names(attr(Male.col, 'table')),
+                  names(attr(Female.col, 'table'))))
+dev.off()
+
+
+#### By race ####
+pdf('../Figs/WACountyPops_2010_ggplot.pdf',
+    height = 8, width = 8)
+grid.arrange(gg_total, gg_male,
+             gg_female, ncol = 2)
+dev.off()
+```

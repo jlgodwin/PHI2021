@@ -1042,11 +1042,11 @@ server <- function(input, output, session) {
                          na.color = NA
                      )
                  } else {
-            col_pal <- colorQuantile(
-                palette = "Blues",
-                domain = sp@data$value,
-                n = 5,
-                na.color = NA
+                     col_pal <- colorQuantile(
+                         palette = "Blues",
+                         domain = sp@data$value,
+                         n = 5,
+                         na.color = NA
             ) 
                  }
         }

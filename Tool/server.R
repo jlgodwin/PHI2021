@@ -1,6 +1,8 @@
 # Libraries ####
 library(shiny)
 
+#change this
+#setwd("C:/Saved Files/PHI Fellowship/Shinyapp/data")
 
 # Load Data ####
 
@@ -50,7 +52,8 @@ while (!exists("kc_tl_2040")) {
     Sys.sleep(1)
 }
 
-### Tract-level Pop Proj, .csv ####
+### Population Projection csv ####
+#### Tract level ####
 message("Read tract-level population projections .csv.\n")
 tract_proj <- read.csv(
     file = "./data/tract_age5_race_sex_proj_2000_2045.csv",
@@ -64,71 +67,7 @@ while (!exists("tract_proj")) {
     Sys.sleep(1)
 }
 
-### Tract-level Med Inc .csv ARA ####
-message("Read tract-level median income .csv.\n")
-tract_inc <- read.csv(
-    file = "./data/med_inc_tract.csv",
-    colClasses = c("GEOID" = "character", "value" = "double")
-)
-while (!exists("tract_inc")) {
-    Sys.sleep(1)
-}
-
-### Tract-level Education .csv ARA ####
-message("Read tract-level educational attainment .csv.\n")
-tract_edu <- read.csv(
-    file = "./data/tract_edu_attainmentv2.csv",
-    colClasses = c("GEOID" = "character", "value" = "double")
-)
-while (!exists("tract_edu")) {
-    Sys.sleep(1)
-}
-
-### Tract-level Rent Burden .csv ARA ####
-message("Read tract-level rent burden .csv.\n")
-tract_burden <- read.csv(
-    file = "./data/tract_rent_burden_pop.csv",
-    colClasses = c("GEOID" = "character", "value" = "double")
-)
-while (!exists("tract_burden")) {
-    Sys.sleep(1)
-}
-
-### HRA-level Rent Burden .csv ####
-message("Read HRA-level rent burden .csv.\n")
-hra_burden <- read.csv(
-    file = "./data/burden_hra.csv",
-    colClasses = c("HRA2010v2_" = "character", "value" = "double")
-)
-hra_burden <- hra_burden %>% 
-    rename("GEOID" = "HRA2010v2_",
-           "short_label" = "burden")
-
-### Tract-level Housing Tenure .csv ARA ####
-message("Read tract-level tenure .csv.\n")
-tract_RO <- read.csv(
-    file = "./data/tract_RO_population.csv",
-    colClasses = c("GEOID" = "character", "value" = "double")
-)
-while (!exists("tract_RO")) {
-    Sys.sleep(1)
-}
-
-### Tract-level Age & Transpo .csv ARA ####
-message("Read tract-level median age by transportation mode .csv.\n")
-tract_transp <- read.csv(
-    file = "./data/tract_transp_age.csv", 
-    colClasses = c("GEOID" = "character", "value" = "double")
-)
-
-### Tract-level Median Rent .csv ####
-message("Read tract-level median rent .csv.\n")
-tract_med_rent <- read.csv(
-    file = "./data/med_rent_tract.csv", 
-    colClasses = c("GEOID" = "character", "value" = "double")
-)
-
-### HRA-level Pop Proj .csv####
+#### HRA-level ####
 message("Read HRA-level population projections .csv.\n")
 hra_proj <- read.csv(
     file = "./data/hra_age5_race_sex_proj_2000_2045.csv"
@@ -140,6 +79,140 @@ hra_proj <- hra_proj %>%
 while (!exists("hra_proj")) {
     Sys.sleep(1)
 }
+
+### Median Income csv ####
+#### Tract-level
+message("Read tract-level median income .csv.\n")
+tract_inc <- read.csv(
+    file = "./data/med_inc_tract.csv",
+    colClasses = c("GEOID" = "character", 
+                   "value" = "double",
+                   "Year" = "character")
+)
+while (!exists("tract_inc")) {
+    Sys.sleep(1)
+}
+
+### Education csv ####
+#### Tract-level ####
+message("Read tract-level educational attainment .csv.\n")
+tract_edu <- read.csv(
+    file = "./data/tract_edu_attainmentv2.csv",
+    colClasses = c("GEOID" = "character", "value" = "double")
+)
+while (!exists("tract_edu")) {
+    Sys.sleep(1)
+}
+
+#### HRA-level ####
+message("Read HRA-level educational attainment .csv.\n")
+hra_edu <- read.csv(
+    file = "./data/edu_hra.csv",
+    colClasses = c("HRA2010v2_" = "character", "estimate" = "double")
+)
+
+hra_edu <- hra_edu %>% 
+    rename("GEOID" = "HRA2010v2_",
+           "short_label" = "Education",
+           "value" = "estimate")
+hra_edu$Sex <- NA #there is no column for sex at the HRA level - causing problems
+hra_edu$Race <- NA #same with race
+hra_edu$moe <- 1.65*hra_edu$SE #SE = MOE/Z
+
+### Rent burden csv ####
+#### Tract-level ####
+message("Read tract-level rent burden .csv.\n")
+tract_burden <- read.csv(
+    file = "./data/tract_rent_burden_pop.csv",
+    colClasses = c("GEOID" = "character", "value" = "double")
+)
+while (!exists("tract_burden")) {
+    Sys.sleep(1)
+}
+
+#### HRA-level ####
+message("Read HRA-level rent burden .csv.\n")
+hra_burden <- read.csv(
+    file = "./data/burden_hra.csv",
+    colClasses = c("HRA2010v2_" = "character", "value" = "double")
+)
+hra_burden <- hra_burden %>% 
+    rename("GEOID" = "HRA2010v2_",
+           "short_label" = "burden")
+hra_burden$moe <- 1.65*hra_burden$SE
+hra_burden$short_label[hra_burden$short_label == "low_burden"] <- "Low Burden"
+hra_burden$short_label[hra_burden$short_label == "highly_burdened"] <- "Highly Burdened"
+hra_burden$short_label[hra_burden$short_label == "severely_burdened"] <- "Severely Burdened"
+
+### Housing tenure csv ####
+#### Tract-level
+message("Read tract-level tenure .csv.\n")
+tract_RO <- read.csv(
+    file = "./data/tract_RO_population.csv",
+    colClasses = c("GEOID" = "character", "value" = "double")
+)
+while (!exists("tract_RO")) {
+    Sys.sleep(1)
+}
+
+### Age & Transportation csv ####
+#### Tract-level
+message("Read tract-level median age by transportation mode .csv.\n")
+tract_transp <- read.csv(
+    file = "./data/tract_transp_age.csv", 
+    colClasses = c("GEOID" = "character", "value" = "double")
+)
+tract_transp$Year[tract_transp$Year == 2010] <- 2009
+
+### Median Rent csv ####
+#### Tract-level
+message("Read tract-level median rent .csv.\n")
+tract_med_rent <- read.csv(
+    file = "./data/med_rent_tract.csv", 
+    colClasses = c("GEOID" = "character", 
+                   "value" = "double",
+                   "Year" = "integer")
+)
+
+### Household size csv ####
+#### Tract-level ####
+message("Read Tract-level household size \n")
+tract_hhsize <- read.csv(
+    file = "./data/hh_by_hh_size_and_tenure_ct.csv",
+    colClasses = c("GEOID" = "character", "value" = "double"))
+
+tract_hhsize <- subset(tract_hhsize, short_label > 0 & !is.na(short_label))
+tract_hhsize$size <- tract_hhsize$short_label
+
+#### HRA-level ####
+message("Read HRA-level household size \n")
+hra_hhsize <- read.csv(
+    file = "./data/hhsize_hra.csv",
+    colClasses = c("GEOID" = "character", "value" = "double"))
+
+hra_hhsize <- subset(hra_hhsize, short_label > 0 & !is.na(short_label))
+#hra_hhsize$short_label = household size values (1-7)
+hra_hhsize$size <- hra_hhsize$short_label
+
+
+### Number of Bedrooms csv####
+#### Tract-level
+message("Read Tract-level bedrooms \n")
+tract_bedrooms <- read.csv(
+    file = "./data/Bedrooms_tract.csv", 
+    colClasses = c("GEOID" = "character", "value" = "double"))
+tract_bedrooms$Bedrooms <- as.numeric(tract_bedrooms$Bedrooms)
+tract_bedrooms <- tract_bedrooms %>% 
+    rename("short_label" = "Bedrooms")
+
+### Occupants per room by race csv####
+#### Tract-level
+message("Tract-level occupants per room \n")
+tract_roomoccupant <- read.csv(
+    file = "./data/tract_roomoc.csv", 
+    colClasses = c("GEOID" = "character", 
+                   "value" = "double"))
+
 
 
 # Server Function ####
@@ -159,8 +232,9 @@ server <- function(input, output, session) {
     })
     
     ## straight_pipe_hh ####
+    # object geo_df not found
     straight_pipe_hh <- reactive({
-        input$var == "Household Size" &&
+        input$var == "Smoothed Household Size" &&
             input$geo_level == "Health Reporting Area (HRA)"
     })
     
@@ -182,14 +256,22 @@ server <- function(input, output, session) {
     
     ## year_reactive ####
     year_reactive <- reactive({
-        var <- input$var
-        if(var == "Population"){
+        #var <- input$var
+        if(input$var %in% c("Population", "Number of Bedrooms")){
             as.numeric(strsplit(input$year, "-")[[1]][1])
-        }else if(var %in% c("Education Level", "Rent Burden")){
+        }else if(input$var %in% c("Education Level", "Rent Burden",
+                            "Median Gross Rent",
+                            "Median Income","Number of Occupants per Room",
+                            "Methods of Transportation to Work")){
             as.numeric(strsplit(input$year, "-")[[1]][2])
-        }else if(var == "Household Size"){
-            as.numeric(strsplit(input$year, "-")[[1]][2])
+        }else if(input$var == "Household Size"){
+            if(grepl("-", input$year)){
+                as.numeric(strsplit(input$year, "-")[[1]][2])
+            }else{
+                as.numeric(input$year)
+                    }
         }
+        
     })
     
     ## race_reactive ####
@@ -208,10 +290,10 @@ server <- function(input, output, session) {
     
     ## size_reactive ####
     size_reactive <- reactive({
-        if(input$size == "4+") {
-            4
+        if(input$size == "7+") {
+            7
         } else {
-            input$size
+            as.numeric(input$size)
         }
     })
     
@@ -270,23 +352,49 @@ server <- function(input, output, session) {
     
     ## tenure_reactive  ####
     tenure_reactive <- reactive({
-        input$tenure
+        gsub(" occupied","", input$tenure)
+    })
+    
+    ## residence_reactive  ####
+    residence_reactive <- reactive({
+        input$residence
+    })
+    
+    ## bedrooms_reactive ####
+    bedrooms_reactive <- reactive({
+        as.numeric(input$bedrooms)
     })
     
     ## trans_reactive ####
-    #Race/counts only/not inclcuding median age 
     transp_reactive <- reactive({
         input$mode_transp
+    })
+    
+    ## income_reactive ####
+    income_reactive <- reactive({
+        input$median_income
+    })
+    
+    ## median_rent_reactive ####
+    median_rent_reactive <- reactive({
+        input$median_gross_rent
+    })
+    
+    ## occupants_reactive  ####
+    occupants_reactive <- reactive({
+        input$occupants
     })
     
     ## all_selected ####
     # return TRUE if "Prevalence" and the whole population are selected; 
     # this is for generating the warning message
     all_selected <- reactive({
-        input$measure_type == "Prevalence" &&
+        all_selected <- input$measure_type == "Prevalence" &&
             length(sex_reactive()) == 2 &&
             length(age_reactive()) == 18 &&
             length(race_reactive()) == 7
+        #shinyFeedback::feedbackWarning(all_selected, !all_selected, "Please select a subset of the population")
+        #req(all_selected)
     })
     
     ## warning_reactive  ####
@@ -313,7 +421,7 @@ server <- function(input, output, session) {
     # selected geographic level and then selected age groups
     # ARA_: conditional branch to differentiate selected df based off of var selection
     # ARA_: I added demographic filters as it originally defaulted 
-    ## to do it later on but not evrey var holds demographic info
+    ## to do it later on but not every var holds demographic info
     ## geo_reactive == TRUE when Tract_level
     
     geo_df_reactive <- reactive({
@@ -344,7 +452,7 @@ server <- function(input, output, session) {
             if(geo){
                 geo_df <- tract_edu 
             }else{
-                
+                geo_df <- hra_edu
             }                
         }   
         ## Rent Burden ####
@@ -358,7 +466,15 @@ server <- function(input, output, session) {
         ## Household Size ####
         else if (var == "Household Size") {
             if(geo){
-                geo_df <- tract_RO 
+                geo_df <- tract_hhsize 
+            }else{
+                geo_df <- hra_hhsize
+            }
+        }
+        ## Number of Bedrooms ####
+        else if (var == "Number of Bedrooms") {
+            if(geo){
+                geo_df <-  tract_bedrooms
             }else{
                 
             }
@@ -379,7 +495,14 @@ server <- function(input, output, session) {
                 
             }
         }
-        
+        ## Occupants per Room ####
+        else if (var == "Number of Occupants per Room"){
+            if(geo){
+                geo_df <- tract_roomoccupant 
+            }else{
+                
+            }
+        }
         
         ### Rename geo_year_df for HH Smoothed ####
         # relies on measure_reactive value
@@ -403,43 +526,50 @@ server <- function(input, output, session) {
         geo_df
     })
     
-    geo_year_df_reactive <- reactive({
-        
-        geo_df <- geo_df_reactive() 
-        year <- year_reactive()
-        measure <- measure_reactive()
-        
-        geo_year_df <- geo_df %>% 
-            filter(Year %in% year)
-        
-        if (measure == "Prevalence" && !straight_pipe_hh()) {
-            geo_year_df <- geo_year_df %>%
-                group_by(GEOID) %>%
-                mutate(
-                    prev_total = sum(value),
-                    value = value / prev_total,
-                    moe = moe / prev_total
-                ) %>%
-                ungroup() 
-        } 
-        
-        geo_year_df
-    })
+    # #geo_year_df_reactive <- reactive({
+    #     
+    #    # geo_df <- geo_df_reactive() 
+    #     year <- year_reactive()
+    #     measure <- measure_reactive()
+    #     
+    #     geo_year_df <- geo_df %>% 
+    #         filter(Year %in% year) %>%
+    #         group_by(GEOID) %>%
+    #         mutate(
+    #             prev_total = sum(value)
+    #         ) %>%
+    #         ungroup() 
+    #     
+    #     
+    #     geo_year_df
+    # })
     
     ## selected_df_reactive ####
     ### Variable Filters ####      
     #ARA: These filter by user-inputted variable specific demographics
     #### Population ####
     selected_df_reactive <- reactive({
-        geo_year_df <- geo_year_df_reactive()
+        geo_df <- geo_df_reactive()
         var <- var_reactive()
+        year <- year_reactive()
+        
+        geo_year_df <- geo_df %>% 
+            filter(Year %in% year) %>%
+            group_by(GEOID) %>%
+            mutate(
+                prev_total = sum(value)
+            ) %>%
+            ungroup() 
+        
+        
         if (var == "Population"){
             selected_df <- geo_year_df %>%
                 filter(Sex %in% sex_reactive(),
                        Race %in% race_reactive(),
                        Age %in% age_reactive())%>%
                 group_by(GEOID) %>%
-                summarize(value = sum(value),
+                summarize(prev_total = unique(prev_total),
+                          value = sum(value),
                           moe = sum(moe))
             
         }
@@ -447,21 +577,22 @@ server <- function(input, output, session) {
         else if (var == "Education Level"){
             selected_df <- geo_year_df %>%
                 filter(short_label %in% edu_reactive(),
-                       Sex %in% sex_reactive(),
+                       #Sex %in% sex_reactive(),
                        Race %in% race_reactive()) %>%
                 group_by(GEOID) %>%
-                summarize(value = sum(value),
+                summarize(# prev_total = unique(prev_total),
+                          value = sum(value),
                           moe = sum(moe))
             
         }           
-        #ARA FIX: for HRA, might need to group by HRA 
         #### Rent Burden ####
         else if (var == "Rent Burden"){
             selected_df <- geo_year_df %>%
                 
                 filter(short_label %in% rent_reactive())%>%
                 group_by(GEOID) %>%
-                summarize(value = sum(value),
+                summarize(prev_total = unique(prev_total),
+                          value = sum(value),
                           moe = sum(moe)) 
             
         }
@@ -476,27 +607,64 @@ server <- function(input, output, session) {
         #### Household Size ####
         else if (var == "Household Size") {
             selected_df <- geo_year_df %>%
-                filter(short_label %in% tenure_reactive()) %>%
+                filter(short_label %in% size_reactive() & 
+                           tenure %in% tenure_reactive()) %>%
+                group_by(GEOID) %>%
+                summarize(prev_total = unique(prev_total),
+                          value = sum(value),
+                          moe = sum(moe))
+        }
+        #### Number of Bedrooms ####
+        else if (var == "Number of Bedrooms") {
+            selected_df <- geo_year_df %>%
+                filter(short_label %in% bedrooms_reactive() & 
+                       Residence %in% residence_reactive()) %>%
+                group_by(GEOID) %>%
+                summarize(prev_total = unique(prev_total),
+                          value = sum(value),
+                          moe = sum(moe))
+        }
+        #### Transportation & Age ####
+        #Need to Add Race to csv in order to filter by it
+        #maybe add median age too or just establish another pipeline for an age-specific csv
+        else if (var == "Methods of Transportation to Work"){
+            selected_df <- geo_year_df %>%
+                filter(short_label %in% transp_reactive()) %>% 
                 group_by(GEOID) %>%
                 summarize(value = sum(value),
                           moe = sum(moe))
         }
-        #### Transportation & Age ####
-        #Need to Add Race to csv in order to filter by it/maybe add median agee too or just establish another pipeline for an age-specific csv
-        else if (var == "Methods of Transportation to Work"){
+        #### Median Income ####
+        else if (var == "Median Income"){
             selected_df <- geo_year_df %>%
-                filter(short_label %in% transp_reactive()) %>% 
-                group_by(GEOID) # %>% 
-            # summarize(value = sum(value),
-            #           moe = sum(moe))
+                filter(short_label %in% income_reactive()) %>% 
+                group_by(GEOID) 
         }
-        
+        #### Median Gross Rent ####
+        else if (var == "Median Gross Rent"){
+            selected_df <- geo_year_df %>%
+                filter(short_label %in% median_rent_reactive()) %>% 
+                group_by(GEOID) %>%
+                summarize(value = sum(value),
+                          moe = sum(moe))
+        }
+        #### Occupants per Room ####
+        else if (var == "Number of Occupants per Room") {
+            selected_df <- geo_year_df %>%
+                filter(short_label %in% occupants_reactive() & 
+                           Race %in% race_reactive()) %>%
+                group_by(GEOID) %>%
+                summarize(prev_total = unique(prev_total),
+                          value = sum(value),
+                          moe = sum(moe))
+        }
         #HRA Var Reactives go here
         else if (var == "Rent Burden"){
             selected_df <- geo_year_df %>%
                 filter(short_label %in% rent_reactive())%>%
                 group_by(GEOID) %>%
-                summarize(value = sum(value),
+                summarize(prev_total = unique(prev_total),
+                          value = sum(value),
                           moe = sum(moe))
             
         }
@@ -508,7 +676,7 @@ server <- function(input, output, session) {
     
     measure_df_reactive <- reactive({
         selected_df <- selected_df_reactive()
- 
+        
         measure <- input$measure_type
         ### Measures ####
         if(!straight_pipe_hh()) {
@@ -526,7 +694,10 @@ server <- function(input, output, session) {
             } 
             else if (measure == "Count") {
                 measure_df <- selected_df %>%
+                    ungroup() %>% 
+                    group_by(GEOID) %>% 
                     mutate(
+                        # prev_total = unique(prev_total),
                         value = round(value, 0),
                         SE = round(moe/qnorm(.95), 0)
                     ) %>%
@@ -537,8 +708,10 @@ server <- function(input, output, session) {
                 measure_df <- selected_df %>%
                     group_by(GEOID) %>%
                     mutate(
+                        prev_total = unique(prev_total),
+                        value = value/prev_total,
                         value  = round(value * 10^4) / 10^2,
-                        SE = round(moe/qnorm(.95) * 10^4) / 10^2
+                        SE = round((moe/prev_total)/qnorm(.95) * 10^4) / 10^2
                     ) %>%
                     ungroup() 
             }
@@ -561,9 +734,10 @@ server <- function(input, output, session) {
         
         measure_df <- measure_df_reactive()        
         geo <- geo_reactive()
+        
         # if "Prevalence" and the whole population are selected, the calculation
         # will not always be 100% but have some small variances (around 0.5%)
-        # the code belowe changes them all to 100% to avoid confusion
+        # the code below changes them all to 100% to avoid confusion
         # if (measure_reactive() == "Prevalence") {
         #     if (all_selected()) {
         #         selected_df <- selected_df %>%
@@ -579,61 +753,50 @@ server <- function(input, output, session) {
         }
     })
     
-    ## Legend Titles ####
+    ## legend_title_reactive() ####
     #ARA_ Added branch for creating legend for other variables
     legend_title_reactive <- reactive({
-        var <- var_reactive()
-        measure <- measure_reactive()
+        var <- input$var
+        measure <- input$measure_type
         if (measure == "Count") {
             if(var == "Population"){
                 "Population"
-            }
-            
-            else if(var == "Education Level"){
+            }else if(var == "Education Level"){
                 "Educational Attainment"
-            }
-            else if(var == "Rent Burden"){
+            }else if(var == "Rent Burden"){
                 "Renters According to Burden"
-            }
-            
-            else if(var == "Household Size"){
+            }else if(var == "Household Size"){
                 "Households by Size and Tenure"
             }
-            
-            
-        }
-        else if(measure == "Value"){
-            if(var == "Median Income"){
-                "Median Income (Dollars)"
-            }
-            
-            else if (var == "Methods of Transportation to Work"){
-                "Median Age"
-            }
-            
-            else if (var == "Median Gross Rent"){
-                "Median Gross Rent (Dollars)"
-            }
-            
-        }
-        else if (measure == "Prevalence") {
+        }else if (measure == "Prevalence") {
             "Prevalence (%)"
-        }
-        
-        else if (measure == "Distribution"){
+        }else if (measure == "Distribution"){
             "Distribution (%)"
+        }else if (measure == "Value") {
+            if (var == "Median Income") {
+                "Median Income (Dollars)"
+            }else if (var == "Methods of Transportation to Work"){
+                "Median Age"
+            }else if (var == "Median Gross Rent"){
+                "Median Gross Rent (Dollars)"
+            }else if (var == "Number of Bedrooms"){
+                "Number of Bedrooms"
+            }
         }
     })
     
     ## Popup/Rollover Text ####
+    # Something is broken here - popup text for value is wrong
     popup_text_reactive <- reactive({
         var <- input$var
         geo_logical <- input$geo_level == "Census Tract"
         measure <- input$measure_type
         geo_prefix <- ifelse(geo_logical,
                              "Tract No.: ", "HRA: ")
-        measure_prefix <- "No. Individuals: "
-        if (measure == "Prevalence"){
+        measure_prefix <- 
+        if (measure == "Count"){
+            measure_prefix <- "No. Individuals: "
+        }else if (measure == "Prevalence"){
             measure_prefix <- "Prevalence: "
         }else if (measure == "Distribution"){
             measure_prefix <- "Distribution: "
@@ -654,7 +817,7 @@ server <- function(input, output, session) {
         if(straight_pipe_hh()){
             uncertainty <- "(<strong>%g</strong>, <strong>%g</strong>)"
         } 
-
+        
         paste0(geo_prefix,
                "<strong>%s</strong><br/>", # GEOID
                measure_prefix,
@@ -662,6 +825,47 @@ server <- function(input, output, session) {
                uncertainty)
     })
     
+    ## unique_quantile_length_reactive ####
+    
+    unique_quant_length_reactive <- reactive({
+        sp <- sp_reactive()
+        length(unique(quantile(sp@data$value,
+                               seq(0, 1, .2),
+                               na.rm = TRUE)))
+    })
+    
+    ## legend_values_reactive ####
+    
+    # calculate the values displayed in the legend
+    legend_values_reactive <- reactive({
+        sp <- sp_reactive()
+        unique_quant_length <- unique_quant_length_reactive()
+        
+        if (unique_quant_length == 6) {
+            quantile(sp@data$value, type = 5, 
+                     probs = seq(0, 1, .2),
+                     names = FALSE, na.rm = TRUE)
+        }else if(unique_quant_length >= 2){
+            quantile(sp@data$value, type = 5, 
+                     probs = seq(0, 1, .5),
+                     names = FALSE, na.rm = TRUE) 
+        }else if(unique_quant_length == 1){
+            quantile(sp@data$value, type = 5, 
+                     probs = c(0,1),
+                     names = FALSE, na.rm = TRUE) + c(-0.01, 0.01)
+        }
+    })
+    col_pal_reactive <- reactive({ 
+        sp <- sp_reactive()
+        pal <- pal_reactive()
+        legend_values <- legend_values_reactive()
+        
+        colorQuantile(
+            palette = pal,
+            domain = sp@data$value,
+            n = length(legend_values) - 1,
+            na.color = NA)
+    })    
     # Output ####
     output$warning <- renderText({
         warning_text_reactive()
@@ -1042,258 +1246,235 @@ server <- function(input, output, session) {
     })
     
     # this function updates the map based on user input
-    # Begin observe() ####
+    # Begin shape observe() ####
     observe({
         shinyjs::showElement(id = 'loading')
         
         var <- var_reactive()
         geo <- geo_reactive()
         measure <- measure_reactive()
+        
         year <- year_reactive()
         
+        
         geo_df <- geo_df_reactive()
-        geo_year_df <- geo_year_df_reactive()
+        #geo_year_df <- geo_year_df_reactive()
         selected_df <- selected_df_reactive()
         measure_df <- measure_df_reactive()
         
         ## sp_reactive() ####
         sp <- sp_reactive()
         
-        popup <- popup_text_reactive()
+        ## proxy_map ####
+        leafletProxy(
+            "map",
+            data = sp
+        ) %>%
+            # clear the existing shapes and legend
+            clearShapes() %>%
+            clearControls() %>%
+            # since polyline will also be removed by the clearShape() function
+            # add the layer again here
+            addPolylines(
+                data = kc_tl_2040,
+                group = "Transit Lines (2040)",
+                color = "#62AC55",
+                weight = 3,
+                opacity = 0.2,
+                popup = sprintf(
+                    "Transit Line Name: <strong>%s</strong>",
+                    kc_tl_2040$Name
+                ) %>%
+                    lapply(htmltools::HTML),
+                options = pathOptions(pane = "layer2")
+            )
+        
+    })
+    
+    # Begin color/legend observe() ####
+    observe({  
+        ## map aesthetics ####
+        year <- year_reactive()
+        sp <- sp_reactive()
         pal <- pal_reactive()
-        # proxy_map ####
+        legend_title <- legend_title_reactive()
+        popup <- popup_text_reactive()
+        unique_quant_length <- unique_quant_length_reactive()
+        legend_values <- legend_values_reactive()
+        col_pal <- col_pal_reactive()
         
-        # proxy_map <- leafletProxy(
-        #     "map",
-        #     data = sp
-        # ) %>%
-        #     # clear the existing shapes and legend
-        #     clearShapes() %>%
-        #     clearControls() %>%
-        #     # since polyline will also be removed by the clearShape() function
-        #     # add the layer again here
-        #     addPolylines(
-        #         data = kc_tl_2040,
-        #         group = "Transit Lines (2040)",
-        #         color = "#62AC55",
-        #         weight = 3,
-        #         opacity = 0.2,
-        #         popup = sprintf(
-        #             "Transit Line Name: <strong>%s</strong>",
-        #             kc_tl_2040$Name
-        #         ) %>%
-        #             lapply(htmltools::HTML),
-        #         options = pathOptions(pane = "layer2")
-        #     )
         
+        # proxy_map old ####
         
         # Create all_selected ####
-        all_selected <- FALSE
+        # all_selected <- FALSE
         # if (all_selected()) {
-        if (1>2) {
-            ## Example map ####
-            proxy_map <- proxy_map %>%
-                addPolygons(
-                    layerId = ~GEOID,
-                    color = "#606060",
-                    weight = 1,
-                    smoothFactor = 0.5,
-                    opacity = 0.9,
-                    fillOpacity = 0.6,
-                    fillColor = ~ colorNumeric(
-                        palette = "#08519C",
-                        domain = c(100)
-                    )(value),
-                    highlightOptions = highlightOptions(
-                        color = "white", weight = 2,
-                        bringToFront = TRUE
-                    ),
-                    ### Pop up sprintf() call ####
-                    label = sprintf(
-                        popup,
-                        sp$GEOID,
-                        sp$value,
-                        sp$SE
-                    ) %>%
-                        lapply(htmltools::HTML),
-                    labelOptions = labelOptions(
-                        style = list("font-weight" = "normal", padding = "3px 8px"),
-                        textsize = "15px",
-                        direction = "auto"
-                    ),
-                    options = pathOptions(pane = "layer1")
-                ) %>%
-                addLegend(
-                    pal = colorNumeric(
-                        palette = "#08519C",
-                        domain = c(100)
-                    ),
-                    values = c(100),
-                    opacity = 0.7,
-                    title = legend_title_reactive(),
-                    position = "bottomright"
-                )
-        } else {
-            ## Map ####
-            ### Polygon Colors ####
-            #define the color palette for filling the polygons based on population
-            #ARA_ changed N from 5 to 2
-            #ARA_ Added unique quant length for quantile 
-            unique_quant_length <- length(unique(quantile(sp@data$value,
-                                                          seq(0,1,.2), na.rm = TRUE)))
-      
-            if(unique_quant_length < 6){
-                #### Less than quintiles ####
-                ## Continuous vars
-               
-                    col_pal <- colorQuantile(
-                        palette = pal,
-                        domain = sp@data$value,
-                        n = 2,
-                        na.color = NA
-                    )
-              
-                # calculate the values displayed in the legend
-                legend_values <- quantile(sp@data$value, type = 5, 
-                                          probs = seq(0, 1, .5),
-                                          names = FALSE, na.rm = TRUE)
+            if (1>2) {
+                #     ## Example map ####
+                #     proxy_map <- proxy_map %>%
+                #         addPolygons(
+                #             layerId = ~GEOID,
+                #             color = "#606060",
+                #             weight = 1,
+                #             smoothFactor = 0.5,
+                #             opacity = 0.9,
+                #             fillOpacity = 0.6,
+                #             fillColor = ~ colorNumeric(
+                #                 palette = "#08519C",
+                #                 domain = c(100)
+                #             )(value),
+                #             highlightOptions = highlightOptions(
+                #                 color = "white", weight = 2,
+                #                 bringToFront = TRUE
+                #             ),
+                #             ### Pop up sprintf() call ####
+                #             label = sprintf(
+                #                 popup,
+                #                 sp$GEOID,
+                #                 sp$value,
+                #                 sp$SE
+                #             ) %>%
+                #                 lapply(htmltools::HTML),
+                #             labelOptions = labelOptions(
+                #                 style = list("font-weight" = "normal", padding = "3px 8px"),
+                #                 textsize = "15px",
+                #                 direction = "auto"
+                #             ),
+                #             options = pathOptions(pane = "layer1")
+                #         ) %>%
+                #         addLegend(
+                #             pal = colorNumeric(
+                #                 palette = "#08519C",
+                #                 domain = c(100)
+                #             ),
+                #             values = c(100),
+                #             opacity = 0.7,
+                #             title = legend_title_reactive(),
+                #             position = "bottomright"
+                #         )
             } else {
-                ### Quintiles ####
-               col_pal <- colorQuantile(
-                        palette = pal,
-                        domain = sp@data$value,
-                        n = 5,
-                        na.color = NA
-                    ) 
+                ## Map ####
+                ### Polygon Colors ####
+                #define the color palette for filling the polygons based on population
+                #ARA_ changed N from 5 to 2
+                #ARA_ Added unique quant length for quantile 
+                # unique_quant_length <- length(unique(quantile(sp@data$value,
+                #                                               seq(0,1,.2), na.rm = TRUE)))
+                # 
                 
-                # calculate the values displayed in the legend
-                legend_values <- quantile(sp@data$value, type = 5, 
-                                          probs = seq(0, 1, .2),
-                                          names = FALSE, na.rm = TRUE)
-            }
-            
-            
-            ## Update map, sprintf() for rollover ####
-            # add the new population data to the map
-            if(straight_pipe_hh()){
-                ### HH Size (Smoothed) ####
-                proxy_map <- proxy_map %>%
-                    addPolygons(
-                        layerId = ~GEOID,
-                        color = "#606060",
-                        weight = 1,
-                        smoothFactor = 0.5,
-                        opacity = 0.9,
-                        fillOpacity = 0.6,
-                        fillColor = ~ col_pal(value),
-                        highlightOptions = highlightOptions(
-                            color = "white", weight = 2,
-                            bringToFront = TRUE
-                        ),
-                        label = sprintf(
-                            popup,
-                            sp$GEOID,
-                            sp$value,
-                            sp$lower,
-                            sp$upper
-                        ) %>%
-                            lapply(htmltools::HTML),
-                        labelOptions = labelOptions(
-                            style = list("font-weight" = "normal", padding = "3px 8px"),
-                            textsize = "15px",
-                            direction = "auto"
-                        ),
-                        options = pathOptions(pane = "layer1")
-                    )%>%
-                    addLegend(
-                        pal = col_pal,
-                        values = ~value,
-                        opacity = 0.7,
-                        labFormat = {
-                            function(type, cuts, p) {
-                                n <- length(cuts)
-                                lower <- as.integer(cuts)[-n]
-                                if (-n != 1) {
-                                    lower <- as.integer(cuts)[-n] + 1
-                                }
-                                upper <- as.integer(cuts)[-1]
-                                paste0(lower, " - ", upper, " (", seq(0, 100, length.out = n)[-n], "th PCTL)")
-                            }
-                        },
-                        title = legend_title_reactive(),
-                        position = "bottomright"
-                    )
-            }else{
                 
-                ## Not HH Size (Smoothed) ####
-                proxy_map <- leafletProxy(
-                    "map",
-                    data = sp
-                ) %>%
-                    # clear the existing shapes and legend
-                    clearShapes() %>%
-                    clearControls() %>%
-                    # since polyline will also be removed by the clearShape() function
-                    # add the layer again here
-                    addPolylines(
-                        data = kc_tl_2040,
-                        group = "Transit Lines (2040)",
-                        color = "#62AC55",
-                        weight = 3,
-                        opacity = 0.2,
-                        popup = sprintf(
-                            "Transit Line Name: <strong>%s</strong>",
-                            kc_tl_2040$Name
-                        ) %>%
-                            lapply(htmltools::HTML),
-                        options = pathOptions(pane = "layer2")
-                    ) %>%
-                    addPolygons(
-                        layerId = ~GEOID,
-                        color = "#606060",
-                        weight = 1,
-                        smoothFactor = 0.5,
-                        opacity = 0.9,
-                        fillOpacity = 0.6,
-                        fillColor = ~ col_pal(value),
-                        highlightOptions = highlightOptions(
-                            color = "white", weight = 2,
-                            bringToFront = TRUE
-                        ),
-                        label = sprintf(
-                            popup,
-                            sp$GEOID,
-                            sp$value,
-                            sp$SE
-                        ) %>%
-                            lapply(htmltools::HTML),
-                        labelOptions = labelOptions(
-                            style = list("font-weight" = "normal", padding = "3px 8px"),
-                            textsize = "15px",
-                            direction = "auto"
-                        ),
-                        options = pathOptions(pane = "layer1")
-                    )%>%
-                    addLegend(
-                        pal = col_pal,
-                        values = ~value,
-                        opacity = 0.7,
-                        labFormat = {
-                            function(type, cuts, p) {
-                                n <- length(cuts)
-                                lower <- as.integer(cuts)[-n]
-                                if (-n != 1) {
-                                    lower <- as.integer(cuts)[-n] + 1
+                ## Update map, sprintf() for rollover ####
+                # add the new population data to the map
+                if(straight_pipe_hh()){
+                    ### HH Size (Smoothed) ####
+                    proxy_map <- proxy_map %>%
+                        addPolygons(
+                            layerId = ~GEOID,
+                            color = "#606060",
+                            weight = 1,
+                            smoothFactor = 0.5,
+                            opacity = 0.9,
+                            fillOpacity = 0.6,
+                            fillColor = ~ col_pal(value),
+                            highlightOptions = highlightOptions(
+                                color = "white", weight = 2,
+                                bringToFront = TRUE
+                            ),
+                            label = sprintf(
+                                popup,
+                                sp$GEOID,
+                                sp$value,
+                                sp$lower,
+                                sp$upper
+                            ) %>%
+                                lapply(htmltools::HTML),
+                            labelOptions = labelOptions(
+                                style = list("font-weight" = "normal", padding = "3px 8px"),
+                                textsize = "15px",
+                                direction = "auto"
+                            ),
+                            options = pathOptions(pane = "layer1")
+                        )%>%
+                        addLegend(
+                            pal = col_pal,
+                            values = ~value,
+                            opacity = 0.7,
+                            labFormat = {
+                                function(type, cuts, p) {
+                                    less_than_one <- sum(cuts < 1)
+                                    n <- length(cuts)
+                                    
+                                    lower <- as.integer(cuts)[-n]
+                                    if (-n != 1) {
+                                        lower <- as.integer(cuts)[-n] + 1
+                                    }
+                                    
+                                    upper <- as.integer(cuts)[-1]
+                                    paste0(lower, " - ", upper, " (", seq(0, 100, length.out = n)[-n], "th PCTL)")
                                 }
-                                upper <- as.integer(cuts)[-1]
-                                paste0(lower, " - ", upper, " (", seq(0, 100, length.out = n)[-n], "th PCTL)")
-                            }
-                        },
-                        title = legend_title_reactive(),
-                        position = "bottomright"
-                    )
+                            },
+                            title = year, #legend_title troubleshoot year
+                            position = "bottomright"
+                        )
+                }else{
+                    
+                    ## Not HH Size (Smoothed) ####
+                    proxy_map <- leafletProxy(
+                        "map",
+                        data = sp) 
+                    
+                    proxy_map %>% 
+                        clearShapes() %>% 
+                        clearControls() %>% 
+                        addPolygons(
+                            layerId = ~GEOID,
+                            color = "#606060",
+                            weight = 1,
+                            smoothFactor = 0.5,
+                            opacity = 0.9,
+                            fillOpacity = 0.6,
+                            fillColor = ~col_pal(value), ## JLG COME BACK!
+                            highlightOptions = highlightOptions(
+                                color = "white", weight = 2,
+                                bringToFront = TRUE
+                            ),
+                            label = sprintf(
+                                popup,
+                                sp$GEOID,
+                                sp$value,
+                                sp$SE
+                            ) %>%
+                                lapply(htmltools::HTML),
+                            labelOptions = labelOptions(
+                                style = list("font-weight" = "normal", padding = "3px 8px"),
+                                textsize = "15px",
+                                direction = "auto"
+                            ),
+                            options = pathOptions(pane = "layer1")
+                        )%>%
+                        addLegend(
+                            pal = col_pal,
+                            values = ~value,
+                            opacity = 0.7,
+                            labFormat = {
+                                function(type, cuts, p) {
+                                    n <- length(cuts)
+                                    lower <- as.integer(cuts)[-n]
+                                    if (-n != 1) {
+                                        lower <- as.integer(cuts)[-n] + 1
+                                    }
+                                    upper <- as.integer(cuts)[-1]
+                                    paste0(lower, " - ", upper, " (", 
+                                           seq(0, 100, length.out = n)[-n],
+                                           "th PCTL)")
+                                }
+                            },
+                            title = year, #change to legend_title
+                            position = "bottomright"
+                        )
+                }
             }
-        }
+        
         
         Sys.sleep(1)
         
@@ -1675,6 +1856,7 @@ server <- function(input, output, session) {
     #     })
     
     
+    # outputOptions() ####
     # preload the visualization once the website is opened
     outputOptions(output, "map", suspendWhenHidden = FALSE)
     # outputOptions(output, "plot", suspendWhenHidden = FALSE)
