@@ -4038,7 +4038,7 @@
       "GithubSha1": null,
       "description": {
         "Package": "stringi",
-        "Version": "1.5.3",
+        "Version": null,
         "Date": "2020-09-04",
         "Title": "Character String Processing Facilities",
         "Description": "A multitude of character string/text/natural language\n    processing tools: pattern searching (e.g., with 'Java'-like regular\n    expressions or the 'Unicode' collation algorithm), random string generation,\n    case mapping, string transliteration, concatenation, sorting, padding,\n    wrapping, Unicode normalisation, date-time formatting and parsing,\n    and many more. They are fast, consistent, convenient, and -\n    owing to the use of the 'ICU' (International Components for Unicode)\n    library - portable across all locales and platforms.",
